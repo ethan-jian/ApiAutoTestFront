@@ -56,7 +56,7 @@
 </template>
 
 <script>
-  import {login, register} from "@/api/user";
+  import {login} from "@/api/user";
 
   export default {
     name: 'login',
@@ -81,10 +81,9 @@
         this.$refs.loginForm.validate(valid => {
           if (valid) {
             login(this.loginForm.username, this.loginForm.password).then(data => {
-              console.log(data)
-              let code = data.code;
-              if (code=200) {
-                this.$router.push('/')
+              let code = data.data.code;
+              if (code === 200) {
+                this.$router.push('/project')
               } else {
                 this.$notify.error({
                   title: "错误",
@@ -170,6 +169,7 @@
     width: 100%;
     background-color: $bg;
     overflow: hidden;
+
     .login-form {
       position: relative;
       width: 520px;

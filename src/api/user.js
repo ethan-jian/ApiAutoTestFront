@@ -1,4 +1,3 @@
-import request from '@/utils/request'
 import {deleteRequest, getRequest, postRequest} from "@/api/common";
 
 export const login = function (username, password) {
