@@ -2,13 +2,16 @@
     <div class="home">
         <div class="dropdown">
             <el-dropdown>
-  <span class="el-dropdown-link">
-      用户<i class="el-icon-arrow-down el-icon--right"></i>
-
-  </span>
+                <el-button type="primary">
+                    用户<i class="el-icon-arrow-down el-icon--right"></i>
+                </el-button>
                 <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item @click="userInfo">用户信息</el-dropdown-item>
-                    <el-dropdown-item @click="userLogout">登出</el-dropdown-item>
+                    <div @click="userLogout">
+                        <el-dropdown-item>登出</el-dropdown-item>
+                    </div>
+                    <div @click="userInfo">
+                        <el-dropdown-item>用户信息</el-dropdown-item>
+                    </div>
                 </el-dropdown-menu>
             </el-dropdown>
         </div>
@@ -38,28 +41,72 @@
                 </el-menu>
             </el-col>
         </el-row>
+
+        <el-popover v-model="open"
+                    placement="right"
+                    width="400"
+                    trigger="click">
+            <el-table :data="gridData">
+                <el-table-column width="50" property="id" label="用户id"></el-table-column>
+                <el-table-column width="100" property="create_time" label="注册时间"></el-table-column>
+                <el-table-column width="100" property="last_login_time" label="最近登录时间"></el-table-column>
+                <el-table-column width="100" property="name" label="用户名"></el-table-column>
+            </el-table>
+        </el-popover>
     </div>
+
 </template>
 
 <script>
-    import {getLoginUserInfo, logout} from "../api/user";
+    import {logout, getLoginUserInfo} from "../api/user";
 
     export default {
         name: "home",
         data() {
-            return {}
+            return {
+                open: false,
+                gridData: []
+            }
         },
         methods: {
-            userInfo(){
+            userInfo() {
+                getLoginUserInfo().then(res => {
+                    console.log(res)
+                    let code = res.data.code;
+                    if (code === 200) {
+                        this.gridData = res.data.data
+                        this.open = true
 
+                    } else {
+                        this.$notify({
+                            title: "获取用户信息失败",
+                            type: "error"
+                        })
+                    }
+
+                })
             },
-            userLogout(){
-                logout()
+            userLogout() {
+                logout().then(data => {
+                    let code = data.data.code;
+                    if (code === 200) {
+                        this.$router.push("/login")
+                        this.$notify({
+                            title: "登出成功",
+                            type: "success"
+                        })
+                    } else {
+                        this.$notify({
+                            title: "登出失败",
+                            type: "error"
+                        })
+                    }
+                })
             },
             created() {
 
             },
-            watch: {}
+            // watch: {}
         }
 
     }
@@ -73,7 +120,7 @@
     .el-dropdown-link {
         cursor: pointer;
         color: #409EFF;
-        float: right;
+        /*float: right;*/
 
     }
 
