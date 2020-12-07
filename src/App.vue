@@ -16,9 +16,10 @@
         },
         methods: {},
         created() {
-            getLoginUserInfo().then(data => {
-                let code = data.data.code;
-                if(!code){ //登录失败的情况下，跳转到登录页面
+            getLoginUserInfo().then(res => {
+                let code = res.data.code;
+                console.log(code)
+                if(code!==200){ //登录失败的情况下，跳转到登录页面
                     this.$router.push('/login')
                 }
             })
