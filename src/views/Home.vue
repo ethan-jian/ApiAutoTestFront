@@ -12,6 +12,7 @@
                     <div @click="userInfo">
                         <el-dropdown-item>用户信息</el-dropdown-item>
                     </div>
+
                 </el-dropdown-menu>
             </el-dropdown>
         </div>
@@ -41,18 +42,20 @@
                 </el-menu>
             </el-col>
         </el-row>
-
-        <el-popover v-model="open"
-                    placement="right"
-                    width="400"
-                    trigger="click">
-            <el-table :data="gridData">
-                <el-table-column width="50" property="id" label="用户id"></el-table-column>
-                <el-table-column width="100" property="create_time" label="注册时间"></el-table-column>
-                <el-table-column width="100" property="last_login_time" label="最近登录时间"></el-table-column>
-                <el-table-column width="100" property="name" label="用户名"></el-table-column>
-            </el-table>
-        </el-popover>
+        <div class="popover">
+            <el-popover v-model="open"
+                        placement="right"
+                        width="400"
+                        trigger="click">
+                <el-table :data="gridData">
+                    <el-table-column width="61" property="id" label="用户id"></el-table-column>
+                    <el-table-column width="100" property="create_time" label="注册时间"></el-table-column>
+                    <el-table-column width="105" property="last_login_time" label="最近登录时间"></el-table-column>
+                    <el-table-column width="100" property="name" label="用户名"></el-table-column>
+                </el-table>
+                <el-button type="text" @click="closePopover">确定</el-button>
+            </el-popover>
+        </div>
     </div>
 
 </template>
@@ -65,18 +68,20 @@
         data() {
             return {
                 open: false,
+
                 gridData: []
             }
         },
         methods: {
+            closePopover() {
+                this.open = false
+            },
             userInfo() {
                 getLoginUserInfo().then(res => {
-                    console.log(res)
                     let code = res.data.code;
                     if (code === 200) {
                         this.gridData = res.data.data
                         this.open = true
-
                     } else {
                         this.$notify({
                             title: "获取用户信息失败",
@@ -136,6 +141,12 @@
         top: 0;
 
         /*z-index: 100;*/
+    }
+
+    .popover {
+        position: absolute;
+        top: 0%;
+        right: 28%;
     }
 
 

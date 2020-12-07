@@ -79,7 +79,7 @@
                             if (code === 200) {
                                 this.$notify({
                                     title: '登录成功',
-                                    type: 'success'
+                                    type: 'success',
                                 });
                                 this.$router.push('/project')
 
