@@ -2,34 +2,38 @@
     <div>
         <el-container style="height: 100%; border: 1px solid #eee">
             <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
-                <el-menu :default-openeds="['1', '2']" default-active="1-1">
+                <el-menu
+                        :default-openeds="['1', '2']"
+                        default-active="1-1"
+                        @select="handleSelect"
+                >
                     <el-submenu index="1">
                         <template slot="title"><i class="el-icon-document"></i>接口管理</template>
                         <el-menu-item-group>
-                            <el-menu-item index="1-1">项目管理</el-menu-item>
-                            <el-menu-item index="1-2">接口信息</el-menu-item>
-                            <el-menu-item index="1-3">业务配置</el-menu-item>
-                            <el-menu-item index="1-4">接口用例</el-menu-item>
-                            <el-menu-item index="1-5">内置函数</el-menu-item>
+                            <el-menu-item index="project">项目管理</el-menu-item>
+                            <el-menu-item index="interface">接口信息</el-menu-item>
+                            <el-menu-item index="servieConfig">业务配置</el-menu-item>
+                            <el-menu-item index="case">接口用例</el-menu-item>
+                            <el-menu-item index="builtInfunc">内置函数</el-menu-item>
                         </el-menu-item-group>
                     </el-submenu>
                     <el-submenu index="2">
                         <template slot="title"><i class="el-icon-menu"></i>报告管理</template>
                         <el-menu-item-group>
-                            <el-menu-item index="2-1">测试报告</el-menu-item>
-                            <el-menu-item index="2-2">定时任务</el-menu-item>
+                            <el-menu-item index="testReport">测试报告</el-menu-item>
+                            <el-menu-item index="timeTask">定时任务</el-menu-item>
                         </el-menu-item-group>
                     </el-submenu>
-                    <el-submenu index="3">
+                    <el-submenu index="otherProcedure">
                         <template slot="title"><i class="el-icon-setting"></i>其它程序</template>
                         <el-menu-item-group>
-                            <el-menu-item index="3-1">小工具</el-menu-item>
+                            <el-menu-item index="smallTool">小工具</el-menu-item>
                         </el-menu-item-group>
                     </el-submenu>
-                    <el-submenu index="4">
+                    <el-submenu index="systemManage">
                         <template slot="title"><i class="el-icon-setting"></i>系统管理</template>
                         <el-menu-item-group>
-                            <el-menu-item index="4-1">用户管理</el-menu-item>
+                            <el-menu-item index="userManage">用户管理</el-menu-item>
                         </el-menu-item-group>
                     </el-submenu>
                 </el-menu>
@@ -52,16 +56,12 @@
 
                 </el-header>
 
-                <!--            <el-main>-->
-                <!--                <el-table :data="tableData">-->
-                <!--                    <el-table-column prop="date" label="日期" width="140">-->
-                <!--                    </el-table-column>-->
-                <!--                    <el-table-column prop="name" label="姓名" width="120">-->
-                <!--                    </el-table-column>-->
-                <!--                    <el-table-column prop="address" label="地址">-->
-                <!--                    </el-table-column>-->
-                <!--                </el-table>-->
-                <!--            </el-main>-->
+                <el-main>
+                    <div class="right-context">
+                        <router-view/>
+                    </div>
+                </el-main>
+
             </el-container>
         </el-container>
         <el-dialog title="用户信息" :visible.sync="dialogTableVisible">
@@ -73,6 +73,8 @@
                 <el-table-column property="address" label="地址"></el-table-column>
             </el-table>
         </el-dialog>
+
+
     </div>
 
 </template>
@@ -80,9 +82,13 @@
 
 <script>
     import {logout, getLoginUserInfo} from "../api/user";
+    import project from "./api_manage/project_manage/project";
 
     export default {
         name: "home",
+        comments: {
+            'project': project
+        },
         data() {
             return {
                 userName: '用户',
@@ -119,20 +125,35 @@
                     }
                 })
             },
-        },
-        created() {
-            getLoginUserInfo().then(res => {
-                let code = res.data.code;
-                if (code === 200) {
-                    this.userName = res.data.data[0].name;
+            handleSelect(index) {
+                this.activeIndex = index;
+                console.log(index)
+                switch (index) {
+                    case "project":
+                        this.$router.push('/project');
+                        break;
+                    case "interface":
+                        this.$router.push('/interface');
+                        break;
+                    case "task":
+                        this.$router.push('/task');
+                        break;
                 }
-            })
-        },
+            },
+            created() {
+                getLoginUserInfo().then(res => {
+                    let code = res.data.code;
+                    if (code === 200) {
+                        this.userName = res.data.data[0].name;
+                    }
+                })
+            },
+        }
+    }
 
-    };
 </script>
 
-<style >
+<style>
     .el-header {
         background-color: #B3C0D1;
         color: #333;
