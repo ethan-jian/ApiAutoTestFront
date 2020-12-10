@@ -82,13 +82,13 @@
 
 <script>
     import {logout, getLoginUserInfo} from "../api/user";
-    import project from "./api_manage/project_manage/project";
+    // import project from "./api_manage/project_manage/project";
 
     export default {
         name: "home",
-        comments: {
-            'project': project
-        },
+        // comments: {
+        //     'project': project
+        // },
         data() {
             return {
                 userName: '用户',
@@ -127,7 +127,6 @@
             },
             handleSelect(index) {
                 this.activeIndex = index;
-                console.log(index)
                 switch (index) {
                     case "project":
                         this.$router.push('/project');
@@ -135,20 +134,44 @@
                     case "interface":
                         this.$router.push('/interface');
                         break;
-                    case "task":
-                        this.$router.push('/task');
+                    case "servieConfig":
+                        this.$router.push('/servieConfig');
+                        break;
+                    case "case":
+                        this.$router.push('/case');
+                        break;
+                    case "builtInfunc":
+                        this.$router.push('/builtInfunc');
+                        break;
+                    case "testReport":
+                        this.$router.push('/testReport');
+                        break;
+                    case "timeTask":
+                        this.$router.push('/timeTask');
+                        break;
+                    case "otherProcedure":
+                        this.$router.push('/otherProcedure');
+                        break;
+                    case "smallTool":
+                        this.$router.push('/smallTool');
+                        break;
+                    case "systemManage":
+                        this.$router.push('/systemManage');
+                        break;
+                    case "userManage":
+                        this.$router.push('/userManage');
                         break;
                 }
             },
-            created() {
-                getLoginUserInfo().then(res => {
-                    let code = res.data.code;
-                    if (code === 200) {
-                        this.userName = res.data.data[0].name;
-                    }
-                })
-            },
-        }
+        },
+        created() {
+            getLoginUserInfo().then(res => {
+                let code = res.data.code;
+                if (code === 200) {
+                    this.userName = res.data.data[0].name;
+                }
+            })
+        },
     }
 
 </script>
