@@ -27,68 +27,125 @@
             </el-table-column>
 
         </el-table>
-        <div style="position: absolute;top: 9.5%;right: 0">
-            <el-button type="primary" plain @click="open">新增</el-button>
-            <el-button type="warning" plain>批量删除</el-button>
-        </div>
-
         <div style="margin-top: 20px">
             <el-button @click="toggleSelection([tableData[1], tableData[2]])">切换第二、第三行的选中状态</el-button>
             <el-button @click="toggleSelection()">取消选择</el-button>
         </div>
-
-        <div>
-            <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-                <el-form-item label="活动名称" prop="name">
-                    <el-input v-model="ruleForm.name"></el-input>
-                </el-form-item>
-                <el-form-item label="活动区域" prop="region">
-                    <el-select v-model="ruleForm.region" placeholder="请选择活动区域">
-                        <el-option label="区域一" value="shanghai"></el-option>
-                        <el-option label="区域二" value="beijing"></el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="活动时间" required>
-                    <el-col :span="11">
-                        <el-form-item prop="date1">
-                            <el-date-picker type="date" placeholder="选择日期" v-model="ruleForm.date1"
-                                            style="width: 100%;"></el-date-picker>
-                        </el-form-item>
-                    </el-col>
-                    <el-col class="line" :span="2">-</el-col>
-                    <el-col :span="11">
-                        <el-form-item prop="date2">
-                            <el-time-picker placeholder="选择时间" v-model="ruleForm.date2"
-                                            style="width: 100%;"></el-time-picker>
-                        </el-form-item>
-                    </el-col>
-                </el-form-item>
-                <el-form-item label="即时配送" prop="delivery">
-                    <el-switch v-model="ruleForm.delivery"></el-switch>
-                </el-form-item>
-                <el-form-item label="活动性质" prop="type">
-                    <el-checkbox-group v-model="ruleForm.type">
-                        <el-checkbox label="美食/餐厅线上活动" name="type"></el-checkbox>
-                        <el-checkbox label="地推活动" name="type"></el-checkbox>
-                        <el-checkbox label="线下主题活动" name="type"></el-checkbox>
-                        <el-checkbox label="单纯品牌曝光" name="type"></el-checkbox>
-                    </el-checkbox-group>
-                </el-form-item>
-                <el-form-item label="特殊资源" prop="resource">
-                    <el-radio-group v-model="ruleForm.resource">
-                        <el-radio label="线上品牌商赞助"></el-radio>
-                        <el-radio label="线下场地免费"></el-radio>
-                    </el-radio-group>
-                </el-form-item>
-                <el-form-item label="活动形式" prop="desc">
-                    <el-input type="textarea" v-model="ruleForm.desc"></el-input>
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
-                    <el-button @click="resetForm('ruleForm')">重置</el-button>
-                </el-form-item>
-            </el-form>
+        <div style="position: absolute;top: 9.5%;right: 0">
+            <el-button type="primary" plain @click="ProjectDialogVisible=true">新增</el-button>
+            <el-button type="warning" plain>批量删除</el-button>
         </div>
+
+        <el-dialog
+                title="创建项目"
+                :visible.sync="ProjectDialogVisible"
+                width="80%"
+                :before-close="handleClose">
+
+            <div style="position: absolute;top: 5.5%;left: 3%">
+                <el-button type="primary" size="mini" plain @click="variableDialogVisible=true">公共变量</el-button>
+
+                <el-dialog
+                        title="公共变量"
+                        :visible.sync="variableDialogVisible"
+                        width="60%"
+                        :before-close="handleClose">
+                    <el-button type="primary" size="mini" @click="addProjectVariable()">
+                        添加
+                    </el-button>
+                    <el-table :data="projectData.variable" stripe :show-header="false" size="mini">
+                        <el-table-column label="Key" header-align="center" minWidth="50">
+                            <template slot-scope="scope">
+                                <el-input v-model="scope.row.key" size="mini" placeholder="key">
+                                </el-input>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="Value" header-align="center" minWidth="80">
+                            <template slot-scope="scope">
+                                <el-input v-model="scope.row.value" size="mini" placeholder="value">
+                                </el-input>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="备注" header-align="center" width="150">
+                            <template slot-scope="scope">
+                                <el-input v-model="scope.row.remark" size="mini" placeholder="备注">
+                                </el-input>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作" header-align="center" width="80">
+                            <template slot-scope="scope">
+                                <el-button type="danger" icon="el-icon-delete" size="mini"
+                                           @click.native="delProjectVariable(scope.$index)">删除
+                                </el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <span slot="footer" class="dialog-footer">
+    <el-button @click="variableDialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="variableDialogVisible = false">确 定</el-button>
+  </span>
+                </el-dialog>
+            </div>
+
+            <div>
+                <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="80px" class="demo-ruleForm">
+                    <el-form-item label-position="left" label="项目名称" prop="name">
+                        <el-input v-model="ruleForm.name" size="mini"></el-input>
+                    </el-form-item>
+                    <el-form-item label-position="left" label="测试环境" prop="testEnvironment">
+                        <el-input v-model="ruleForm.testEnvironment" size="mini"></el-input>
+                    </el-form-item>
+                    <el-form-item label-position="left" label="开发环境" prop="devEnvironment">
+                        <el-input v-model="ruleForm.devEnvironment" size="mini"></el-input>
+                    </el-form-item>
+                    <el-form-item label-position="left" label="线上环境" prop="onLineEnvironment">
+                        <el-input v-model="ruleForm.onLineEnvironment" size="mini"></el-input>
+                    </el-form-item>
+                    <el-form-item label-position="left" label="备用环境" prop="bakEnvironment">
+                        <el-input v-model="ruleForm.bakEnvironment" size="mini"></el-input>
+                    </el-form-item>
+
+                    <el-form-item label-position="left" label="执行环境" prop="environment">
+                        <el-select v-model="ruleForm.environment" placeholder="请选择测试环境">
+                            <el-option label="测试环境" value="shanghai"></el-option>
+                            <el-option label="开发环境" value="beijing"></el-option>
+                            <el-option label="线上环境" value="beijing"></el-option>
+                            <el-option label="备用环境" value="beijing"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label-position="left" label="函数文件" prop="fun">
+                        <el-select v-model="ruleForm.fun" placeholder="请选择函数文件">
+                            <el-option label="ethan1" value="shanghai"></el-option>
+                            <el-option label="ethan2" value="beijing"></el-option>
+                            <el-option label="ethan3" value="beijing"></el-option>
+                            <el-option label="ethan4" value="beijing"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label-position="left" label="测试人员" prop="testUser">
+                        <el-select v-model="ruleForm.testUser" placeholder="请选择测试人员">
+                            <el-option label="ethan1" value="shanghai"></el-option>
+                            <el-option label="ethan2" value="beijing"></el-option>
+                            <el-option label="ethan3" value="beijing"></el-option>
+                            <el-option label="ethan4" value="beijing"></el-option>
+                        </el-select>
+                    </el-form-item>
+
+                    <el-form-item label="项目描述" prop="desc">
+                        <el-input type="textarea" v-model="ruleForm.desc"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
+                        <el-button @click="resetForm('ruleForm')">重置</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+    <el-button @click="ProjectDialogVisible = false">取 消</el-button>
+                <!--    <el-button type="primary" @click="ProjectDialogVisible = false">确 定</el-button>-->
+  </span>
+        </el-dialog>
+
 
     </div>
 </template>
@@ -98,6 +155,23 @@
         name: 'project',
         data() {
             return {
+                ProjectDialogVisible: false,
+                variableDialogVisible: false,
+                projectData: {
+                    host: null,
+                    hostTwo: null,
+                    hostThree: null,
+                    hostFour: null,
+                    id: null,
+                    userId: null,
+                    modelFormVisible: false,
+                    projectName: null,
+                    principal: null,
+                    formLabelWidth: '80px',
+                    funcFile: '',
+                    header: Array(),
+                    variable: Array(),
+                },
                 tableData: [{
                     date: '2016-05-03',
                     name: '王小虎',
@@ -110,37 +184,41 @@
                 multipleSelection: [],
                 ruleForm: {
                     name: '',
-                    region: '',
-                    date1: '',
-                    date2: '',
-                    delivery: false,
-                    type: [],
-                    resource: '',
+                    testEnvironment: '',
+                    devEnvironment: '',
+                    onLineEnvironment: '',
+                    bakEnvironment: '',
+                    environment: '',
+                    fun: '',
+                    testUser: '',
                     desc: ''
                 },
                 rules: {
                     name: [
-                        {required: true, message: '请输入活动名称', trigger: 'blur'},
+                        {required: true, message: '请输入项目名称', trigger: 'blur'},
                         {min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur'}
                     ],
-                    region: [
-                        {required: true, message: '请选择活动区域', trigger: 'change'}
+                    environment: [
+                        {required: true, message: '请选择执行环境', trigger: 'blur'}
                     ],
-                    date1: [
-                        {type: 'date', required: true, message: '请选择日期', trigger: 'change'}
+                    testUser: [
+                        {required: true, message: '请选择测试人员', trigger: 'blur'}
                     ],
-                    date2: [
-                        {type: 'date', required: true, message: '请选择时间', trigger: 'change'}
+                    testEnvironment: [
+                        {required: false, message: '请选择函数文件', trigger: 'blur'}
                     ],
-                    type: [
-                        {type: 'array', required: true, message: '请至少选择一个活动性质', trigger: 'change'}
+                    devEnvironment: [
+                        {required: false, message: '请选择函数文件', trigger: 'blur'}
                     ],
-                    resource: [
-                        {required: true, message: '请选择活动资源', trigger: 'change'}
+                    onLineEnvironment: [
+                        {required: false, message: '请选择函数文件', trigger: 'blur'}
                     ],
-                    desc: [
-                        {required: true, message: '请填写活动形式', trigger: 'blur'}
-                    ]
+                    bakEnvironment: [
+                        {required: false, message: '请选择函数文件', trigger: 'blur'}
+                    ],
+                    fun: [
+                        {required: false, message: '请选择函数文件', trigger: 'blur'}
+                    ],
                 }
             }
         },
@@ -158,22 +236,8 @@
                 this.multipleSelection = val;
             },
             open() {
-                this.$prompt('请输入邮箱', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    inputPattern: /[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\w](?:[\w-]*[\w])?\.)+[\w](?:[\w-]*[\w])?/,
-                    inputErrorMessage: '邮箱格式不正确'
-                }).then(({value}) => {
-                    this.$message({
-                        type: 'success',
-                        message: '你的邮箱是: ' + value
-                    });
-                }).catch(() => {
-                    this.$message({
-                        type: 'info',
-                        message: '取消输入'
-                    });
-                });
+                this.dialogVisible = true;
+
             },
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
@@ -187,7 +251,13 @@
             },
             resetForm(formName) {
                 this.$refs[formName].resetFields();
-            }
+            },
+            addProjectVariable() {
+                this.projectData.variable.push({key: null, value: null, remark: null});
+            },
+            delProjectVariable(i) {
+                this.projectData.variable.splice(i, 1);
+            },
         },
     }
 
