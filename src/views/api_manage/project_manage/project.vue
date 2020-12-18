@@ -25,8 +25,8 @@
                     label="地址"
                     show-overflow-tooltip>
             </el-table-column>
-
         </el-table>
+
         <div style="margin-top: 20px">
             <el-button @click="toggleSelection([tableData[1], tableData[2]])">切换第二、第三行的选中状态</el-button>
             <el-button @click="toggleSelection()">取消选择</el-button>
@@ -41,7 +41,6 @@
                 :visible.sync="ProjectDialogVisible"
                 width="80%"
                 :before-close="handleClose">
-
             <div style="position: absolute;top: 5.5%;left: 3%">
                 <el-button type="primary" size="mini" plain @click="variableDialogVisible=true">公共变量</el-button>
 
@@ -88,33 +87,33 @@
             </div>
 
             <div>
-                <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="80px" class="demo-ruleForm">
+                <el-form :model="projectData" :rules="rules" ref="ruleForm" label-width="80px" class="demo-ruleForm">
                     <el-form-item label-position="left" label="项目名称" prop="name">
-                        <el-input v-model="ruleForm.name" size="mini"></el-input>
+                        <el-input v-model="projectData.projectName" size="mini"></el-input>
                     </el-form-item>
                     <el-form-item label-position="left" label="测试环境" prop="testEnvironment">
-                        <el-input v-model="ruleForm.testEnvironment" size="mini"></el-input>
+                        <el-input v-model="projectData.testEnvironment" size="mini"></el-input>
                     </el-form-item>
                     <el-form-item label-position="left" label="开发环境" prop="devEnvironment">
-                        <el-input v-model="ruleForm.devEnvironment" size="mini"></el-input>
+                        <el-input v-model="projectData.devEnvironment" size="mini"></el-input>
                     </el-form-item>
                     <el-form-item label-position="left" label="线上环境" prop="onLineEnvironment">
-                        <el-input v-model="ruleForm.onLineEnvironment" size="mini"></el-input>
+                        <el-input v-model="projectData.onLineEnvironment" size="mini"></el-input>
                     </el-form-item>
                     <el-form-item label-position="left" label="备用环境" prop="bakEnvironment">
-                        <el-input v-model="ruleForm.bakEnvironment" size="mini"></el-input>
+                        <el-input v-model="projectData.bakEnvironment" size="mini"></el-input>
                     </el-form-item>
 
                     <el-form-item label-position="left" label="执行环境" prop="environment">
-                        <el-select v-model="ruleForm.environment" placeholder="请选择测试环境">
-                            <el-option label="测试环境" value="shanghai"></el-option>
-                            <el-option label="开发环境" value="beijing"></el-option>
-                            <el-option label="线上环境" value="beijing"></el-option>
-                            <el-option label="备用环境" value="beijing"></el-option>
+                        <el-select v-model="projectData.environment" placeholder="请选择测试环境">
+                            <el-option label="测试环境" value="projectData.testEnvironment"></el-option>
+                            <el-option label="开发环境" value="projectData.devEnvironment"></el-option>
+                            <el-option label="线上环境" value="projectData.onLineEnvironment"></el-option>
+                            <el-option label="备用环境" value="projectData.bakEnvironment"></el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label-position="left" label="函数文件" prop="fun">
-                        <el-select v-model="ruleForm.fun" placeholder="请选择函数文件">
+                        <el-select v-model="projectData.fun" placeholder="请选择函数文件">
                             <el-option label="ethan1" value="shanghai"></el-option>
                             <el-option label="ethan2" value="beijing"></el-option>
                             <el-option label="ethan3" value="beijing"></el-option>
@@ -122,7 +121,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item label-position="left" label="测试人员" prop="testUser">
-                        <el-select v-model="ruleForm.testUser" placeholder="请选择测试人员">
+                        <el-select v-model="projectData.testUser" placeholder="请选择测试人员">
                             <el-option label="ethan1" value="shanghai"></el-option>
                             <el-option label="ethan2" value="beijing"></el-option>
                             <el-option label="ethan3" value="beijing"></el-option>
@@ -131,11 +130,11 @@
                     </el-form-item>
 
                     <el-form-item label="项目描述" prop="desc">
-                        <el-input type="textarea" v-model="ruleForm.desc"></el-input>
+                        <el-input type="textarea" v-model="projectData.desc"></el-input>
                     </el-form-item>
                     <el-form-item>
-                        <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
-                        <el-button @click="resetForm('ruleForm')">重置</el-button>
+                        <el-button type="primary" @click="submitForm('projectData')">立即创建</el-button>
+                        <el-button @click="resetForm('projectData')">重置</el-button>
                     </el-form-item>
                 </el-form>
             </div>
@@ -158,10 +157,11 @@
                 ProjectDialogVisible: false,
                 variableDialogVisible: false,
                 projectData: {
-                    host: null,
-                    hostTwo: null,
-                    hostThree: null,
-                    hostFour: null,
+                    testEnvironment: null,
+                    devEnvironment: null,
+                    onLineEnvironment: null,
+                    bakEnvironment: null,
+                    environment: null,
                     id: null,
                     userId: null,
                     modelFormVisible: false,
@@ -171,6 +171,7 @@
                     funcFile: '',
                     header: Array(),
                     variable: Array(),
+                    desc:null,
                 },
                 tableData: [{
                     date: '2016-05-03',
@@ -182,17 +183,17 @@
                     address: '上海市普陀区金沙江路 1518 弄'
                 },],
                 multipleSelection: [],
-                ruleForm: {
-                    name: '',
-                    testEnvironment: '',
-                    devEnvironment: '',
-                    onLineEnvironment: '',
-                    bakEnvironment: '',
-                    environment: '',
-                    fun: '',
-                    testUser: '',
-                    desc: ''
-                },
+                // ruleForm: {
+                //     name: '',
+                //     testEnvironment: '',
+                //     devEnvironment: '',
+                //     onLineEnvironment: '',
+                //     bakEnvironment: '',
+                //     environment: '',
+                //     fun: '',
+                //     testUser: '',
+                //     desc: ''
+                // },
                 rules: {
                     name: [
                         {required: true, message: '请输入项目名称', trigger: 'blur'},
