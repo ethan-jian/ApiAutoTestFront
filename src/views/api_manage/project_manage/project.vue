@@ -88,7 +88,7 @@
 
             <div>
                 <el-form :model="projectData" :rules="rules" ref="ruleForm" label-width="80px" class="demo-ruleForm">
-                    <el-form-item label-position="left" label="项目名称" prop="name">
+                    <el-form-item label-position="left" label="项目名称" prop="projectName">
                         <el-input v-model="projectData.projectName" size="mini"></el-input>
                     </el-form-item>
                     <el-form-item label-position="left" label="测试环境" prop="testEnvironment">
@@ -104,28 +104,42 @@
                         <el-input v-model="projectData.bakEnvironment" size="mini"></el-input>
                     </el-form-item>
 
-                    <el-form-item label-position="left" label="执行环境" prop="environment">
-                        <el-select v-model="projectData.environment" placeholder="请选择测试环境">
-                            <el-option label="测试环境" value="projectData.testEnvironment"></el-option>
-                            <el-option label="开发环境" value="projectData.devEnvironment"></el-option>
-                            <el-option label="线上环境" value="projectData.onLineEnvironment"></el-option>
-                            <el-option label="备用环境" value="projectData.bakEnvironment"></el-option>
+                    <el-form-item label-position="left" label="执行环境">
+                        <el-select
+                                v-model="projectData.environment"
+                                placeholder="请选择测试环境"
+                                @focus="getEnvironments" @change="getEnvironment">
+                            <el-option
+                                    v-for="item in projectData.environmentOptions"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value"
+                            >
+                            </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label-position="left" label="函数文件" prop="fun">
-                        <el-select v-model="projectData.fun" placeholder="请选择函数文件">
-                            <el-option label="ethan1" value="shanghai"></el-option>
-                            <el-option label="ethan2" value="beijing"></el-option>
-                            <el-option label="ethan3" value="beijing"></el-option>
-                            <el-option label="ethan4" value="beijing"></el-option>
+                        <el-select v-model="projectData.fun" placeholder="请选择函数文件" @focus="getEnvironments">
+                            <el-option v-for="item in projectData.environmentOptions"
+                                       :key="item.value"
+                                       :label="item.label"
+                                       :value="item.value"
+                            >
+                            </el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label-position="left" label="测试人员" prop="testUser">
-                        <el-select v-model="projectData.testUser" placeholder="请选择测试人员">
-                            <el-option label="ethan1" value="shanghai"></el-option>
-                            <el-option label="ethan2" value="beijing"></el-option>
-                            <el-option label="ethan3" value="beijing"></el-option>
-                            <el-option label="ethan4" value="beijing"></el-option>
+                        <el-select v-model="projectData.testUser"
+                                   placeholder="请选择测试人员"
+                                   @focus="getAllUser"
+                        >
+                            <el-option v-for="item in projectData.userList"
+                                       :key="item.id"
+                                       :label="item.username"
+                                       :value="item.id"
+                            >
+                            </el-option>
+
                         </el-select>
                     </el-form-item>
 
@@ -150,6 +164,9 @@
 </template>
 
 <script>
+    import {getUserInfo} from "../../../api/user";
+    import {addProjectInfo} from "../../../api/project";
+
     export default {
         name: 'project',
         data() {
@@ -157,21 +174,20 @@
                 ProjectDialogVisible: false,
                 variableDialogVisible: false,
                 projectData: {
+                    id: null,
+                    projectName: null,
                     testEnvironment: null,
                     devEnvironment: null,
                     onLineEnvironment: null,
                     bakEnvironment: null,
                     environment: null,
-                    id: null,
-                    userId: null,
-                    modelFormVisible: false,
-                    projectName: null,
-                    principal: null,
-                    formLabelWidth: '80px',
+                    testUserId: null,
                     funcFile: '',
-                    header: Array(),
-                    variable: Array(),
-                    desc:null,
+                    desc: null,
+                    variable: [],
+                    headers: [],
+                    environmentOptions: [],
+                    userList: [],
                 },
                 tableData: [{
                     date: '2016-05-03',
@@ -195,7 +211,7 @@
                 //     desc: ''
                 // },
                 rules: {
-                    name: [
+                    projectName: [
                         {required: true, message: '请输入项目名称', trigger: 'blur'},
                         {min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur'}
                     ],
@@ -206,16 +222,16 @@
                         {required: true, message: '请选择测试人员', trigger: 'blur'}
                     ],
                     testEnvironment: [
-                        {required: false, message: '请选择函数文件', trigger: 'blur'}
+                        {required: false, message: '请输入测试环境', trigger: 'blur'}
                     ],
                     devEnvironment: [
-                        {required: false, message: '请选择函数文件', trigger: 'blur'}
+                        {required: false, message: '请输入开发环境', trigger: 'blur'}
                     ],
                     onLineEnvironment: [
-                        {required: false, message: '请选择函数文件', trigger: 'blur'}
+                        {required: false, message: '请输入线上环境', trigger: 'blur'}
                     ],
                     bakEnvironment: [
-                        {required: false, message: '请选择函数文件', trigger: 'blur'}
+                        {required: false, message: '请输入备用环境', trigger: 'blur'}
                     ],
                     fun: [
                         {required: false, message: '请选择函数文件', trigger: 'blur'}
@@ -224,6 +240,64 @@
             }
         },
         methods: {
+            getEnvironment() {
+                console.log(this.projectData.environment)
+            },
+
+            addProject() {
+                addProjectInfo(
+                    this.projectData.userId,
+                    this.projectData.name,
+                    this.projectData.variable,
+                    this.projectData.headers,
+                    this.projectData.environment,
+                    this.projectData.funcFile,
+                ).then(res => {
+                    let code = res.data.code;
+                    if (code === 200) {
+                        // this.$router.push('/login')
+                        this.$notify({
+                            title: "新增项目成功",
+                            type: "success"
+                        })
+                    } else {
+                        this.$notify({
+                            title: "新增项目失败",
+                            type: "error"
+                        })
+                    }
+
+                })
+            },
+
+            getAllUser() {
+                getUserInfo().then(res => {
+                    let code = res.data.code;
+                    if (code === 200) {
+                        this.projectData.userList = res.data.data;
+                    }
+                })
+
+            },
+            getEnvironments() {
+                this.projectData.environmentOptions = []
+                if (this.projectData.testEnvironment) {
+                    this.projectData.environmentOptions.push({label: '测试环境', value: this.projectData.testEnvironment});
+                }
+                if (this.projectData.devEnvironment) {
+                    this.projectData.environmentOptions.push({label: '开发环境', value: this.projectData.devEnvironment});
+                }
+                if (this.projectData.onLineEnvironment) {
+                    this.projectData.environmentOptions.push({
+                        label: '线上环境',
+                        value: this.projectData.onLineEnvironment
+                    });
+                }
+                if (this.projectData.bakEnvironment) {
+                    this.projectData.environmentOptions.push({label: '备用环境', value: this.projectData.bakEnvironment});
+                }
+                console.log(this.projectData.environmentOptions);
+            },
             toggleSelection(rows) {
                 if (rows) {
                     rows.forEach(row => {
@@ -258,6 +332,8 @@
             },
             delProjectVariable(i) {
                 this.projectData.variable.splice(i, 1);
+            },
+            handleClose() {
             },
         },
     }
