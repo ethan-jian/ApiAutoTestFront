@@ -87,7 +87,7 @@
             </div>
 
             <div>
-                <el-form :model="projectData" :rules="rules" ref="ruleForm" label-width="80px" class="demo-ruleForm">
+                <el-form :model="projectData" :rules="rules" ref="projectData" label-width="80px" class="demo-ruleForm">
                     <el-form-item label-position="left" label="项目名称" prop="projectName">
                         <el-input v-model="projectData.projectName" size="mini"></el-input>
                     </el-form-item>
@@ -104,7 +104,7 @@
                         <el-input v-model="projectData.bakEnvironment" size="mini"></el-input>
                     </el-form-item>
 
-                    <el-form-item label-position="left" label="执行环境">
+                    <el-form-item label-position="left" label="执行环境" prop="environment">
                         <el-select
                                 v-model="projectData.environment"
                                 placeholder="请选择测试环境"
@@ -118,6 +118,7 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
+
                     <el-form-item label-position="left" label="函数文件" prop="fun">
                         <el-select v-model="projectData.fun" placeholder="请选择函数文件" @focus="getEnvironments">
                             <el-option v-for="item in projectData.environmentOptions"
@@ -128,8 +129,8 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label-position="left" label="测试人员" prop="testUser">
-                        <el-select v-model="projectData.testUser"
+                    <el-form-item label-position="left" label="测试人员" prop="testUserId">
+                        <el-select v-model="projectData.testUserId"
                                    placeholder="请选择测试人员"
                                    @focus="getAllUser"
                         >
@@ -184,7 +185,7 @@
                     testUserId: null,
                     funcFile: '',
                     desc: null,
-                    variable: [],
+                    variable: [{'k':'v'}],
                     headers: [],
                     environmentOptions: [],
                     userList: [],
@@ -199,43 +200,30 @@
                     address: '上海市普陀区金沙江路 1518 弄'
                 },],
                 multipleSelection: [],
-                // ruleForm: {
-                //     name: '',
-                //     testEnvironment: '',
-                //     devEnvironment: '',
-                //     onLineEnvironment: '',
-                //     bakEnvironment: '',
-                //     environment: '',
-                //     fun: '',
-                //     testUser: '',
-                //     desc: ''
-                // },
+                ruleForm: {
+                    name: '',
+                    region: '',
+                    date1: '',
+                    date2: '',
+                    delivery: false,
+                    type: [],
+                    resource: '',
+                    desc: ''
+                },
                 rules: {
                     projectName: [
                         {required: true, message: '请输入项目名称', trigger: 'blur'},
                         {min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur'}
                     ],
                     environment: [
-                        {required: true, message: '请选择执行环境', trigger: 'blur'}
+                        {required: true, message: '请选择执行环境', trigger: 'change'}
                     ],
-                    testUser: [
-                        {required: true, message: '请选择测试人员', trigger: 'blur'}
+                    testUserId: [
+                        {required: true, message: '请选择测试人员', trigger: 'change'}
                     ],
-                    testEnvironment: [
-                        {required: false, message: '请输入测试环境', trigger: 'blur'}
-                    ],
-                    devEnvironment: [
-                        {required: false, message: '请输入开发环境', trigger: 'blur'}
-                    ],
-                    onLineEnvironment: [
-                        {required: false, message: '请输入线上环境', trigger: 'blur'}
-                    ],
-                    bakEnvironment: [
-                        {required: false, message: '请输入备用环境', trigger: 'blur'}
-                    ],
-                    fun: [
-                        {required: false, message: '请选择函数文件', trigger: 'blur'}
-                    ],
+                    desc: [
+                        {required: false, message: '请填写项目描述', trigger: 'blur'}
+                    ]
                 }
             }
         },
@@ -245,14 +233,13 @@
             },
 
             addProject() {
-                addProjectInfo(
-                    this.projectData.userId,
-                    this.projectData.name,
-                    this.projectData.variable,
-                    this.projectData.headers,
-                    this.projectData.environment,
-                    this.projectData.funcFile,
-                ).then(res => {
+                let postData = {
+                    name: this.projectData.projectName,
+                    user_id: this.projectData.testUserId,
+                    environment: this.projectData.environment,
+                    variables: this.projectData.variable,
+                };
+                addProjectInfo(postData).then(res => {
                     let code = res.data.code;
                     if (code === 200) {
                         // this.$router.push('/login')
@@ -318,6 +305,7 @@
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         alert('submit!');
+                        this.addProject();
                     } else {
                         console.log('error submit!!');
                         return false;
