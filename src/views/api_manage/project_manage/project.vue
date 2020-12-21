@@ -2,7 +2,7 @@
     <div>
         <el-table
                 ref="multipleTable"
-                :data="tableData"
+                :data="listProjectData"
                 tooltip-effect="dark"
                 style="width: 100%"
                 @selection-change="handleSelectionChange">
@@ -11,20 +11,37 @@
                     width="55">
             </el-table-column>
             <el-table-column
-                    label="日期"
-                    width="120">
-                <template slot-scope="scope">{{ scope.row.date }}</template>
-            </el-table-column>
-            <el-table-column
                     prop="name"
-                    label="姓名"
+                    label="名称"
                     width="120">
             </el-table-column>
             <el-table-column
-                    prop="address"
-                    label="地址"
+                    prop="desc"
+                    label="描述"
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    label="执行环境"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.environment }}</template>
+            </el-table-column>
+            <el-table-column
+                    prop="fun"
+                    label="内置函数"
                     show-overflow-tooltip>
             </el-table-column>
+            <el-table-column
+                    label="创建时间"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.created_time }}</template>
+            </el-table-column>
+            <el-table-column
+                    label="更新时间"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.update_time }}</template>
+            </el-table-column>
+
+
         </el-table>
 
         <div style="margin-top: 20px">
@@ -166,7 +183,7 @@
 
 <script>
     import {getUserInfo} from "../../../api/user";
-    import {addProjectInfo} from "../../../api/project";
+    import {addProjectInfo, listProjectInfo} from "../../../api/project";
 
     export default {
         name: 'project',
@@ -185,35 +202,18 @@
                     testUserId: null,
                     funcFile: '',
                     desc: null,
-                    variable: [{'k':'v'}],
+                    variable: [],
                     headers: [],
                     environmentOptions: [],
                     userList: [],
                 },
-                tableData: [{
-                    date: '2016-05-03',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1518 弄'
-                }, {
-                    date: '2016-05-02',
-                    name: '王小虎',
-                    address: '上海市普陀区金沙江路 1518 弄'
-                },],
+                listProjectData: [],
+
                 multipleSelection: [],
-                ruleForm: {
-                    name: '',
-                    region: '',
-                    date1: '',
-                    date2: '',
-                    delivery: false,
-                    type: [],
-                    resource: '',
-                    desc: ''
-                },
                 rules: {
                     projectName: [
                         {required: true, message: '请输入项目名称', trigger: 'blur'},
-                        {min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur'}
+                        {min: 3, max: 25, message: '长度在 3 到 25 个字符', trigger: 'blur'}
                     ],
                     environment: [
                         {required: true, message: '请选择执行环境', trigger: 'change'}
@@ -238,18 +238,22 @@
                     user_id: this.projectData.testUserId,
                     environment: this.projectData.environment,
                     variables: this.projectData.variable,
+                    desc: this.projectData.desc,
                 };
                 addProjectInfo(postData).then(res => {
                     let code = res.data.code;
+                    let message = res.data.message;
                     if (code === 200) {
                         // this.$router.push('/login')
+                        this.ProjectDialogVisible = false;
+                        this.resetForm('projectData')
                         this.$notify({
-                            title: "新增项目成功",
+                            title: message,
                             type: "success"
                         })
                     } else {
                         this.$notify({
-                            title: "新增项目失败",
+                            title: message,
                             type: "error"
                         })
                     }
@@ -266,22 +270,52 @@
                 })
 
             },
+
+            getListProject() {
+                listProjectInfo().then(res => {
+                    let code = res.data.code;
+                    let rsData = res.data.data
+                    if (code === 200) {
+                        for (var i = 0; i < rsData.length; i++) {
+                            var item = rsData[i];
+                            if (item.environment.name === "测试环境") {
+                                item.environment = "00000000";
+                            }
+                            // item.environment = item.environment.name;
+                            // console.log(item.environment)
+                        }
+
+                        console.log(rsData);
+                        this.listProjectData = rsData;
+                    }
+                })
+
+            },
             getEnvironments() {
                 this.projectData.environmentOptions = []
                 if (this.projectData.testEnvironment) {
-                    this.projectData.environmentOptions.push({label: '测试环境', value: this.projectData.testEnvironment});
+                    this.projectData.environmentOptions.push({
+                        label: '测试环境',
+                        value: {name: '测试环境', host: this.projectData.testEnvironment}
+                    });
                 }
                 if (this.projectData.devEnvironment) {
-                    this.projectData.environmentOptions.push({label: '开发环境', value: this.projectData.devEnvironment});
+                    this.projectData.environmentOptions.push({
+                        label: '开发环境',
+                        value: {name: '开发环境', host: this.projectData.devEnvironment}
+                    });
                 }
                 if (this.projectData.onLineEnvironment) {
                     this.projectData.environmentOptions.push({
                         label: '线上环境',
-                        value: this.projectData.onLineEnvironment
+                        value: {name: '线上环境', host: this.projectData.onLineEnvironment}
                     });
                 }
                 if (this.projectData.bakEnvironment) {
-                    this.projectData.environmentOptions.push({label: '备用环境', value: this.projectData.bakEnvironment});
+                    this.projectData.environmentOptions.push({
+                        label: '备用环境',
+                        value: {name: '备用环境', host: this.projectData.bakEnvironment}
+                    });
                 }
                 console.log(this.projectData.environmentOptions);
             },
@@ -304,7 +338,7 @@
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        alert('submit!');
+                        // alert('submit!');
                         this.addProject();
                     } else {
                         console.log('error submit!!');
@@ -324,6 +358,9 @@
             handleClose() {
             },
         },
+        created() {
+            this.getListProject();
+        }
     }
 
 
