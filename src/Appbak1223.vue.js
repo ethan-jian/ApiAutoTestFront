@@ -1,32 +1,19 @@
 <template>
     <div id="app">
-        <router-view v-if="isRouterAlive"></router-view>
+        <router-view/>
     </div>
 </template>
 
 <script>
     // @ is an alias to /src
     import {getLoginUserInfo} from "./api/user";
-
     export default {
         name: 'App',
         components: {},
-        provide (){
-            return {
-                reload: this.reload
-            }
+        date() {
+            return {}
         },
-        data() {
-            return {isRouterAlive:true}
-        },
-        methods: {
-            reload (){
-                this.isRouterAlive = false
-                this.$nextTick(function () {
-                    this.isRouterAlive = true
-                })
-            }
-        },
+        methods: {},
         created() {
             getLoginUserInfo().then(res => {
                 let code = res.data.code;
@@ -50,24 +37,19 @@
         height: 100%;
         overflow: auto;
     }
-
     html, body {
         height: 100%;
     }
-
     #nav {
         padding: 30px;
     }
-
     #nav a {
         font-weight: bold;
         color: #2c3e50;
     }
-
     #nav a.router-link-exact-active {
         color: #42b983;
     }
-
     body {
         display: block;
         margin: 0;

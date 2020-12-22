@@ -23,12 +23,22 @@
             <el-table-column
                     label="执行环境"
                     width="120">
-                <template slot-scope="scope">{{ scope.row.environment }}</template>
+                <template slot-scope="scope">
+                    <span v-if="scope.row.environment_type === '1'">测试环境</span>
+                    <span v-if="scope.row.environment_type === '2'">开发环境</span>
+                    <span v-if="scope.row.environment_type === '3'">线上环境</span>
+                    <span v-if="scope.row.environment_type === '4'">备用环境</span>
+                </template>
             </el-table-column>
             <el-table-column
                     prop="fun"
                     label="内置函数"
                     show-overflow-tooltip>
+            </el-table-column>
+             <el-table-column
+                    label="测试人员"
+                    width="120">
+                <template slot-scope="scope">{{ scope.row.user_id }}</template>
             </el-table-column>
             <el-table-column
                     label="创建时间"
@@ -122,10 +132,10 @@
                     </el-form-item>
 
                     <el-form-item label-position="left" label="执行环境" prop="environment">
-                        <el-select
-                                v-model="projectData.environment"
-                                placeholder="请选择测试环境"
-                                @focus="getEnvironments" @change="getEnvironment">
+                        <el-select ref="selectEnvironment"
+                                   v-model="projectData.environment"
+                                   placeholder="请选择测试环境"
+                                   @focus="getEnvironments" @change="getEnvironment">
                             <el-option
                                     v-for="item in projectData.environmentOptions"
                                     :key="item.value"
@@ -182,10 +192,12 @@
 </template>
 
 <script>
+
     import {getUserInfo} from "../../../api/user";
     import {addProjectInfo, listProjectInfo} from "../../../api/project";
 
     export default {
+        inject: ['reload'],
         name: 'project',
         data() {
             return {
@@ -199,6 +211,7 @@
                     onLineEnvironment: null,
                     bakEnvironment: null,
                     environment: null,
+                    environment_type: '1',//测试环境
                     testUserId: null,
                     funcFile: '',
                     desc: null,
@@ -229,23 +242,40 @@
         },
         methods: {
             getEnvironment() {
-                console.log(this.projectData.environment)
+                //locations是v-for里面的也是datas里面的值
+                console.log()
+            },
+
+            getSelectedEnvironmentType() {
+                let selectedLabel = this.$refs.selectEnvironment.selected.label;
+                if (selectedLabel === '测试环境') {
+                    this.projectData.environment_type = '1';
+                } else if (selectedLabel === '开发环境') {
+                    this.projectData.environment_type = '2';
+                } else if (selectedLabel === '线上环境') {
+                    this.projectData.environment_type = '3';
+                } else if (selectedLabel === '备用环境') {
+                    this.projectData.environment_type = '4';
+                }
             },
 
             addProject() {
+                this.getSelectedEnvironmentType();
                 let postData = {
                     name: this.projectData.projectName,
                     user_id: this.projectData.testUserId,
                     environment: this.projectData.environment,
+                    environment_type: this.projectData.environment_type,
                     variables: this.projectData.variable,
                     desc: this.projectData.desc,
+
                 };
                 addProjectInfo(postData).then(res => {
                     let code = res.data.code;
                     let message = res.data.message;
                     if (code === 200) {
-                        // this.$router.push('/login')
                         this.ProjectDialogVisible = false;
+                        this.reload()
                         this.resetForm('projectData')
                         this.$notify({
                             title: message,
@@ -259,6 +289,7 @@
                     }
 
                 })
+
             },
 
             getAllUser() {
@@ -276,45 +307,35 @@
                     let code = res.data.code;
                     let rsData = res.data.data
                     if (code === 200) {
-                        for (var i = 0; i < rsData.length; i++) {
-                            var item = rsData[i];
-                            if (item.environment.name === "测试环境") {
-                                item.environment = "00000000";
-                            }
-                            // item.environment = item.environment.name;
-                            // console.log(item.environment)
-                        }
-
                         console.log(rsData);
                         this.listProjectData = rsData;
                     }
                 })
-
             },
             getEnvironments() {
                 this.projectData.environmentOptions = []
                 if (this.projectData.testEnvironment) {
                     this.projectData.environmentOptions.push({
                         label: '测试环境',
-                        value: {name: '测试环境', host: this.projectData.testEnvironment}
+                        value: this.projectData.testEnvironment
                     });
                 }
                 if (this.projectData.devEnvironment) {
                     this.projectData.environmentOptions.push({
                         label: '开发环境',
-                        value: {name: '开发环境', host: this.projectData.devEnvironment}
+                        value: this.projectData.devEnvironment
                     });
                 }
                 if (this.projectData.onLineEnvironment) {
                     this.projectData.environmentOptions.push({
                         label: '线上环境',
-                        value: {name: '线上环境', host: this.projectData.onLineEnvironment}
+                        value: this.projectData.onLineEnvironment
                     });
                 }
                 if (this.projectData.bakEnvironment) {
                     this.projectData.environmentOptions.push({
                         label: '备用环境',
-                        value: {name: '备用环境', host: this.projectData.bakEnvironment}
+                        value: this.projectData.bakEnvironment
                     });
                 }
                 console.log(this.projectData.environmentOptions);
