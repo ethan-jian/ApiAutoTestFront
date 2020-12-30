@@ -33,11 +33,12 @@
             <el-table-column
                     prop="fun"
                     label="内置函数"
-                    show-overflow-tooltip>
-            </el-table-column>
-             <el-table-column
-                    label="测试人员"
+                    show-overflow-tooltip
                     width="120">
+            </el-table-column>
+            <el-table-column
+                    label="测试人员"
+                    width="100">
                 <template slot-scope="scope">{{ scope.row.user_name }}</template>
             </el-table-column>
             <el-table-column
