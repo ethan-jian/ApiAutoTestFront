@@ -7,3 +7,7 @@ export const addProjectInfo = function (data) {
 export const listProjectInfo = function () {
     return getRequest('list/project')
 };
+
+export const deleteProjectInfo = function (data) {
+    return postRequest('delete/project/', data)
+};

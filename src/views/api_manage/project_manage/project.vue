@@ -51,17 +51,26 @@
                     width="120">
                 <template slot-scope="scope">{{ scope.row.update_time }}</template>
             </el-table-column>
-
+            <el-table-column
+                    label="操作"
+                    width="120">
+                <template slot-scope="scope">
+                    <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
+                    <el-button @click="handleClick(scope.row)" type="text" size="small">编辑</el-button>
+                    <el-button @click="deleteProject(scope.row.id)" type="text" size="small">删除</el-button>
+                </template>
+            </el-table-column>
 
         </el-table>
 
-        <div style="margin-top: 20px">
-            <el-button @click="toggleSelection([tableData[1], tableData[2]])">切换第二、第三行的选中状态</el-button>
-            <el-button @click="toggleSelection()">取消选择</el-button>
-        </div>
+        <!--        <div style="margin-top: 20px">-->
+        <!--            <el-button @click="toggleSelection([tableData[1], tableData[2]])">切换第二、第三行的选中状态</el-button>-->
+        <!--            <el-button @click="toggleSelection()">取消选择</el-button>-->
+        <!--        </div>-->
+
         <div style="position: absolute;top: 9.5%;right: 0">
             <el-button type="primary" plain @click="ProjectDialogVisible=true">新增</el-button>
-            <el-button type="warning" plain>批量删除</el-button>
+            <el-button type="warning" @click="deleteProject" plain>批量删除</el-button>
         </div>
 
         <el-dialog
@@ -187,15 +196,24 @@
                 <!--    <el-button type="primary" @click="ProjectDialogVisible = false">确 定</el-button>-->
   </span>
         </el-dialog>
-
-
+        <div class="block">
+            <el-pagination
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="currentPage4"
+                    :page-sizes="[100, 200, 300, 400]"
+                    :page-size="100"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    :total="400">
+            </el-pagination>
+        </div>
     </div>
 </template>
 
 <script>
 
     import {getUserInfo} from "../../../api/user";
-    import {addProjectInfo, listProjectInfo} from "../../../api/project";
+    import {addProjectInfo, deleteProjectInfo, listProjectInfo} from "../../../api/project";
 
     export default {
         inject: ['reload'],
@@ -206,6 +224,7 @@
                 variableDialogVisible: false,
                 projectData: {
                     id: null,
+                    ids: [],
                     projectName: null,
                     testEnvironment: null,
                     devEnvironment: null,
@@ -245,6 +264,36 @@
             getEnvironment() {
                 //locations是v-for里面的也是datas里面的值
                 console.log()
+            },
+            deleteProject(id) {
+                console.log(id)
+                if (typeof id === "number") {
+                    this.projectData.ids.push(id);
+                }
+                let postData = {
+                    ids: this.projectData.ids
+                };
+                this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    deleteProjectInfo(postData).then(res => {
+                        let code = res.data.code;
+                        if (code === 200) {
+                            this.reload()
+                        }
+                    });
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功!'
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
             },
 
             getSelectedEnvironmentType() {
@@ -341,6 +390,7 @@
                 }
                 console.log(this.projectData.environmentOptions);
             },
+
             toggleSelection(rows) {
                 if (rows) {
                     rows.forEach(row => {
@@ -352,7 +402,11 @@
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
+                this.multipleSelection.map((item) => {
+                    this.projectData.ids.push(item.id)
+                });
             },
+
             open() {
                 this.dialogVisible = true;
 
@@ -387,6 +441,7 @@
 
 
 </script>
+
 <style scoped>
     .projectTable {
         /*width:50%;*/
