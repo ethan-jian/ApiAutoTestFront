@@ -54,11 +54,21 @@
 
 
         </el-table>
-
-        <div style="margin-top: 20px">
-            <el-button @click="toggleSelection([tableData[1], tableData[2]])">切换第二、第三行的选中状态</el-button>
-            <el-button @click="toggleSelection()">取消选择</el-button>
+        <div class="block">
+            <el-pagination
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="currentPage"
+                    :page-sizes=pageSizes
+                    :page-size=pageSize
+                    layout="total, sizes, prev, pager, next, jumper"
+                    :total=totalPage>
+            </el-pagination>
         </div>
+        <!--        <div style="margin-top: 20px">-->
+        <!--            <el-button @click="toggleSelection([tableData[1], tableData[2]])">切换第二、第三行的选中状态</el-button>-->
+        <!--            <el-button @click="toggleSelection()">取消选择</el-button>-->
+        <!--        </div>-->
         <div style="position: absolute;top: 9.5%;right: 0">
             <el-button type="primary" plain @click="ProjectDialogVisible=true">新增</el-button>
             <el-button type="warning" plain>批量删除</el-button>
@@ -204,6 +214,10 @@
             return {
                 ProjectDialogVisible: false,
                 variableDialogVisible: false,
+                currentPage: 1,
+                pageSize: 10,
+                pageSizes: [10,20,30,40,50],
+                totalPage: 100,
                 projectData: {
                     id: null,
                     projectName: null,
@@ -242,6 +256,13 @@
             }
         },
         methods: {
+            handleSizeChange(val) {
+                console.log(`每页 ${val} 条`);
+            },
+            handleCurrentChange(val) {
+                console.log(`当前页: ${val}`);
+            },
+
             getEnvironment() {
                 //locations是v-for里面的也是datas里面的值
                 console.log()
