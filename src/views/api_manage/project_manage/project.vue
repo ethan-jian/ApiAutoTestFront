@@ -1,5 +1,19 @@
 <template>
     <div>
+
+        <el-input
+                style="width: 200px;
+                    float: left;"
+                placeholder="请输入项目名称"
+                v-model="kw"
+                clearable>
+        </el-input>
+        <div style="position: absolute;
+        left: 430px;
+">
+            <el-button type="primary" @click="getListProject">查询</el-button>
+            <el-button @click="resetInput()">重置</el-button>
+        </div>
         <el-table
                 ref="multipleTable"
                 :data="listProjectData"
@@ -55,16 +69,14 @@
                     label="操作"
                     width="120">
                 <template slot-scope="scope">
-                    <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
-                    <el-button @click="handleClick(scope.row)" type="text" size="small">编辑</el-button>
+<!--                    <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>-->
+                    <el-button @click="editProject(scope.row.id)" type="text" size="small">编辑</el-button>
                     <el-button @click="deleteProject(scope.row.id)" type="text" size="small">删除</el-button>
                 </template>
             </el-table-column>
 
         </el-table>
-<<<<<<< HEAD
 
-=======
         <div class="block">
             <el-pagination
                     @size-change="handleSizeChange"
@@ -76,15 +88,7 @@
                     :total=totalPage>
             </el-pagination>
         </div>
->>>>>>> be2c6b46b8da5d206b88c0a3994002c5378c07ba
-        <!--        <div style="margin-top: 20px">-->
-        <!--            <el-button @click="toggleSelection([tableData[1], tableData[2]])">切换第二、第三行的选中状态</el-button>-->
-        <!--            <el-button @click="toggleSelection()">取消选择</el-button>-->
-        <!--        </div>-->
-<<<<<<< HEAD
 
-=======
->>>>>>> be2c6b46b8da5d206b88c0a3994002c5378c07ba
         <div style="position: absolute;top: 9.5%;right: 0">
             <el-button type="primary" plain @click="ProjectDialogVisible=true">新增</el-button>
             <el-button type="warning" @click="deleteProject" plain>批量删除</el-button>
@@ -213,17 +217,6 @@
                 <!--    <el-button type="primary" @click="ProjectDialogVisible = false">确 定</el-button>-->
   </span>
         </el-dialog>
-        <div class="block">
-            <el-pagination
-                    @size-change="handleSizeChange"
-                    @current-change="handleCurrentChange"
-                    :current-page="currentPage4"
-                    :page-sizes="[100, 200, 300, 400]"
-                    :page-size="100"
-                    layout="total, sizes, prev, pager, next, jumper"
-                    :total="400">
-            </el-pagination>
-        </div>
     </div>
 </template>
 
@@ -237,12 +230,13 @@
         name: 'project',
         data() {
             return {
+                kw: '',
                 ProjectDialogVisible: false,
                 variableDialogVisible: false,
                 currentPage: 1,
                 pageSize: 10,
-                pageSizes: [10,20,30,40,50],
-                totalPage: 100,
+                pageSizes: [10, 20, 30, 40, 50],
+                totalPage: 0,
                 projectData: {
                     id: null,
                     ids: [],
@@ -284,9 +278,13 @@
         methods: {
             handleSizeChange(val) {
                 console.log(`每页 ${val} 条`);
+                this.pageSize = val;
+                this.getListProject();
             },
             handleCurrentChange(val) {
                 console.log(`当前页: ${val}`);
+                this.currentPage = val;
+                this.getListProject();
             },
 
             getEnvironment() {
@@ -323,7 +321,9 @@
                     });
                 });
             },
-
+            editProject() {
+                this.ProjectDialogVisible = true;
+            },
             getSelectedEnvironmentType() {
                 let selectedLabel = this.$refs.selectEnvironment.selected.label;
                 if (selectedLabel === '测试环境') {
@@ -381,12 +381,22 @@
             },
 
             getListProject() {
-                listProjectInfo().then(res => {
+                let postData = {
+                    totalCount: this.totalPage,
+                    pageSize: this.pageSize,
+                    currentPage: this.currentPage,
+                    kw: this.kw,
+                    sort: [{"direct": "DESC", "field": "created_time"}]
+
+                };
+                listProjectInfo(postData).then(res => {
                     let code = res.data.code;
                     let rsData = res.data.data
                     if (code === 200) {
                         console.log(rsData);
+                        this.totalPage = res.data.totalCount;
                         this.listProjectData = rsData;
+
                     }
                 })
             },
@@ -452,6 +462,10 @@
             },
             resetForm(formName) {
                 this.$refs[formName].resetFields();
+            },
+            resetInput() {
+                this.kw = '';
+                this.getListProject();
             },
             addProjectVariable() {
                 this.projectData.variable.push({key: null, value: null, remark: null});
