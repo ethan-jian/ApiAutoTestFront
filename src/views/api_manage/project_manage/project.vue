@@ -69,7 +69,7 @@
                     label="操作"
                     width="120">
                 <template slot-scope="scope">
-<!--                    <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>-->
+                    <!--                    <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>-->
                     <el-button @click="editProject(scope.row.id)" type="text" size="small">编辑</el-button>
                     <el-button @click="deleteProject(scope.row.id)" type="text" size="small">删除</el-button>
                 </template>
@@ -90,12 +90,12 @@
         </div>
 
         <div style="position: absolute;top: 9.5%;right: 0">
-            <el-button type="primary" plain @click="ProjectDialogVisible=true">新增</el-button>
+            <el-button type="primary" plain @click="openAddproject">新增</el-button>
             <el-button type="warning" @click="deleteProject" plain>批量删除</el-button>
         </div>
 
         <el-dialog
-                title="创建项目"
+                :title="title"
                 :visible.sync="ProjectDialogVisible"
                 width="80%"
                 :before-close="handleClose">
@@ -223,13 +223,20 @@
 <script>
 
     import {getUserInfo} from "../../../api/user";
-    import {addProjectInfo, deleteProjectInfo, listProjectInfo} from "../../../api/project";
+    import {
+        addProjectInfo,
+        catProjectDetailInfo,
+        deleteProjectInfo,
+        // editProjectInfo,
+        listProjectInfo
+    } from "../../../api/project";
 
     export default {
         inject: ['reload'],
         name: 'project',
         data() {
             return {
+                title: '创建项目',
                 kw: '',
                 ProjectDialogVisible: false,
                 variableDialogVisible: false,
@@ -276,6 +283,10 @@
             }
         },
         methods: {
+            openAddproject() {
+                this.title = '新增项目';
+                this.ProjectDialogVisible = true;
+            },
             handleSizeChange(val) {
                 console.log(`每页 ${val} 条`);
                 this.pageSize = val;
@@ -321,8 +332,70 @@
                     });
                 });
             },
-            editProject() {
+            editProject(id) {
+                this.title = '编辑项目';
                 this.ProjectDialogVisible = true;
+                let postData = {
+                    "id": id
+                };
+                catProjectDetailInfo(postData).then(res => {
+                    let code = res.data.code;
+                    // let message = res.data.message;
+                    let resData = res.data.data[0];
+                    if (code === 200) {
+                        this.projectData.projectName = resData.name;
+                        this.projectData.testEnvironment = resData.test_environment;
+                        this.projectData.devEnvironment = resData.dev_environment;
+                        this.projectData.onLineEnvironment = resData.online_environment;
+                        this.projectData.bakEnvironment = resData.bak_environment;
+                        this.projectData.desc = resData.desc;
+                        this.projectData.environment_type = resData.environment_type;
+                        if (this.projectData.environment_type === '1') {
+                            this.projectData.environment = '测试环境';
+                        } else if (this.projectData.environment_type === '2') {
+                            this.projectData.environment = '开发环境';
+                        } else if (this.projectData.environment_type === '3') {
+                            this.projectData.environment = '线上环境';
+                        } else if (this.projectData.environment_type === '4') {
+                            this.projectData.environment = '备用环境';
+                        }
+                        this.getAllUser();
+                        this.projectData.testUserId = resData.user_id_id;
+                        this.projectData.variable = resData.variables;
+                        let postData = {
+                            name: this.projectData.projectName,
+                            user_id_id: this.projectData.testUserId,
+                            // environment: this.projectData.environment,
+                            test_environment: this.projectData.testEnvironment,
+                            dev_environment: this.projectData.devEnvironment,
+                            online_environment: this.projectData.onLineEnvironment,
+                            bak_environment: this.projectData.bakEnvironment,
+                            environment_type: this.projectData.environment_type,
+                            variables: this.projectData.variable,
+                            desc: this.projectData.desc,
+
+                        };
+                        this.editProjectInfo(postData).then(res => {
+                            let code = res.data.code;
+                            let message = res.data.message;
+                            if (code === 200) {
+                                this.ProjectDialogVisible = false;
+                                this.reload()
+                                this.resetForm('projectData')
+                                this.$notify({
+                                    title: message,
+                                    type: "success"
+                                })
+                            } else {
+                                this.$notify({
+                                    title: message,
+                                    type: "error"
+                                })
+                            }
+
+                        })
+                    }
+                })
             },
             getSelectedEnvironmentType() {
                 let selectedLabel = this.$refs.selectEnvironment.selected.label;
@@ -342,7 +415,11 @@
                 let postData = {
                     name: this.projectData.projectName,
                     user_id_id: this.projectData.testUserId,
-                    environment: this.projectData.environment,
+                    // environment: this.projectData.environment,
+                    test_environment: this.projectData.testEnvironment,
+                    dev_environment: this.projectData.devEnvironment,
+                    online_environment: this.projectData.onLineEnvironment,
+                    bak_environment: this.projectData.bakEnvironment,
                     environment_type: this.projectData.environment_type,
                     variables: this.projectData.variable,
                     desc: this.projectData.desc,
@@ -451,11 +528,13 @@
             },
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
-                    if (valid) {
-                        // alert('submit!');
+                    if (valid && this.title==='创建项目') {
                         this.addProject();
-                    } else {
-                        console.log('error submit!!');
+                    }
+                    else if (valid && this.title==='编辑项目'){
+                        this.editProject();
+                    }
+                    else {
                         return false;
                     }
                 });
