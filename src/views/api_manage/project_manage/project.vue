@@ -138,8 +138,8 @@
                         </el-table-column>
                     </el-table>
                     <span slot="footer" class="dialog-footer">
-    <el-button @click="variableDialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="variableDialogVisible = false">确 定</el-button>
+<!--    <el-button @click="handleClosevariableDialog">取 消</el-button>-->
+<!--    <el-button type="primary" @click="variableDialogVisible = false">确 定</el-button>-->
   </span>
                 </el-dialog>
             </div>
@@ -206,7 +206,7 @@
                         <el-input type="textarea" v-model="projectData.desc"></el-input>
                     </el-form-item>
                     <el-form-item>
-                        <el-button type="primary" @click="submitForm('projectData')">立即创建</el-button>
+                        <el-button type="primary" @click="submitForm('projectData')">保存</el-button>
                         <el-button @click="resetForm('projectData')">重置</el-button>
                     </el-form-item>
                 </el-form>
@@ -563,6 +563,7 @@
             },
             handleClosevariableDialog() {
                 this.variableDialogVisible = false;
+                // this.projectData.variable = [];
             },
 
         },
