@@ -70,7 +70,7 @@
                     width="120">
                 <template slot-scope="scope">
                     <!--                    <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>-->
-                    <el-button @click="editProject(scope.row.id)" type="text" size="small">编辑</el-button>
+                    <el-button @click="catProject(scope.row.id)" type="text" size="small">编辑</el-button>
                     <el-button @click="deleteProject(scope.row.id)" type="text" size="small">删除</el-button>
                 </template>
             </el-table-column>
@@ -98,7 +98,7 @@
                 :title="title"
                 :visible.sync="ProjectDialogVisible"
                 width="80%"
-                :before-close="handleClose">
+                :before-close="handleCloseProjectDialog">
             <div style="position: absolute;top: 5.5%;left: 3%">
                 <el-button type="primary" size="mini" plain @click="variableDialogVisible=true">公共变量</el-button>
 
@@ -106,7 +106,7 @@
                         title="公共变量"
                         :visible.sync="variableDialogVisible"
                         width="60%"
-                        :before-close="handleClose">
+                        :before-close="handleClosevariableDialog">
                     <el-button type="primary" size="mini" @click="addProjectVariable()">
                         添加
                     </el-button>
@@ -226,7 +226,7 @@
     import {
         addProjectInfo,
         catProjectDetailInfo,
-        deleteProjectInfo,
+        deleteProjectInfo, editProjectInfo,
         // editProjectInfo,
         listProjectInfo
     } from "../../../api/project";
@@ -286,6 +286,8 @@
             openAddproject() {
                 this.title = '新增项目';
                 this.ProjectDialogVisible = true;
+                this.resetForm('projectData');
+                this.projectData.variable = [];
             },
             handleSizeChange(val) {
                 console.log(`每页 ${val} 条`);
@@ -332,12 +334,14 @@
                     });
                 });
             },
-            editProject(id) {
+            catProject(id) {
                 this.title = '编辑项目';
                 this.ProjectDialogVisible = true;
+                this.projectData.id = id;
                 let postData = {
                     "id": id
                 };
+
                 catProjectDetailInfo(postData).then(res => {
                     let code = res.data.code;
                     // let message = res.data.message;
@@ -361,40 +365,43 @@
                         }
                         this.getAllUser();
                         this.projectData.testUserId = resData.user_id_id;
-                        this.projectData.variable = resData.variables;
-                        let postData = {
-                            name: this.projectData.projectName,
-                            user_id_id: this.projectData.testUserId,
-                            // environment: this.projectData.environment,
-                            test_environment: this.projectData.testEnvironment,
-                            dev_environment: this.projectData.devEnvironment,
-                            online_environment: this.projectData.onLineEnvironment,
-                            bak_environment: this.projectData.bakEnvironment,
-                            environment_type: this.projectData.environment_type,
-                            variables: this.projectData.variable,
-                            desc: this.projectData.desc,
+                        this.projectData.variable = JSON.parse(resData.variables);
+                    }
+                })
+            },
 
-                        };
-                        this.editProjectInfo(postData).then(res => {
-                            let code = res.data.code;
-                            let message = res.data.message;
-                            if (code === 200) {
-                                this.ProjectDialogVisible = false;
-                                this.reload()
-                                this.resetForm('projectData')
-                                this.$notify({
-                                    title: message,
-                                    type: "success"
-                                })
-                            } else {
-                                this.$notify({
-                                    title: message,
-                                    type: "error"
-                                })
-                            }
-
+            editProject() {
+                let postData = {
+                    id: this.projectData.id,
+                    name: this.projectData.projectName,
+                    user_id_id: this.projectData.testUserId,
+                    // environment: this.projectData.environment,
+                    test_environment: this.projectData.testEnvironment,
+                    dev_environment: this.projectData.devEnvironment,
+                    online_environment: this.projectData.onLineEnvironment,
+                    bak_environment: this.projectData.bakEnvironment,
+                    environment_type: this.projectData.environment_type,
+                    variables: JSON.stringify(this.projectData.variable),
+                    desc: this.projectData.desc,
+                };
+                editProjectInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let message = res.data.message;
+                    if (code === 200) {
+                        this.ProjectDialogVisible = false;
+                        this.reload()
+                        this.resetForm('projectData')
+                        this.$notify({
+                            title: message,
+                            type: "success"
+                        })
+                    } else {
+                        this.$notify({
+                            title: message,
+                            type: "error"
                         })
                     }
+
                 })
             },
             getSelectedEnvironmentType() {
@@ -421,7 +428,7 @@
                     online_environment: this.projectData.onLineEnvironment,
                     bak_environment: this.projectData.bakEnvironment,
                     environment_type: this.projectData.environment_type,
-                    variables: this.projectData.variable,
+                    variables: JSON.stringify(this.projectData.variable),
                     desc: this.projectData.desc,
 
                 };
@@ -444,6 +451,7 @@
                     }
 
                 })
+
 
             },
 
@@ -528,13 +536,11 @@
             },
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
-                    if (valid && this.title==='创建项目') {
+                    if (valid && this.title === '新增项目') {
                         this.addProject();
-                    }
-                    else if (valid && this.title==='编辑项目'){
+                    } else if (valid && this.title === '编辑项目') {
                         this.editProject();
-                    }
-                    else {
+                    } else {
                         return false;
                     }
                 });
@@ -552,8 +558,13 @@
             delProjectVariable(i) {
                 this.projectData.variable.splice(i, 1);
             },
-            handleClose() {
+            handleCloseProjectDialog() {
+                this.ProjectDialogVisible = false;
             },
+            handleClosevariableDialog() {
+                this.variableDialogVisible = false;
+            },
+
         },
         created() {
             this.getListProject();
