@@ -26,6 +26,11 @@ const routes = [
                 name: 'project',
                 component: () => import('../views/api_manage/project_manage/project'),
             },
+            {
+                path: 'interface',
+                name: 'interface',
+                component: () => import('../views/api_info/apiInfo'),
+            },
 
         ]
     },

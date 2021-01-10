@@ -1,30 +1,30 @@
 import {deleteRequest, getRequest, postRequest} from "@/api/common";
 
 export const login = function (username, password) {
-    return postRequest('user/login/', {
+    return postRequest('UserLogin', {
         username: username,
         password: password,
     })
 };
 
 export const register = function (username, password) {
-    return postRequest('user/register/', {
+    return postRequest('UserRegister', {
         username: username,
         password: password,
     })
 };
 
 export const logout = function () {
-    return deleteRequest('user/logout')
+    return deleteRequest('UserLogout')
 };
 
 
 export const getLoginUserInfo = function () {
-    return getRequest('login_user/info')
+    return getRequest('LoginUserInfo')
 };
 
 export const getUserInfo = function () {
-    return getRequest('user/info')
+    return getRequest('UserInfo')
 };
 
 
