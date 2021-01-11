@@ -19,17 +19,22 @@ const routes = [
             {
                 path: 'project',
                 name: 'project',
-                component: () => import('../views/api_manage/project_manage/project'),
+                component: () => import('../views/api_manage/project'),
             },
             {
                 path: '',
                 name: 'project',
-                component: () => import('../views/api_manage/project_manage/project'),
+                component: () => import('../views/api_manage/project'),
             },
             {
                 path: 'interface',
                 name: 'interface',
-                component: () => import('../views/api_info/apiInfo'),
+                component: () => import('../views/api_manage/apiInfo'),
+            },
+            {
+                path: 'module',
+                name: 'module',
+                component: () => import('../views/api_manage/module'),
             },
 
         ]

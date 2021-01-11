@@ -11,6 +11,7 @@
                         <template slot="title"><i class="el-icon-document"></i>接口管理</template>
                         <el-menu-item-group>
                             <el-menu-item index="project">项目管理</el-menu-item>
+                            <el-menu-item index="module">模块管理</el-menu-item>
                             <el-menu-item index="interface">接口信息</el-menu-item>
                             <el-menu-item index="servieConfig">业务配置</el-menu-item>
                             <el-menu-item index="case">接口用例</el-menu-item>
@@ -130,6 +131,9 @@
                 switch (index) {
                     case "project":
                         this.$router.push('/project');
+                        break;
+                    case "module":
+                        this.$router.push('/module');
                         break;
                     case "interface":
                         this.$router.push('/interface');

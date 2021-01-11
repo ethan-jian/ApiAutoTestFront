@@ -35,7 +35,7 @@
                     width="120">
             </el-table-column>
             <el-table-column
-                    label="项目"
+                    label="执行环境"
                     width="120">
                 <template slot-scope="scope">
                     <span v-if="scope.row.environment_type === '1'">测试环境</span>
@@ -44,14 +44,14 @@
                     <span v-if="scope.row.environment_type === '4'">备用环境</span>
                 </template>
             </el-table-column>
-            <!--            <el-table-column-->
-            <!--                    prop="fun"-->
-            <!--                    label="内置函数"-->
-            <!--                    show-overflow-tooltip-->
-            <!--                    width="120">-->
-            <!--            </el-table-column>-->
             <el-table-column
-                    label="模块"
+                    prop="fun"
+                    label="内置函数"
+                    show-overflow-tooltip
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    label="测试人员"
                     width="100">
                 <template slot-scope="scope">{{ scope.row.user_name }}</template>
             </el-table-column>
@@ -99,17 +99,97 @@
                 :visible.sync="ProjectDialogVisible"
                 width="80%"
                 :before-close="handleCloseProjectDialog">
+            <div style="position: absolute;top: 5.5%;left: 3%">
+                <el-button type="primary" size="mini" plain @click="variableDialogVisible=true">公共变量</el-button>
+
+                <el-dialog
+                        title="公共变量"
+                        :visible.sync="variableDialogVisible"
+                        width="60%"
+                        :before-close="handleClosevariableDialog">
+                    <el-button type="primary" size="mini" @click="addProjectVariable()">
+                        添加
+                    </el-button>
+                    <el-table :data="projectData.variable" stripe :show-header="false" size="mini">
+                        <el-table-column label="Key" header-align="center" minWidth="50">
+                            <template slot-scope="scope">
+                                <el-input v-model="scope.row.key" size="mini" placeholder="key">
+                                </el-input>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="Value" header-align="center" minWidth="80">
+                            <template slot-scope="scope">
+                                <el-input v-model="scope.row.value" size="mini" placeholder="value">
+                                </el-input>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="备注" header-align="center" width="150">
+                            <template slot-scope="scope">
+                                <el-input v-model="scope.row.remark" size="mini" placeholder="备注">
+                                </el-input>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作" header-align="center" width="80">
+                            <template slot-scope="scope">
+                                <el-button type="danger" icon="el-icon-delete" size="mini"
+                                           @click.native="delProjectVariable(scope.$index)">删除
+                                </el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <span slot="footer" class="dialog-footer">
+<!--    <el-button @click="handleClosevariableDialog">取 消</el-button>-->
+<!--    <el-button type="primary" @click="variableDialogVisible = false">确 定</el-button>-->
+  </span>
+                </el-dialog>
+            </div>
+
             <div>
                 <el-form :model="projectData" :rules="rules" ref="projectData" label-width="80px" class="demo-ruleForm">
-                    <el-form-item label-position="left" label="接口名称" prop="projectName">
+                    <el-form-item label-position="left" label="项目名称" prop="projectName">
                         <el-input v-model="projectData.projectName" size="mini"></el-input>
                     </el-form-item>
-                    <el-form-item label-position="left" label="接口地址" prop="projectName">
-                        <el-input v-model="projectData.projectName" size="mini"></el-input>
+                    <el-form-item label-position="left" label="测试环境" prop="testEnvironment">
+                        <el-input v-model="projectData.testEnvironment" size="mini"></el-input>
                     </el-form-item>
-                    <el-form-item label-position="left" label="项目名称" prop="testUserId">
+                    <el-form-item label-position="left" label="开发环境" prop="devEnvironment">
+                        <el-input v-model="projectData.devEnvironment" size="mini"></el-input>
+                    </el-form-item>
+                    <el-form-item label-position="left" label="线上环境" prop="onLineEnvironment">
+                        <el-input v-model="projectData.onLineEnvironment" size="mini"></el-input>
+                    </el-form-item>
+                    <el-form-item label-position="left" label="备用环境" prop="bakEnvironment">
+                        <el-input v-model="projectData.bakEnvironment" size="mini"></el-input>
+                    </el-form-item>
+
+                    <el-form-item label-position="left" label="执行环境" prop="environment">
+                        <el-select ref="selectEnvironment"
+                                   v-model="projectData.environment"
+                                   placeholder="请选择测试环境"
+                                   @focus="getEnvironments" @change="getEnvironment">
+                            <el-option
+                                    v-for="item in projectData.environmentOptions"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value"
+                            >
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+
+                    <el-form-item label-position="left" label="函数文件" prop="fun">
+                        <el-select v-model="projectData.fun" placeholder="请选择函数文件" @focus="getEnvironments">
+                            <el-option v-for="item in projectData.environmentOptions"
+                                       :key="item.value"
+                                       :label="item.label"
+                                       :value="item.value"
+                            >
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label-position="left" label="测试人员" prop="testUserId">
                         <el-select v-model="projectData.testUserId"
-                                   placeholder="请选择项目"
+                                   placeholder="请选择测试人员"
                                    @focus="getAllUser"
                         >
                             <el-option v-for="item in projectData.userList"
@@ -118,16 +198,14 @@
                                        :value="item.id"
                             >
                             </el-option>
+
                         </el-select>
                     </el-form-item>
-                     <el-form-item label-position="left" label="模块名称" prop="projectName">
-                        <el-input v-model="projectData.projectName" size="mini"></el-input>
-                    </el-form-item>
-                    <el-form-item label="接口描述" prop="desc">
+
+                    <el-form-item label="项目描述" prop="desc">
                         <el-input type="textarea" v-model="projectData.desc"></el-input>
                     </el-form-item>
                     <el-form-item>
-                        <el-button type="primary" @click="submitForm('projectData')">发送</el-button>
                         <el-button type="primary" @click="submitForm('projectData')">保存</el-button>
                         <el-button @click="resetForm('projectData')">重置</el-button>
                     </el-form-item>
@@ -144,30 +222,21 @@
 
 <script>
 
-    // import {getUserInfo} from "../../../api/user";
-    // import {
-    //     addProjectInfo,
-    //     catProjectDetailInfo,
-    //     deleteProjectInfo, editProjectInfo,
-    //     // editProjectInfo,
-    //     listProjectInfo
-    // } from "../../../api/project";
-
+    import {getUserInfo} from "../../api/user";
     import {
         addProjectInfo,
         catProjectDetailInfo,
-        deleteProjectInfo,
-        editProjectInfo,
+        deleteProjectInfo, editProjectInfo,
+        // editProjectInfo,
         listProjectInfo
     } from "../../api/project";
-    import {getUserInfo} from "../../api/user";
 
     export default {
         inject: ['reload'],
-        name: 'apiInfo',
+        name: 'project',
         data() {
             return {
-                title: '新增接口',
+                title: '创建项目',
                 kw: '',
                 ProjectDialogVisible: false,
                 variableDialogVisible: false,
@@ -215,7 +284,7 @@
         },
         methods: {
             openAddproject() {
-                this.title = '新增接口';
+                this.title = '新增项目';
                 this.ProjectDialogVisible = true;
                 this.resetForm('projectData');
                 this.projectData.variable = [];
@@ -266,7 +335,7 @@
                 });
             },
             catProject(id) {
-                this.title = '编辑接口';
+                this.title = '编辑项目';
                 this.ProjectDialogVisible = true;
                 this.projectData.id = id;
                 let postData = {
