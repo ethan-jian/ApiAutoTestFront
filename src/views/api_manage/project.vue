@@ -364,7 +364,7 @@
                             this.projectData.environment = '备用环境';
                         }
                         this.getAllUser();
-                        this.projectData.testUserId = resData.user_id_id;
+                        this.projectData.testUserId = resData.user_id;
                         this.projectData.variable = JSON.parse(resData.variables);
                     }
                 })
@@ -374,7 +374,7 @@
                 let postData = {
                     id: this.projectData.id,
                     name: this.projectData.projectName,
-                    user_id_id: this.projectData.testUserId,
+                    user_id: this.projectData.testUserId,
                     // environment: this.projectData.environment,
                     test_environment: this.projectData.testEnvironment,
                     dev_environment: this.projectData.devEnvironment,
