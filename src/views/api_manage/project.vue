@@ -53,7 +53,7 @@
             <el-table-column
                     label="测试人员"
                     width="100">
-                <template slot-scope="scope">{{ scope.row.user_name }}</template>
+                <template slot-scope="scope">{{ scope.row.username }}</template>
             </el-table-column>
             <el-table-column
                     label="创建时间"
@@ -421,7 +421,7 @@
                 this.getSelectedEnvironmentType();
                 let postData = {
                     name: this.projectData.projectName,
-                    user_id_id: this.projectData.testUserId,
+                    user_id: this.projectData.testUserId,
                     // environment: this.projectData.environment,
                     test_environment: this.projectData.testEnvironment,
                     dev_environment: this.projectData.devEnvironment,
