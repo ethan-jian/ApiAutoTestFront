@@ -11,12 +11,12 @@
         <div style="position: absolute;
         left: 430px;
 ">
-            <el-button type="primary" @click="getListProject">查询</el-button>
+            <el-button type="primary" @click="getListModule">查询</el-button>
             <el-button @click="resetInput()">重置</el-button>
         </div>
         <el-table
                 ref="multipleTable"
-                :data="listmoduleData"
+                :data="moduleData.moduleList"
                 tooltip-effect="dark"
                 style="width: 100%"
                 @selection-change="handleSelectionChange">
@@ -30,24 +30,14 @@
                     width="120">
             </el-table-column>
             <el-table-column
+                    prop="project_name"
+                    label="项目"
+                    width="120">
+            </el-table-column>
+             <el-table-column
                     prop="desc"
                     label="描述"
                     width="120">
-            </el-table-column>
-            <el-table-column
-                    label="项目"
-                    width="120">
-                <template slot-scope="scope">
-                    <span v-if="scope.row.environment_type === '1'">测试环境</span>
-                    <span v-if="scope.row.environment_type === '2'">开发环境</span>
-                    <span v-if="scope.row.environment_type === '3'">线上环境</span>
-                    <span v-if="scope.row.environment_type === '4'">备用环境</span>
-                </template>
-            </el-table-column>
-            <el-table-column
-                    label="模块"
-                    width="100">
-                <template slot-scope="scope">{{ scope.row.user_name }}</template>
             </el-table-column>
             <el-table-column
                     label="创建时间"
@@ -130,23 +120,15 @@
 </template>
 
 <script>
-
-    // import {getUserInfo} from "../../../api/user";
-    // import {
-    //     addProjectInfo,
-    //     catProjectDetailInfo,
-    //     deleteModuleInfo, editProjectInfo,
-    //     // editProjectInfo,
-    //     listProjectInfo
-    // } from "../../../api/project";
+    import {listProjectInfo} from "../../api/project";
 
     import {
-        addProjectInfo,
-        catProjectDetailInfo,
+        addModuleInfo,
+        catModuleDetailInfo,
         deleteModuleInfo,
-        editProjectInfo,
-        listProjectInfo
-    } from "../../api/project";
+        editModuleInfo,
+        listModuleInfo
+    } from "../../api/module";
 
     export default {
         inject: ['reload'],
@@ -164,29 +146,22 @@
                     id: null,
                     ids: [],
                     moduleName: null,
-                    url:null,
+                    url: null,
                     moduleId: null,
-                    testEnvironment: null,
-                    devEnvironment: null,
-                    onLineEnvironment: null,
-                    bakEnvironment: null,
-                    environment: null,
-                    environment_type: '1',//测试环境
                     projectId: null,
-                    funcFile: '',
                     desc: null,
                     variable: [],
                     headers: [],
-                    environmentOptions: [],
                     projectList: [],
+                    moduleList: [],
                 },
-                listmoduleData: [],
+
 
                 multipleSelection: [],
                 rules: {
                     moduleName: [
                         {required: true, message: '请输入模块名称', trigger: 'blur'},
-                        {min: 3, max: 25, message: '长度在 3 到 25 个字符', trigger: 'blur'}
+                        {min: 2, max: 25, message: '长度在 3 到 25 个字符', trigger: 'blur'}
                     ],
                     projectId: [
                         {required: true, message: '请选择项目名称', trigger: 'change'}
@@ -198,6 +173,75 @@
             }
         },
         methods: {
+            addModule() {
+                let postData = {
+                    name: this.moduleData.moduleName,
+                    project_id: this.moduleData.projectId,
+                    desc: this.moduleData.desc,
+
+                };
+                addModuleInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let message = res.data.message;
+                    if (code === 200) {
+                        this.ApiDialogVisible = false;
+                        this.reload()
+                        this.resetForm('moduleData')
+                        this.$notify({
+                            title: message,
+                            type: "success"
+                        })
+                    } else {
+                        this.$notify({
+                            title: message,
+                            type: "error"
+                        })
+                    }
+
+                })
+
+
+            },
+            getListModule() {
+                let postData = {
+                    totalCount: this.totalPage,
+                    pageSize: this.pageSize,
+                    currentPage: this.currentPage,
+                    kw: this.kw,
+                    sort: [{"direct": "DESC", "field": "created_time"}]
+
+                };
+                listModuleInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let rsData = res.data.data
+                    if (code === 200) {
+                        this.totalPage = res.data.totalCount;
+                        this.moduleData.moduleList = rsData;
+                        console.log(rsData);
+
+                    }
+                })
+            },
+            getListProject() {
+                let postData = {
+                    totalCount: this.totalPage,
+                    pageSize: this.pageSize,
+                    currentPage: this.currentPage,
+                    kw: this.kw,
+                    sort: [{"direct": "DESC", "field": "created_time"}]
+
+                };
+                listProjectInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let rsData = res.data.data
+                    if (code === 200) {
+                        console.log(rsData);
+                        this.totalPage = res.data.totalCount;
+                        this.moduleData.projectList = rsData;
+                    }
+                })
+            },
+
             openAddModule() {
                 this.title = '新增模块';
                 this.moduleDialogVisible = true;
@@ -249,7 +293,7 @@
                     });
                 });
             },
-            catProject(id) {
+            catModule(id) {
                 this.title = '编辑接口';
                 this.ApiDialogVisible = true;
                 this.moduleData.id = id;
@@ -257,7 +301,7 @@
                     "id": id
                 };
 
-                catProjectDetailInfo(postData).then(res => {
+                catModuleDetailInfo(postData).then(res => {
                     let code = res.data.code;
                     // let message = res.data.message;
                     let resData = res.data.data[0];
@@ -285,7 +329,7 @@
                 })
             },
 
-            editProject() {
+            editModule() {
                 let postData = {
                     id: this.moduleData.id,
                     name: this.moduleData.moduleName,
@@ -299,7 +343,7 @@
                     variables: JSON.stringify(this.moduleData.variable),
                     desc: this.moduleData.desc,
                 };
-                editProjectInfo(postData).then(res => {
+                editModuleInfo(postData).then(res => {
                     let code = res.data.code;
                     let message = res.data.message;
                     if (code === 200) {
@@ -318,105 +362,6 @@
                     }
 
                 })
-            },
-            getSelectedEnvironmentType() {
-                let selectedLabel = this.$refs.selectEnvironment.selected.label;
-                if (selectedLabel === '测试环境') {
-                    this.moduleData.environment_type = '1';
-                } else if (selectedLabel === '开发环境') {
-                    this.moduleData.environment_type = '2';
-                } else if (selectedLabel === '线上环境') {
-                    this.moduleData.environment_type = '3';
-                } else if (selectedLabel === '备用环境') {
-                    this.moduleData.environment_type = '4';
-                }
-            },
-
-            addProject() {
-                this.getSelectedEnvironmentType();
-                let postData = {
-                    name: this.moduleData.moduleName,
-                    user_id_id: this.moduleData.testUserId,
-                    // environment: this.moduleData.environment,
-                    test_environment: this.moduleData.testEnvironment,
-                    dev_environment: this.moduleData.devEnvironment,
-                    online_environment: this.moduleData.onLineEnvironment,
-                    bak_environment: this.moduleData.bakEnvironment,
-                    environment_type: this.moduleData.environment_type,
-                    variables: JSON.stringify(this.moduleData.variable),
-                    desc: this.moduleData.desc,
-
-                };
-                addProjectInfo(postData).then(res => {
-                    let code = res.data.code;
-                    let message = res.data.message;
-                    if (code === 200) {
-                        this.ApiDialogVisible = false;
-                        this.reload()
-                        this.resetForm('moduleData')
-                        this.$notify({
-                            title: message,
-                            type: "success"
-                        })
-                    } else {
-                        this.$notify({
-                            title: message,
-                            type: "error"
-                        })
-                    }
-
-                })
-
-
-            },
-
-            getListProject() {
-                let postData = {
-                    totalCount: this.totalPage,
-                    pageSize: this.pageSize,
-                    currentPage: this.currentPage,
-                    kw: this.kw,
-                    sort: [{"direct": "DESC", "field": "created_time"}]
-
-                };
-                listProjectInfo(postData).then(res => {
-                    let code = res.data.code;
-                    let rsData = res.data.data
-                    if (code === 200) {
-                        console.log(rsData);
-                        this.totalPage = res.data.totalCount;
-                        this.moduleData.projectList = rsData;
-
-                    }
-                })
-            },
-            getEnvironments() {
-                this.moduleData.environmentOptions = []
-                if (this.moduleData.testEnvironment) {
-                    this.moduleData.environmentOptions.push({
-                        label: '测试环境',
-                        value: this.moduleData.testEnvironment
-                    });
-                }
-                if (this.moduleData.devEnvironment) {
-                    this.moduleData.environmentOptions.push({
-                        label: '开发环境',
-                        value: this.moduleData.devEnvironment
-                    });
-                }
-                if (this.moduleData.onLineEnvironment) {
-                    this.moduleData.environmentOptions.push({
-                        label: '线上环境',
-                        value: this.moduleData.onLineEnvironment
-                    });
-                }
-                if (this.moduleData.bakEnvironment) {
-                    this.moduleData.environmentOptions.push({
-                        label: '备用环境',
-                        value: this.moduleData.bakEnvironment
-                    });
-                }
-                console.log(this.moduleData.environmentOptions);
             },
 
             toggleSelection(rows) {
@@ -441,10 +386,10 @@
             },
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
-                    if (valid && this.title === '新增项目') {
-                        this.addProject();
-                    } else if (valid && this.title === '编辑项目') {
-                        this.editProject();
+                    if (valid && this.title === '新增模块') {
+                        this.addModule();
+                    } else if (valid && this.title === '编辑模块') {
+                        this.editModule();
                     } else {
                         return false;
                     }
@@ -457,18 +402,13 @@
                 this.kw = '';
                 this.getListProject();
             },
-            addProjectVariable() {
-                this.moduleData.variable.push({key: null, value: null, remark: null});
-            },
-            delProjectVariable(i) {
-                this.moduleData.variable.splice(i, 1);
-            },
+
             handleCloseModuleDialog() {
                 this.moduleDialogVisible = false;
             },
         },
         created() {
-            this.getListProject();
+            this.getListModule();
         }
     }
 
