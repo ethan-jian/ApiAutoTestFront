@@ -20,5 +20,8 @@ export const deleteProjectInfo = function (data) {
     return postRequest('DeleteProject', data)
 };
 
+export const catProjectModuleInfo = function (data) {
+    return postRequest('ProjectModule', data)
+};
 
 

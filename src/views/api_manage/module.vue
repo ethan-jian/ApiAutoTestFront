@@ -54,7 +54,7 @@
                     width="120">
                 <template slot-scope="scope">
                     <!--                    <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>-->
-                    <el-button @click="catProject(scope.row.id)" type="text" size="small">编辑</el-button>
+                    <el-button @click="catModule(scope.row.id)" type="text" size="small">编辑</el-button>
                     <el-button @click="deleteModule(scope.row.id)" type="text" size="small">删除</el-button>
                 </template>
             </el-table-column>
@@ -135,7 +135,7 @@
         name: 'module',
         data() {
             return {
-                title: '新增模块',
+                title: '新增',
                 kw: '',
                 moduleDialogVisible: false,
                 currentPage: 1,
@@ -224,9 +224,6 @@
             },
             getListProject() {
                 let postData = {
-                    totalCount: this.totalPage,
-                    pageSize: this.pageSize,
-                    currentPage: this.currentPage,
                     kw: this.kw,
                     sort: [{"direct": "DESC", "field": "created_time"}]
 
@@ -294,8 +291,8 @@
                 });
             },
             catModule(id) {
-                this.title = '编辑接口';
-                this.ApiDialogVisible = true;
+                this.title = '编辑';
+                this.moduleDialogVisible = true;
                 this.moduleData.id = id;
                 let postData = {
                     "id": id
@@ -307,24 +304,9 @@
                     let resData = res.data.data[0];
                     if (code === 200) {
                         this.moduleData.moduleName = resData.name;
-                        this.moduleData.testEnvironment = resData.test_environment;
-                        this.moduleData.devEnvironment = resData.dev_environment;
-                        this.moduleData.onLineEnvironment = resData.online_environment;
-                        this.moduleData.bakEnvironment = resData.bak_environment;
+                        this.getListProject()
+                        this.moduleData.projectId = resData.project_id;
                         this.moduleData.desc = resData.desc;
-                        this.moduleData.environment_type = resData.environment_type;
-                        if (this.moduleData.environment_type === '1') {
-                            this.moduleData.environment = '测试环境';
-                        } else if (this.moduleData.environment_type === '2') {
-                            this.moduleData.environment = '开发环境';
-                        } else if (this.moduleData.environment_type === '3') {
-                            this.moduleData.environment = '线上环境';
-                        } else if (this.moduleData.environment_type === '4') {
-                            this.moduleData.environment = '备用环境';
-                        }
-                        this.getAllUser();
-                        this.moduleData.testUserId = resData.user_id_id;
-                        this.moduleData.variable = JSON.parse(resData.variables);
                     }
                 })
             },
@@ -333,14 +315,7 @@
                 let postData = {
                     id: this.moduleData.id,
                     name: this.moduleData.moduleName,
-                    user_id_id: this.moduleData.testUserId,
-                    // environment: this.moduleData.environment,
-                    test_environment: this.moduleData.testEnvironment,
-                    dev_environment: this.moduleData.devEnvironment,
-                    online_environment: this.moduleData.onLineEnvironment,
-                    bak_environment: this.moduleData.bakEnvironment,
-                    environment_type: this.moduleData.environment_type,
-                    variables: JSON.stringify(this.moduleData.variable),
+                    project_id: this.moduleData.projectId,
                     desc: this.moduleData.desc,
                 };
                 editModuleInfo(postData).then(res => {
@@ -386,9 +361,9 @@
             },
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
-                    if (valid && this.title === '新增模块') {
+                    if (valid && this.title === '新增') {
                         this.addModule();
-                    } else if (valid && this.title === '编辑模块') {
+                    } else if (valid && this.title === '编辑') {
                         this.editModule();
                     } else {
                         return false;

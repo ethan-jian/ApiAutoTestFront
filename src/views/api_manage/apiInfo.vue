@@ -98,9 +98,7 @@
                     <el-form-item label-position="left" label="接口名称" prop="apiName">
                         <el-input v-model="apiData.apiName" size="mini"></el-input>
                     </el-form-item>
-                    <el-form-item label-position="left" label="接口地址" prop="url">
-                        <el-input v-model="apiData.url" size="mini"></el-input>
-                    </el-form-item>
+
                     <el-form-item label-position="left" label="项目名称" prop="projectId">
                         <el-select v-model="apiData.projectId"
                                    placeholder="请选择项目"
@@ -114,9 +112,25 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                     <el-form-item label-position="left" label="模块名称" prop="apiName">
-                        <el-input v-model="apiData.apiName" size="mini"></el-input>
+                    <el-form-item label-position="left" label="模块名称" prop="projectId">
+                        <el-select v-model="apiData.moduleId"
+                                   placeholder="请选择模块"
+                                   @focus="getProjectModule"
+                        >
+                            <el-option v-for="item in apiData.moduleList"
+                                       :key="item.id"
+                                       :label="item.name"
+                                       :value="item.id"
+                            >
+                            </el-option>
+                        </el-select>
                     </el-form-item>
+                    <el-form-item label-position="left" label="接口地址" prop="url">
+                        <el-input v-model="apiData.url" size="mini"></el-input>
+                    </el-form-item>
+                    <!--                     <el-form-item label-position="left" label="模块名称" prop="apiName">-->
+                    <!--                        <el-input v-model="apiData.apiName" size="mini"></el-input>-->
+                    <!--                    </el-form-item>-->
                     <el-form-item label="接口描述" prop="desc">
                         <el-input type="textarea" v-model="apiData.desc"></el-input>
                     </el-form-item>
@@ -138,29 +152,29 @@
 
 <script>
 
-    // import {getUserInfo} from "../../../api/user";
     // import {
-    //     addProjectInfo,
     //     catProjectDetailInfo,
     //     deleteProjectInfo, editProjectInfo,
     //     // editProjectInfo,
     //     listProjectInfo
     // } from "../../../api/project";
 
+    import {addApiInfo} from "../../api/api";
     import {
-        addProjectInfo,
+        catProjectModuleInfo,
         catProjectDetailInfo,
         deleteProjectInfo,
         editProjectInfo,
-        listProjectInfo
+        listProjectInfo,
     } from "../../api/project";
+
 
     export default {
         inject: ['reload'],
         name: 'apiInfo',
         data() {
             return {
-                title: '新增接口',
+                title: '新增',
                 kw: '',
                 ApiDialogVisible: false,
                 variableDialogVisible: false,
@@ -172,7 +186,7 @@
                     id: null,
                     ids: [],
                     apiName: null,
-                    url:null,
+                    url: null,
                     moduleId: null,
                     testEnvironment: null,
                     devEnvironment: null,
@@ -187,6 +201,7 @@
                     headers: [],
                     environmentOptions: [],
                     projectList: [],
+                    moduleList: [],
                 },
                 listApiData: [],
 
@@ -211,7 +226,7 @@
         },
         methods: {
             openAddproject() {
-                this.title = '新增接口';
+                this.title = '新增';
                 this.ApiDialogVisible = true;
                 this.resetForm('apiData');
                 this.apiData.variable = [];
@@ -262,7 +277,7 @@
                 });
             },
             catProject(id) {
-                this.title = '编辑接口';
+                this.title = '编辑';
                 this.ApiDialogVisible = true;
                 this.apiData.id = id;
                 let postData = {
@@ -344,22 +359,15 @@
                 }
             },
 
-            addProject() {
-                this.getSelectedEnvironmentType();
+            addApi() {
                 let postData = {
                     name: this.apiData.apiName,
-                    user_id_id: this.apiData.testUserId,
-                    // environment: this.apiData.environment,
-                    test_environment: this.apiData.testEnvironment,
-                    dev_environment: this.apiData.devEnvironment,
-                    online_environment: this.apiData.onLineEnvironment,
-                    bak_environment: this.apiData.bakEnvironment,
-                    environment_type: this.apiData.environment_type,
-                    variables: JSON.stringify(this.apiData.variable),
+                    url: this.apiData.url,
+                    module_id: this.apiData.moduleId,
+                    project_id: this.apiData.moduleId,
                     desc: this.apiData.desc,
-
                 };
-                addProjectInfo(postData).then(res => {
+                addApiInfo(postData).then(res => {
                     let code = res.data.code;
                     let message = res.data.message;
                     if (code === 200) {
@@ -384,9 +392,6 @@
 
             getListProject() {
                 let postData = {
-                    totalCount: this.totalPage,
-                    pageSize: this.pageSize,
-                    currentPage: this.currentPage,
                     kw: this.kw,
                     sort: [{"direct": "DESC", "field": "created_time"}]
 
@@ -402,6 +407,21 @@
                     }
                 })
             },
+
+            getProjectModule() {
+                let postData = {
+                    id: this.apiData.projectId,
+                };
+                catProjectModuleInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let rsData = res.data.data
+                    if (code === 200) {
+                        this.totalPage = res.data.totalCount;
+                        this.apiData.moduleList = rsData;
+                    }
+                })
+            },
+
             getEnvironments() {
                 this.apiData.environmentOptions = []
                 if (this.apiData.testEnvironment) {
@@ -453,9 +473,9 @@
             },
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
-                    if (valid && this.title === '新增项目') {
-                        this.addProject();
-                    } else if (valid && this.title === '编辑项目') {
+                    if (valid && this.title === '新增') {
+                        this.addApi();
+                    } else if (valid && this.title === '编辑') {
                         this.editProject();
                     } else {
                         return false;
