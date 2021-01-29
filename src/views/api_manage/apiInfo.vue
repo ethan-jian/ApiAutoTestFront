@@ -1,20 +1,22 @@
 <template>
     <div>
 
-        <el-input
-                style="width: 200px;
-                    float: left;"
-                placeholder="请输入项目名称"
-                v-model="kw"
-                clearable>
-        </el-input>
-        <div style="position: absolute;
+
+        <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
+            <el-tab-pane label="接口信息" name="first">
+                <div style="position: absolute;
         left: 430px;
 ">
-            <el-button type="primary" @click="getListProject">查询</el-button>
-            <el-button @click="resetInput()">重置</el-button>
-        </div>
-        <el-table
+                    <el-input
+                            style="width: 200px;float: left;"
+                            placeholder="请输入项目名称"
+                            v-model="kw"
+                            clearable>
+                    </el-input>
+                    <el-button type="primary" @click="getListProject">查询</el-button>
+                    <el-button @click="resetInput()">重置</el-button>
+                </div>
+                <el-table
                 ref="multipleTable"
                 :data="listApiData"
                 tooltip-effect="dark"
@@ -70,6 +72,13 @@
             </el-table-column>
 
         </el-table>
+            </el-tab-pane>
+
+            <el-tab-pane label="接口配置" name="second">
+
+            </el-tab-pane>
+        </el-tabs>
+
 
         <div class="block">
             <el-pagination
