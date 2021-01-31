@@ -72,109 +72,46 @@
             </el-tab-pane>
 
             <el-tab-pane label="接口配置" name="second">
-
-                <el-form ref="form" :model="form" label-width="80px" size="small">
-                    <el-row>
-                        <el-col :span="6">
-                            <el-form-item label="接口名称">
+                <div>
+                    <el-form ref="form" :model="form">
+                        <el-form-item label="接口名称" size="small">
+                            <el-col :span="5">
                                 <el-input v-model="apiData.name"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-form-item label="选择项目">
-                                <el-select v-model="apiData.region" placeholder="请选择活动区域">
-                                    <el-option label="区域一" value="shanghai"></el-option>
-                                    <el-option label="区域二" value="beijing"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-form-item label="选择模块">
-                                <el-select v-model="apiData.region" placeholder="请选择活动区域">
-                                    <el-option label="区域一" value="shanghai"></el-option>
-                                    <el-option label="区域二" value="beijing"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-form-item label="选择环境">
-                                <el-select v-model="apiData.region2" placeholder="请选择活动区域">
-                                    <el-option label="区域一" value="shanghai"></el-option>
-                                    <el-option label="区域二" value="beijing"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-
-                    <el-row>
-                        <el-col :span="6">
-                            <el-form-item label="前置函数">
-                                <el-input v-model="apiData.name3" placeholder="set_up_hooks"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-form-item label="后置函数">
-                                <el-input v-model="apiData.name2" placeholder="set_down_hooks"></el-input>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-form-item label="是否跳过">
-                                <el-select v-model="apiData.region2" placeholder="true or false">
-                                    <el-option label="区域一" value="shanghai"></el-option>
-                                    <el-option label="区域二" value="beijing"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-
-                    <el-form ref="form" :model="form" label-width="80px">
-                        <el-row>
-                            <el-col :span="24">
-                                <el-input placeholder="Enter request URL"
-                                          v-model="apiData.url"
-                                          style="width: 80%;margin-right: 5px"
-                                          size="medium"
-                                >
-                                    <el-select v-model="apiData.method"
-                                               size="medium"
-                                               style="width: 100px"
-                                               slot="prepend"
-                                               placeholder="选择请求方式">
-                                        <el-option v-for="item in methods"
-                                                   :key="item"
-                                                   :value="item"
-                                                   :label="item">
-                                        </el-option>
-                                    </el-select>
-                                </el-input>
-                                <el-button type="primary"
-                                           @click.native="saveAndRun()"
-                                           size="medium"
-                                           :loading="this.saveRunStatus"
-                                >Send
-                                </el-button>
-                                <el-button type="primary" @click.native="addApiMsg()" size="medium">Save</el-button>
                             </el-col>
-                        </el-row>
-                        <el-row>
-                            <el-col>
-                                <el-tabs v-model="activeName1" type="card" @tab-click="handleClick">
-                                    <el-tab-pane label="Heard" name="first">
-
-                                    </el-tab-pane>
-                                    <el-tab-pane label="Body" name="second">
-                                    </el-tab-pane>
-                                    <el-tab-pane label="Extract" name="third">
-                                    </el-tab-pane>
-                                    <el-tab-pane label="Assert" name="four">
-                                    </el-tab-pane>
-                                </el-tabs>
-                            </el-col>
-                        </el-row>
+                        </el-form-item>
+                        <el-form-item label="选择项目" size="small">
+                            <el-select v-model="apiData.region" style="left: -36.5%" placeholder="请选择项目">
+                                <el-option label="区域一" value="shanghai"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="选择模块" size="small">
+                            <el-select v-model="apiData.region" style="left: -36.5%" placeholder="请选择模块">
+                                <el-option label="区域一" value="shanghai"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="选择host" size="small">
+                            <el-select v-model="apiData.region" style="left: -36.5%" placeholder="请选择模块">
+                                <el-option label="区域一" value="shanghai"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="前置函数" size="small">
+                            <el-select v-model="apiData.region" style="left: -36.5%" placeholder="请选择模块">
+                                <el-option label="区域一" value="shanghai"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="后置函数" size="small">
+                            <el-select v-model="apiData.region" style="left: -36.5%" placeholder="请选择模块">
+                                <el-option label="区域一" value="shanghai"></el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="跳过请求" size="small">
+                            <el-select v-model="apiData.region" style="left: -36.5%" placeholder="请选择模块">
+                                <el-option label="区域一" value="shanghai"></el-option>
+                            </el-select>
+                        </el-form-item>
                     </el-form>
-
-                </el-form>
-
+                </div>
+                <el-input v-model="apiData.name"></el-input>
             </el-tab-pane>
 
         </el-tabs>
@@ -207,7 +144,6 @@
         data() {
             return {
                 activeName: 'first',
-                activeName1: 'first',
                 title: '新增',
                 kw: '',
                 ApiDialogVisible: false,

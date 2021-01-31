@@ -240,7 +240,7 @@
             },
 
             openAddModule() {
-                this.title = '新增模块';
+                this.title = '新增';
                 this.moduleDialogVisible = true;
                 this.resetForm('moduleData');
                 this.moduleData.variable = [];
