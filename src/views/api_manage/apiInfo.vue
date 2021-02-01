@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
+        <el-tabs v-model="activeName" type="card">
             <el-tab-pane label="接口信息" name="first">
                 <div style="position: absolute;
         left: 430px;
@@ -73,7 +73,7 @@
 
             <el-tab-pane label="接口配置" name="second">
 
-                <el-form ref="form" :model="form" label-width="80px" size="small">
+                <el-form ref="form" :model="form" label-width="80px" size="small" style="float: left">
                     <el-row>
                         <el-col :span="6">
                             <el-form-item label="接口名称">
@@ -127,12 +127,12 @@
                         </el-col>
                     </el-row>
 
-                    <el-form ref="form" :model="form" label-width="80px">
+                    <el-form ref="form" :model="form" label-width="100%">
                         <el-row>
                             <el-col :span="24">
                                 <el-input placeholder="Enter request URL"
                                           v-model="apiData.url"
-                                          style="width: 80%;margin-right: 5px"
+                                          style="width: 100%;margin-right: 5px"
                                           size="medium"
                                 >
                                     <el-select v-model="apiData.method"
@@ -146,27 +146,245 @@
                                                    :label="item">
                                         </el-option>
                                     </el-select>
+                                    <el-button slot="suffix" type="primary" size="medium">
+                                        Send
+                                    </el-button>
+                                    <el-button slot="suffix" type="primary" size="medium">
+                                        Save
+                                    </el-button>
+
                                 </el-input>
-                                <el-button type="primary"
-                                           @click.native="saveAndRun()"
-                                           size="medium"
-                                           :loading="this.saveRunStatus"
-                                >Send
-                                </el-button>
-                                <el-button type="primary" @click.native="addApiMsg()" size="medium">Save</el-button>
+
                             </el-col>
+                            <!--                            &lt;!&ndash;                            <el-col :span="2.5">&ndash;&gt;-->
+                            <!--                            &lt;!&ndash;                                <el-button type="primary"&ndash;&gt;-->
+                            <!--                            &lt;!&ndash;                                           @click.native="saveAndRun()"&ndash;&gt;-->
+                            <!--                            &lt;!&ndash;                                           size="medium"&ndash;&gt;-->
+                            <!--                            &lt;!&ndash;                                           :loading="this.saveRunStatus"&ndash;&gt;-->
+                            <!--                            &lt;!&ndash;                                >Send&ndash;&gt;-->
+                            <!--                            &lt;!&ndash;                                </el-button>&ndash;&gt;-->
+                            <!--                            &lt;!&ndash;                                <el-button type="primary" @click.native="addApiMsg()" size="medium">Save</el-button>&ndash;&gt;-->
+                            <!--                            &lt;!&ndash;                            </el-col>&ndash;&gt;-->
                         </el-row>
                         <el-row>
                             <el-col>
-                                <el-tabs v-model="activeName1" type="card" @tab-click="handleClick">
+                                <el-tabs v-model="activeName1" type="card">
                                     <el-tab-pane label="Heard" name="first">
+                                        <el-button type="primary" plain @click="addHeader" size="small">添加</el-button>
+                                        <div>
+                                            <el-form v-for="(item, index) in apiData.headers"
+                                                     :key="item.pass">
+                                                <el-form-item>
+                                                    <el-row>
+                                                        <el-col :span="6">
+                                                            <el-input clearable v-model="item.key"
+                                                                      size="small" placeholder="key"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="14">
+                                                            <el-input clearable v-model="item.value"
+                                                                      size="small" placeholder="value"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="3">
+                                                            <el-input clearable v-model="item.remark"
+                                                                      size="small" placeholder="备注"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="1">
+                                                            <el-button type="danger" class="el-icon-delete"
+                                                                       @click="delHeader(index)" size="small">
+                                                            </el-button>
+                                                        </el-col>
+                                                    </el-row>
+                                                </el-form-item>
+                                            </el-form>
 
+                                        </div>
                                     </el-tab-pane>
                                     <el-tab-pane label="Body" name="second">
+                                        <el-tabs v-model="activeName2">
+                                            <el-tab-pane label="Form-data" name="first">
+                                                <el-button type="primary" plain @click="addBodyFormData" size="small">
+                                                    添加
+                                                </el-button>
+                                                <div>
+                                                    <el-form v-for="(item, index) in apiData.bodys"
+                                                             :key="item.pass">
+                                                        <el-form-item>
+                                                            <el-row>
+                                                                <el-col :span="6">
+                                                                    <el-input clearable v-model="item.key"
+                                                                              size="small" placeholder="key"></el-input>
+                                                                </el-col>
+                                                                <el-col :span="2">
+                                                                    <el-select v-model="apiData.bodyFormDataType"
+                                                                               size="small"
+                                                                               style="width: 100px"
+                                                                               placeholder="选择">
+                                                                        <el-option
+                                                                                v-for="item in apiData.bodyFormDataTypes"
+                                                                                :key="item"
+                                                                                :value="item"
+                                                                                :label="item">
+                                                                        </el-option>
+                                                                    </el-select>
+
+
+                                                                </el-col>
+
+
+                                                                <div v-if="apiData.bodyFormDataType==='file'">
+                                                                    <el-col :span="2" style="padding-left:10px;">
+                                                                        <el-upload
+                                                                                class="upload-demo"
+                                                                                action="/api/upload"
+                                                                                :show-file-list='false'
+                                                                                :on-success="fileChange">
+                                                                            <el-button size="mini" type="primary"
+                                                                                       @click="tempNum(scope.$index)">
+                                                                                点击上传
+                                                                            </el-button>
+                                                                        </el-upload>
+                                                                    </el-col>
+                                                                </div>
+
+                                                                <div v-else>
+                                                                    <el-col :span="12">
+                                                                        <el-input clearable v-model="item.value"
+                                                                                  size="small"
+                                                                                  placeholder="value"></el-input>
+                                                                    </el-col>
+                                                                </div>
+
+
+                                                                <el-col :span="3">
+                                                                    <el-input clearable v-model="item.remark"
+                                                                              size="small" placeholder="备注"></el-input>
+                                                                </el-col>
+                                                                <el-col :span="1">
+                                                                    <el-button type="danger" class="el-icon-delete"
+                                                                               @click="delBodyFormData(index)"
+                                                                               size="small">
+                                                                    </el-button>
+                                                                </el-col>
+                                                            </el-row>
+                                                        </el-form-item>
+                                                    </el-form>
+
+                                                </div>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="Raw" name="second">
+
+                                            </el-tab-pane>
+                                            <el-tab-pane label="Text" name="third">
+                                                <el-button type="primary" plain @click="addBodyFormData" size="small">
+                                                    添加
+                                                </el-button>
+                                                <div>
+                                                    <el-form v-for="(item, index) in apiData.bodys"
+                                                             :key="item.pass">
+                                                        <el-form-item>
+                                                            <el-row>
+                                                                <el-col :span="6">
+                                                                    <el-input clearable v-model="item.key"
+                                                                              size="small" placeholder="key"></el-input>
+                                                                </el-col>
+                                                                <el-col :span="2">
+                                                                    <el-select v-model="apiData.bodyFormDataType"
+                                                                               size="small"
+                                                                               style="width: 100px"
+                                                                               placeholder="选择请求方式">
+                                                                        <el-option
+                                                                                v-for="item in apiData.bodyFormDataTypes"
+                                                                                :key="item"
+                                                                                :value="item"
+                                                                                :label="item">
+                                                                        </el-option>
+                                                                    </el-select>
+
+                                                                </el-col>
+
+                                                                <el-col :span="12">
+                                                                    <el-input clearable v-model="item.value"
+                                                                              size="small"
+                                                                              placeholder="value"></el-input>
+                                                                </el-col>
+                                                                <el-col :span="3">
+                                                                    <el-input clearable v-model="item.remark"
+                                                                              size="small" placeholder="备注"></el-input>
+                                                                </el-col>
+                                                                <el-col :span="1">
+                                                                    <el-button type="danger" class="el-icon-delete"
+                                                                               @click="delBody(index)" size="small">
+                                                                    </el-button>
+                                                                </el-col>
+                                                            </el-row>
+                                                        </el-form-item>
+                                                    </el-form>
+
+                                                </div>
+
+                                            </el-tab-pane>
+                                        </el-tabs>
+
                                     </el-tab-pane>
                                     <el-tab-pane label="Extract" name="third">
+                                        <el-button type="primary" plain @click="addExtract" size="small">添加</el-button>
+                                        <div>
+                                            <el-form v-for="(item, index) in apiData.extracts"
+                                                     :key="item.pass">
+                                                <el-form-item>
+                                                    <el-row>
+                                                        <el-col :span="6">
+                                                            <el-input clearable v-model="item.key"
+                                                                      size="small" placeholder="key"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="14">
+                                                            <el-input clearable v-model="item.value"
+                                                                      size="small" placeholder="value"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="3">
+                                                            <el-input clearable v-model="item.remark"
+                                                                      size="small" placeholder="备注"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="1">
+                                                            <el-button type="danger" class="el-icon-delete"
+                                                                       @click="delExtract(index)" size="small">
+                                                            </el-button>
+                                                        </el-col>
+                                                    </el-row>
+                                                </el-form-item>
+                                            </el-form>
+
+                                        </div>
                                     </el-tab-pane>
                                     <el-tab-pane label="Assert" name="four">
+                                        <el-button type="primary" plain @click="addAssert" size="small">添加</el-button>
+                                        <div>
+                                            <el-form v-for="(item, index) in apiData.asserts"
+                                                     :key="item.pass">
+                                                <el-form-item>
+                                                    <el-row>
+                                                        <el-col :span="6">
+                                                            <el-input clearable v-model="item.key"
+                                                                      size="small" placeholder="key"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="14">
+                                                            <el-input clearable v-model="item.value"
+                                                                      size="small" placeholder="value"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="3">
+                                                            <el-input clearable v-model="item.remark"
+                                                                      size="small" placeholder="备注"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="1">
+                                                            <el-button type="danger" class="el-icon-delete"
+                                                                       @click="delAssert(index)" size="small">
+                                                            </el-button>
+                                                        </el-col>
+                                                    </el-row>
+                                                </el-form-item>
+                                            </el-form>
+
+                                        </div>
                                     </el-tab-pane>
                                 </el-tabs>
                             </el-col>
@@ -208,6 +426,10 @@
             return {
                 activeName: 'first',
                 activeName1: 'first',
+                activeName2: 'first',
+                activeName3: 'first',
+                activeName4: 'first',
+                activeName5: 'first',
                 title: '新增',
                 kw: '',
                 ApiDialogVisible: false,
@@ -222,17 +444,21 @@
                     apiName: null,
                     url: null,
                     moduleId: null,
-                    testEnvironment: null,
-                    devEnvironment: null,
-                    onLineEnvironment: null,
-                    bakEnvironment: null,
-                    environment: null,
                     environment_type: '1',//测试环境
                     projectId: null,
                     funcFile: '',
                     desc: null,
+                    methods: ['POST', 'GET'],
                     variable: [],
                     headers: [],
+                    bodys: [],
+                    bodysJson: [],
+                    bodyFormDataTypes: ["string", "file"],
+                    bodyFormDataType: "string",
+                    bodyRowType: null,
+                    bodyTextType: null,
+                    extracts: [],
+                    asserts: [],
                     environmentOptions: [],
                     projectList: [],
                     moduleList: [],
@@ -523,11 +749,33 @@
                 this.kw = '';
                 this.getListProject();
             },
-            addProjectVariable() {
-                this.apiData.variable.push({key: null, value: null, remark: null});
+            addHeader() {
+                this.apiData.headers.push({key: null, value: null, remark: null});
+                console.log(this.apiData.headers)
             },
-            delProjectVariable(i) {
-                this.apiData.variable.splice(i, 1);
+            delHeader(index) {
+                this.apiData.headers.splice(index, 1);
+            },
+            addBodyFormData() {
+                this.apiData.bodys.push({key: null, value: null, remark: null});
+                console.log(this.apiData.headers)
+            },
+            delBodyFormData(index) {
+                this.apiData.bodys.splice(index, 1);
+            },
+            addExtract() {
+                this.apiData.extracts.push({key: null, value: null, remark: null});
+                console.log(this.apiData.headers)
+            },
+            delExtract(index) {
+                this.apiData.extracts.splice(index, 1);
+            },
+            addAssert() {
+                this.apiData.asserts.push({key: null, value: null, remark: null});
+                console.log(this.apiData.headers)
+            },
+            delAssert(index) {
+                this.apiData.asserts.splice(index, 1);
             },
             handleCloseProjectDialog() {
                 this.ApiDialogVisible = false;
@@ -540,7 +788,9 @@
         },
         created() {
             this.getListProject();
-        }
+        },
+
+
     }
 
 
