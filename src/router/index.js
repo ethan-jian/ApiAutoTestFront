@@ -36,6 +36,11 @@ const routes = [
                 name: 'module',
                 component: () => import('../views/api_manage/module'),
             },
+             {
+                path: 'servieConfig',
+                name: 'servieConfig',
+                component: () => import('../views/api_manage/servieConfig'),
+            },
 
         ]
     },

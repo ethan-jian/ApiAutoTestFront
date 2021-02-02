@@ -162,9 +162,12 @@
                     case "systemManage":
                         this.$router.push('/systemManage');
                         break;
+
                     case "userManage":
                         this.$router.push('/userManage');
                         break;
+
+
                 }
             },
         },

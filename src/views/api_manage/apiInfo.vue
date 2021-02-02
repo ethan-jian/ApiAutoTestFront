@@ -272,6 +272,30 @@
                                                 </div>
                                             </el-tab-pane>
                                             <el-tab-pane label="Raw" name="second">
+                                                <el-form>
+                                                    <el-form-item>
+                                                        <el-row>
+                                                            <el-col :span="24">
+                                                                <div>
+                                                                    <editor
+                                                                            v-contextmenu:contextmenu
+                                                                            style="font-size: 15px"
+                                                                            v-model="apiData.bodysJson"
+                                                                            @init="editorInit"
+                                                                            lang="json"
+                                                                            theme="chrome"
+                                                                            width="100%"
+                                                                            height="515px"
+                                                                            :options="{}"
+                                                                    ></editor>
+
+                                                                </div>
+
+                                                            </el-col>
+                                                        </el-row>
+                                                    </el-form-item>
+                                                </el-form>
+
 
                                             </el-tab-pane>
                                             <el-tab-pane label="Text" name="third">
@@ -422,6 +446,10 @@
     export default {
         inject: ['reload'],
         name: 'apiInfo',
+
+        components: {
+            editor: require('vue2-ace-editor'),
+        },
         data() {
             return {
                 activeName: 'first',
@@ -438,6 +466,10 @@
                 pageSize: 10,
                 pageSizes: [10, 20, 30, 40, 50],
                 totalPage: 0,
+                jsonContent: {
+                    "name": "ethan",
+                    "age": "18",
+                },
                 apiData: {
                     id: null,
                     ids: [],
@@ -784,6 +816,42 @@
                 this.variableDialogVisible = false;
                 // this.apiData.variable = [];
             },
+
+
+            onJsonChange(value) {
+                // console.log('更改value:', value);
+                // 实时保存
+                this.onJsonSave(value)
+            },
+            onJsonSave(value) {
+                // console.log('保存value:', value);
+                this.resultInfo = value
+                this.hasJsonFlag = true
+            },
+            onError(value) {
+                console.log("json错误了value:", value);
+                this.hasJsonFlag = false
+            },
+            // 检查json
+            checkJson() {
+                if (this.hasJsonFlag === false) {
+                    // console.log("json验证失败")
+                    // this.$message.error("json验证失败")
+                    alert("json验证失败")
+                    return false
+                } else {
+                    // console.log("json验证成功")
+                    // this.$message.success("json验证成功")
+                    alert("json验证成功")
+                    return true
+                }
+            },
+            editorInit: function () {
+                require('brace/ext/language_tools');
+                require('brace/mode/json');
+                require('brace/theme/chrome');
+                require('brace/snippets/json')
+            }
 
         },
         created() {
