@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-tabs v-model="activeName" type="card">
+        <el-tabs v-model="activeName1" type="card">
             <el-tab-pane label="接口信息" name="first">
                 <div style="position: absolute;
         left: 430px;
@@ -82,25 +82,34 @@
                         </el-col>
                         <el-col :span="6">
                             <el-form-item label="选择项目">
-                                <el-select v-model="apiData.region" placeholder="请选择活动区域">
-                                    <el-option label="区域一" value="shanghai"></el-option>
-                                    <el-option label="区域二" value="beijing"></el-option>
+                                <el-select v-model="apiData.project_id" placeholder="请选择项目" @focus="listProject()">
+                                    <el-option v-for="item in projectList"
+                                               :key="item.id"
+                                               :value="item.id"
+                                               :label="item.name">
+                                    </el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
                         <el-col :span="6">
                             <el-form-item label="选择模块">
-                                <el-select v-model="apiData.region" placeholder="请选择活动区域">
-                                    <el-option label="区域一" value="shanghai"></el-option>
-                                    <el-option label="区域二" value="beijing"></el-option>
+                                <el-select v-model="apiData.module_id" placeholder="请选择模块" @focus="listProjectModule(apiData.project_id)">
+                                    <el-option v-for="item in moduleList"
+                                               :key="item.id"
+                                               :value="item.id"
+                                               :label="item.name">
+                                    </el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
                         <el-col :span="6">
                             <el-form-item label="选择环境">
-                                <el-select v-model="apiData.region2" placeholder="请选择活动区域">
-                                    <el-option label="区域一" value="shanghai"></el-option>
-                                    <el-option label="区域二" value="beijing"></el-option>
+                                <el-select v-model="apiData.base_url" placeholder="请选择活动区域">
+                                    <el-option v-for="item in moduleList"
+                                               :key="item.id"
+                                               :value="item.id"
+                                               :label="item.name">
+                                    </el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
@@ -109,17 +118,17 @@
                     <el-row>
                         <el-col :span="6">
                             <el-form-item label="前置函数">
-                                <el-input v-model="apiData.name3" placeholder="set_up_hooks"></el-input>
+                                <el-input v-model="apiData.up_func" placeholder="set_up_hooks"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :span="6">
                             <el-form-item label="后置函数">
-                                <el-input v-model="apiData.name2" placeholder="set_down_hooks"></el-input>
+                                <el-input v-model="apiData.down_func" placeholder="set_down_hooks"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :span="6">
                             <el-form-item label="是否跳过">
-                                <el-select v-model="apiData.region2" placeholder="true or false">
+                                <el-select v-model="apiData.skip" placeholder="true or false">
                                     <el-option label="区域一" value="shanghai"></el-option>
                                     <el-option label="区域二" value="beijing"></el-option>
                                 </el-select>
@@ -140,7 +149,7 @@
                                                style="width: 100px"
                                                slot="prepend"
                                                placeholder="选择请求方式">
-                                        <el-option v-for="item in methods"
+                                        <el-option v-for="item in methodList"
                                                    :key="item"
                                                    :value="item"
                                                    :label="item">
@@ -156,23 +165,16 @@
                                 </el-input>
 
                             </el-col>
-                            <!--                            &lt;!&ndash;                            <el-col :span="2.5">&ndash;&gt;-->
-                            <!--                            &lt;!&ndash;                                <el-button type="primary"&ndash;&gt;-->
-                            <!--                            &lt;!&ndash;                                           @click.native="saveAndRun()"&ndash;&gt;-->
-                            <!--                            &lt;!&ndash;                                           size="medium"&ndash;&gt;-->
-                            <!--                            &lt;!&ndash;                                           :loading="this.saveRunStatus"&ndash;&gt;-->
-                            <!--                            &lt;!&ndash;                                >Send&ndash;&gt;-->
-                            <!--                            &lt;!&ndash;                                </el-button>&ndash;&gt;-->
-                            <!--                            &lt;!&ndash;                                <el-button type="primary" @click.native="addApiMsg()" size="medium">Save</el-button>&ndash;&gt;-->
-                            <!--                            &lt;!&ndash;                            </el-col>&ndash;&gt;-->
+
                         </el-row>
                         <el-row>
                             <el-col>
-                                <el-tabs v-model="activeName1" type="card">
+                                <el-tabs v-model="activeName11" type="card">
                                     <el-tab-pane label="Heard" name="first">
-                                        <el-button type="primary" plain @click="addHeader" size="small">添加</el-button>
+                                        <el-button type="primary" plain @click="addRow('Heard')" size="small">添加
+                                        </el-button>
                                         <div>
-                                            <el-form v-for="(item, index) in apiData.headers"
+                                            <el-form v-for="(item, index) in apiData.header"
                                                      :key="item.pass">
                                                 <el-form-item>
                                                     <el-row>
@@ -190,7 +192,7 @@
                                                         </el-col>
                                                         <el-col :span="1">
                                                             <el-button type="danger" class="el-icon-delete"
-                                                                       @click="delHeader(index)" size="small">
+                                                                       @click="delRow('Heard', index)" size="small">
                                                             </el-button>
                                                         </el-col>
                                                     </el-row>
@@ -200,158 +202,108 @@
                                         </div>
                                     </el-tab-pane>
                                     <el-tab-pane label="Body" name="second">
-                                        <el-tabs v-model="activeName2">
-                                            <el-tab-pane label="Form-data" name="first">
-                                                <el-button type="primary" plain @click="addBodyFormData" size="small">
-                                                    添加
-                                                </el-button>
-                                                <div>
-                                                    <el-form v-for="(item, index) in apiData.bodys"
-                                                             :key="item.pass">
-                                                        <el-form-item>
-                                                            <el-row>
-                                                                <el-col :span="6">
-                                                                    <el-input clearable v-model="item.key"
-                                                                              size="small" placeholder="key"></el-input>
-                                                                </el-col>
-                                                                <el-col :span="2">
-                                                                    <el-select v-model="apiData.bodyFormDataType"
-                                                                               size="small"
-                                                                               style="width: 100px"
-                                                                               placeholder="选择">
-                                                                        <el-option
-                                                                                v-for="item in apiData.bodyFormDataTypes"
-                                                                                :key="item"
-                                                                                :value="item"
-                                                                                :label="item">
-                                                                        </el-option>
-                                                                    </el-select>
-
-
-                                                                </el-col>
-
-
-                                                                <div v-if="apiData.bodyFormDataType==='file'">
-                                                                    <el-col :span="2" style="padding-left:10px;">
-                                                                        <el-upload
-                                                                                class="upload-demo"
-                                                                                action="/api/upload"
-                                                                                :show-file-list='false'
-                                                                                :on-success="fileChange">
-                                                                            <el-button size="mini" type="primary"
-                                                                                       @click="tempNum(scope.$index)">
-                                                                                点击上传
-                                                                            </el-button>
-                                                                        </el-upload>
-                                                                    </el-col>
-                                                                </div>
-
-                                                                <div v-else>
-                                                                    <el-col :span="12">
-                                                                        <el-input clearable v-model="item.value"
-                                                                                  size="small"
-                                                                                  placeholder="value"></el-input>
-                                                                    </el-col>
-                                                                </div>
-
-
-                                                                <el-col :span="3">
-                                                                    <el-input clearable v-model="item.remark"
-                                                                              size="small" placeholder="备注"></el-input>
-                                                                </el-col>
-                                                                <el-col :span="1">
-                                                                    <el-button type="danger" class="el-icon-delete"
-                                                                               @click="delBodyFormData(index)"
-                                                                               size="small">
+                                        <el-row style="float: left">
+                                            <el-col :span="24">
+                                                <el-radio-group v-model="radio">
+                                                    <el-radio-button label="Form-data"></el-radio-button>
+                                                    <el-radio-button label="Raw"></el-radio-button>
+                                                    <el-radio-button label="Text"></el-radio-button>
+                                                </el-radio-group>
+                                            </el-col>
+                                        </el-row>
+                                        <br>
+                                        <br>
+                                        <div class="Form-dataClass" v-if="radio!=='Raw'">
+                                            <el-button type="primary" plain
+                                                       @click="addRow(radio)"
+                                                       size="small">
+                                                添加
+                                            </el-button>
+                                            <el-form v-for="(item, index) in apiData.body_form_data"
+                                                     :key="item.pass">
+                                                <el-form-item>
+                                                    <el-row>
+                                                        <el-col :span="6">
+                                                            <el-input clearable v-model="item.key"
+                                                                      size="small" placeholder="key"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="2">
+                                                            <el-select v-model="item.bodyFormDataType"
+                                                                       size="small"
+                                                                       style="width: 100px"
+                                                                       placeholder="选择">
+                                                                <el-option
+                                                                        v-for="item in bodyFormDataTypes"
+                                                                        :key="item"
+                                                                        :value="item"
+                                                                        :label="item">
+                                                                </el-option>
+                                                            </el-select>
+                                                        </el-col>
+                                                        <div v-if="item.bodyFormDataType==='file'">
+                                                            <el-col :span="2" style="padding-left:10px;">
+                                                                <el-upload
+                                                                        class="upload-demo"
+                                                                        action="/api/upload"
+                                                                        :show-file-list='false'
+                                                                        :on-success="fileChange">
+                                                                    <el-button size="mini" type="primary"
+                                                                               @click="tempNum(scope.$index)">
+                                                                        点击上传
                                                                     </el-button>
-                                                                </el-col>
-                                                            </el-row>
-                                                        </el-form-item>
-                                                    </el-form>
-
-                                                </div>
-                                            </el-tab-pane>
-                                            <el-tab-pane label="Raw" name="second">
-                                                <el-form>
-                                                    <el-form-item>
-                                                        <el-row>
-                                                            <el-col :span="24">
-                                                                <div>
-                                                                    <editor
-                                                                            v-contextmenu:contextmenu
-                                                                            style="font-size: 15px"
-                                                                            v-model="apiData.bodysJson"
-                                                                            @init="editorInit"
-                                                                            lang="json"
-                                                                            theme="chrome"
-                                                                            width="100%"
-                                                                            height="515px"
-                                                                            :options="{}"
-                                                                    ></editor>
-
-                                                                </div>
-
+                                                                </el-upload>
                                                             </el-col>
-                                                        </el-row>
-                                                    </el-form-item>
-                                                </el-form>
+                                                        </div>
+                                                        <div v-else>
+                                                            <el-col :span="12">
+                                                                <el-input clearable v-model="item.value"
+                                                                          size="small"
+                                                                          placeholder="value"></el-input>
+                                                            </el-col>
+                                                        </div>
+                                                        <el-col :span="3">
+                                                            <el-input clearable v-model="item.remark"
+                                                                      size="small" placeholder="备注"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="1">
+                                                            <el-button type="danger" class="el-icon-delete"
+                                                                       @click="delRow(radio, index)"
+                                                                       size="small">
+                                                            </el-button>
+                                                        </el-col>
+                                                    </el-row>
+                                                </el-form-item>
+                                            </el-form>
+                                        </div>
 
-
-                                            </el-tab-pane>
-                                            <el-tab-pane label="Text" name="third">
-                                                <el-button type="primary" plain @click="addBodyFormData" size="small">
-                                                    添加
-                                                </el-button>
-                                                <div>
-                                                    <el-form v-for="(item, index) in apiData.bodys"
-                                                             :key="item.pass">
-                                                        <el-form-item>
-                                                            <el-row>
-                                                                <el-col :span="6">
-                                                                    <el-input clearable v-model="item.key"
-                                                                              size="small" placeholder="key"></el-input>
-                                                                </el-col>
-                                                                <el-col :span="2">
-                                                                    <el-select v-model="apiData.bodyFormDataType"
-                                                                               size="small"
-                                                                               style="width: 100px"
-                                                                               placeholder="选择请求方式">
-                                                                        <el-option
-                                                                                v-for="item in apiData.bodyFormDataTypes"
-                                                                                :key="item"
-                                                                                :value="item"
-                                                                                :label="item">
-                                                                        </el-option>
-                                                                    </el-select>
-
-                                                                </el-col>
-
-                                                                <el-col :span="12">
-                                                                    <el-input clearable v-model="item.value"
-                                                                              size="small"
-                                                                              placeholder="value"></el-input>
-                                                                </el-col>
-                                                                <el-col :span="3">
-                                                                    <el-input clearable v-model="item.remark"
-                                                                              size="small" placeholder="备注"></el-input>
-                                                                </el-col>
-                                                                <el-col :span="1">
-                                                                    <el-button type="danger" class="el-icon-delete"
-                                                                               @click="delBody(index)" size="small">
-                                                                    </el-button>
-                                                                </el-col>
-                                                            </el-row>
-                                                        </el-form-item>
-                                                    </el-form>
-
-                                                </div>
-
-                                            </el-tab-pane>
-                                        </el-tabs>
+                                        <div class="jsonClass" v-if="radio==='Raw'">
+                                            <el-form>
+                                                <el-form-item>
+                                                    <el-row>
+                                                        <el-col :span="24">
+                                                            <div>
+                                                                <editor
+                                                                        v-contextmenu:contextmenu
+                                                                        style="font-size: 15px"
+                                                                        v-model="apiData.body_json"
+                                                                        @init="editorInit"
+                                                                        lang="json"
+                                                                        theme="chrome"
+                                                                        width="100%"
+                                                                        height="515px"
+                                                                        :options="{}"
+                                                                ></editor>
+                                                            </div>
+                                                        </el-col>
+                                                    </el-row>
+                                                </el-form-item>
+                                            </el-form>
+                                        </div>
 
                                     </el-tab-pane>
                                     <el-tab-pane label="Extract" name="third">
-                                        <el-button type="primary" plain @click="addExtract" size="small">添加</el-button>
+                                        <el-button type="primary" plain @click="addRow('Extract')" size="small">添加
+                                        </el-button>
                                         <div>
                                             <el-form v-for="(item, index) in apiData.extracts"
                                                      :key="item.pass">
@@ -371,7 +323,7 @@
                                                         </el-col>
                                                         <el-col :span="1">
                                                             <el-button type="danger" class="el-icon-delete"
-                                                                       @click="delExtract(index)" size="small">
+                                                                       @click="delRow('Extract', index)" size="small">
                                                             </el-button>
                                                         </el-col>
                                                     </el-row>
@@ -380,8 +332,9 @@
 
                                         </div>
                                     </el-tab-pane>
-                                    <el-tab-pane label="Assert" name="four">
-                                        <el-button type="primary" plain @click="addAssert" size="small">添加</el-button>
+                                    <el-tab-pane label="Validate" name="four">
+                                        <el-button type="primary" plain @click="addRow('validate')" size="small">添加
+                                        </el-button>
                                         <div>
                                             <el-form v-for="(item, index) in apiData.asserts"
                                                      :key="item.pass">
@@ -401,7 +354,7 @@
                                                         </el-col>
                                                         <el-col :span="1">
                                                             <el-button type="danger" class="el-icon-delete"
-                                                                       @click="delAssert(index)" size="small">
+                                                                       @click="delRow('validate', index)" size="small">
                                                             </el-button>
                                                         </el-col>
                                                     </el-row>
@@ -426,14 +379,7 @@
 
 <script>
 
-    // import {
-    //     catProjectDetailInfo,
-    //     deleteProjectInfo, editProjectInfo,
-    //     // editProjectInfo,
-    //     listProjectInfo
-    // } from "../../../api/project";
-
-    import {addApiInfo} from "../../api/api";
+    import {addApiInfo, listProjectModuleInfo} from "../../api/api";
     import {
         catProjectModuleInfo,
         catProjectDetailInfo,
@@ -452,52 +398,54 @@
         },
         data() {
             return {
-                activeName: 'first',
+                radio: 'Form-data',
                 activeName1: 'first',
-                activeName2: 'first',
-                activeName3: 'first',
-                activeName4: 'first',
-                activeName5: 'first',
+                activeName11: 'first',
+                activeBody: 'first',
                 title: '新增',
+                methodList: ['POST', 'GET', 'PUT', 'DELETE'],
+                bodyFormDataTypes: ['string', 'file'],
+                bodyFormDataType: 'string',
                 kw: '',
+                sort: [
+                    {
+                        "direct": "DESC",
+                        "field": "created_time"
+                    }],
                 ApiDialogVisible: false,
                 variableDialogVisible: false,
+                projectList: [],
+                moduleList: [],
+                apiList: [],
+                multipleSelection: [],
                 currentPage: 1,
                 pageSize: 10,
                 pageSizes: [10, 20, 30, 40, 50],
                 totalPage: 0,
-                jsonContent: {
-                    "name": "ethan",
-                    "age": "18",
-                },
+
                 apiData: {
                     id: null,
-                    ids: [],
-                    apiName: null,
-                    url: null,
-                    moduleId: null,
-                    environment_type: '1',//测试环境
-                    projectId: null,
-                    funcFile: '',
+                    num: null,
+                    name: null,
                     desc: null,
-                    methods: ['POST', 'GET'],
-                    variable: [],
-                    headers: [],
-                    bodys: [],
-                    bodysJson: [],
-                    bodyFormDataTypes: ["string", "file"],
-                    bodyFormDataType: "string",
-                    bodyRowType: null,
-                    bodyTextType: null,
-                    extracts: [],
-                    asserts: [],
-                    environmentOptions: [],
-                    projectList: [],
-                    moduleList: [],
-                },
-                listApiData: [],
+                    body_type: 'json', //参数选择类型
+                    base_url: '1',      //基础url,序号对应项目的环境
+                    up_func: null,       //接口执行前的函数
+                    down_func: '',      //接口执行后的函数
+                    method: 'POST',       //请求方式
+                    body_form_data: [],     //form-data形式的参数
+                    body_json: [],  //json形式的参数
+                    url_param: [],          //url上面所带的参数
+                    url: null,  //接口地址
+                    skip: false, //跳过判断
+                    extract: [], //提取信息
+                    validate: [], //断言信息
+                    header: [],   //头部信息
+                    module_id: null,  //所属的接口模块id
+                    project_id: null,  //所属的项目id
 
-                multipleSelection: [],
+                },
+
                 rules: {
                     apiName: [
                         {required: true, message: '请输入接口名称', trigger: 'blur'},
@@ -517,6 +465,37 @@
             }
         },
         methods: {
+
+            listProjectModule(project_id) {
+                let postData = {
+                    id: project_id,
+                };
+                listProjectModuleInfo(postData).then(res => {
+                        let code = res.data.code;
+                        let rsData = res.data.data
+                        if (code === 200) {
+                            this.moduleList = rsData;
+                        }
+                    }
+                )
+            },
+
+            listProject() {
+                let postData = {
+                    kw: this.kw,
+                    sort: this.sort,
+                };
+                listProjectInfo(postData).then(res => {
+                        let code = res.data.code;
+                        let rsData = res.data.data
+                        if (code === 200) {
+                            // this.totalPage = res.data.totalCount;
+                            this.projectList = rsData;
+                        }
+                    }
+                )
+            },
+
             openAddproject() {
                 this.title = '新增';
                 this.ApiDialogVisible = true;
@@ -763,6 +742,7 @@
                 this.dialogVisible = true;
 
             },
+
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid && this.title === '新增') {
@@ -774,41 +754,48 @@
                     }
                 });
             },
+
             resetForm(formName) {
                 this.$refs[formName].resetFields();
             },
+
             resetInput() {
                 this.kw = '';
                 this.getListProject();
             },
-            addHeader() {
-                this.apiData.headers.push({key: null, value: null, remark: null});
-                console.log(this.apiData.headers)
+
+            addRow(type) {
+                if (type === 'Heard') {
+                    console.log(this.apiData.header)
+                    this.apiData.header.push({key: null, value: null, remark: null});
+                } else if (type === 'Form-data') {
+                    this.apiData.body_form_data.push({key: null, value: null, bodyFormDataType: null, remark: null});
+                    console.log(this.apiData.body_form_data)
+                } else if (type === 'Text') {
+                    this.apiData.body_form_data.push({key: null, value: null, remark: null});
+                } else if (type === 'Extract') {
+                    this.apiData.extract.push({key: null, value: null, remark: null});
+                } else if (type === 'Validate') {
+                    this.apiData.validate.push({key: null, value: null, remark: null});
+                }
+
             },
-            delHeader(index) {
-                this.apiData.headers.splice(index, 1);
+
+            delRow(type, index) {
+                if (type === 'Heard') {
+                    this.apiData.header.splice(index, 1);
+                } else if (type === 'Form-data') {
+                    this.apiData.body_form_data.splice(index, 1);
+                } else if (type === 'Text') {
+                    this.apiData.body_form_data.splice(index, 1);
+                } else if (type === 'Extract') {
+                    this.apiData.extract.splice(index, 1);
+                } else if (type === 'Validate') {
+                    this.apiData.validate.splice(index, 1);
+                }
+
             },
-            addBodyFormData() {
-                this.apiData.bodys.push({key: null, value: null, remark: null});
-                console.log(this.apiData.headers)
-            },
-            delBodyFormData(index) {
-                this.apiData.bodys.splice(index, 1);
-            },
-            addExtract() {
-                this.apiData.extracts.push({key: null, value: null, remark: null});
-                console.log(this.apiData.headers)
-            },
-            delExtract(index) {
-                this.apiData.extracts.splice(index, 1);
-            },
-            addAssert() {
-                this.apiData.asserts.push({key: null, value: null, remark: null});
-                console.log(this.apiData.headers)
-            },
-            delAssert(index) {
-                this.apiData.asserts.splice(index, 1);
-            },
+
             handleCloseProjectDialog() {
                 this.ApiDialogVisible = false;
             },

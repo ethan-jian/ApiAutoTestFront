@@ -8,6 +8,10 @@ export const listApiInfo = function (data) {
     return postRequest('ListApi', data)
 };
 
+export const listProjectModuleInfo = function (data) {
+    return postRequest('ProjectModule', data)
+};
+
 export const catApiDetailInfo = function (data) {
     return postRequest('DetailApi', data)
 };
