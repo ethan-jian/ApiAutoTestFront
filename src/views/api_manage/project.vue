@@ -166,7 +166,7 @@
                         <el-select ref="selectEnvironment"
                                    v-model="projectData.environment"
                                    placeholder="请选择测试环境"
-                                   @focus="getEnvironments" @change="getEnvironment">
+                                   @focus="getEnvironments" @change="getEnvironments">
                             <el-option
                                     v-for="item in projectData.environmentOptions"
                                     :key="item.value"
@@ -371,6 +371,7 @@
             },
 
             editProject() {
+                this.getSelectedEnvironmentType();
                 let postData = {
                     id: this.projectData.id,
                     name: this.projectData.projectName,

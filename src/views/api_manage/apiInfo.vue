@@ -82,18 +82,20 @@
                         </el-col>
                         <el-col :span="6">
                             <el-form-item label="选择项目">
-                                <el-select v-model="apiData.project_id" placeholder="请选择项目" @focus="listProject()">
+                                <el-select v-model="apiData.project_id" placeholder="请选择项目" @focus="listProject()" @change="listProject()">
                                     <el-option v-for="item in projectList"
                                                :key="item.id"
                                                :value="item.id"
-                                               :label="item.name">
+                                               :label="item.name"
+                                    >
                                     </el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
                         <el-col :span="6">
                             <el-form-item label="选择模块">
-                                <el-select v-model="apiData.module_id" placeholder="请选择模块" @focus="listProjectModule(apiData.project_id)">
+                                <el-select v-model="apiData.module_id" placeholder="请选择模块"
+                                           @focus="listProjectModule(apiData.project_id)">
                                     <el-option v-for="item in moduleList"
                                                :key="item.id"
                                                :value="item.id"
@@ -103,14 +105,19 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="6">
-                            <el-form-item label="选择环境">
-                                <el-select v-model="apiData.base_url" placeholder="请选择活动区域">
-                                    <el-option v-for="item in moduleList"
-                                               :key="item.id"
-                                               :value="item.id"
-                                               :label="item.name">
-                                    </el-option>
-                                </el-select>
+                            <el-form-item label="基础url">
+                                    <el-input
+                                            placeholder="base_url"
+                                            v-model="apiData.base_url"
+                                            :disabled="true">
+                                    </el-input>
+<!--                                <el-select v-model="apiData.base_url" placeholder="请选择活动区域">-->
+                                    <!--                                    <el-option v-for="item in moduleList"-->
+                                    <!--                                               :key="item.id"-->
+                                    <!--                                               :value="item.id"-->
+                                    <!--                                               :label="item.name">-->
+                                    <!--                                    </el-option>-->
+<!--                                </el-select>-->
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -129,8 +136,11 @@
                         <el-col :span="6">
                             <el-form-item label="是否跳过">
                                 <el-select v-model="apiData.skip" placeholder="true or false">
-                                    <el-option label="区域一" value="shanghai"></el-option>
-                                    <el-option label="区域二" value="beijing"></el-option>
+                                    <el-option v-for="item in skips"
+                                               :key="item"
+                                               :value="item"
+                                               >
+                                    </el-option>
                                 </el-select>
                             </el-form-item>
                         </el-col>
@@ -158,7 +168,7 @@
                                     <el-button slot="suffix" type="primary" size="medium">
                                         Send
                                     </el-button>
-                                    <el-button slot="suffix" type="primary" size="medium">
+                                    <el-button slot="suffix" type="primary" size="medium" @click="addApi">
                                         Save
                                     </el-button>
 
@@ -305,7 +315,7 @@
                                         <el-button type="primary" plain @click="addRow('Extract')" size="small">添加
                                         </el-button>
                                         <div>
-                                            <el-form v-for="(item, index) in apiData.extracts"
+                                            <el-form v-for="(item, index) in apiData.extract"
                                                      :key="item.pass">
                                                 <el-form-item>
                                                     <el-row>
@@ -333,10 +343,10 @@
                                         </div>
                                     </el-tab-pane>
                                     <el-tab-pane label="Validate" name="four">
-                                        <el-button type="primary" plain @click="addRow('validate')" size="small">添加
+                                        <el-button type="primary" plain @click="addRow('Validate')" size="small">添加
                                         </el-button>
                                         <div>
-                                            <el-form v-for="(item, index) in apiData.asserts"
+                                            <el-form v-for="(item, index) in apiData.validate"
                                                      :key="item.pass">
                                                 <el-form-item>
                                                     <el-row>
@@ -354,7 +364,7 @@
                                                         </el-col>
                                                         <el-col :span="1">
                                                             <el-button type="danger" class="el-icon-delete"
-                                                                       @click="delRow('validate', index)" size="small">
+                                                                       @click="delRow('Validate', index)" size="small">
                                                             </el-button>
                                                         </el-col>
                                                     </el-row>
@@ -403,6 +413,7 @@
                 activeName11: 'first',
                 activeBody: 'first',
                 title: '新增',
+                skips: [true, false],
                 methodList: ['POST', 'GET', 'PUT', 'DELETE'],
                 bodyFormDataTypes: ['string', 'file'],
                 bodyFormDataType: 'string',
@@ -422,19 +433,18 @@
                 pageSize: 10,
                 pageSizes: [10, 20, 30, 40, 50],
                 totalPage: 0,
+                id: null,
 
                 apiData: {
-                    id: null,
-                    num: null,
                     name: null,
                     desc: null,
                     body_type: 'json', //参数选择类型
-                    base_url: '1',      //基础url,序号对应项目的环境
+                    base_url: null,      //基础url,序号对应项目的环境
                     up_func: null,       //接口执行前的函数
                     down_func: '',      //接口执行后的函数
                     method: 'POST',       //请求方式
                     body_form_data: [],     //form-data形式的参数
-                    body_json: [],  //json形式的参数
+                    body_json: null,  //json形式的参数
                     url_param: [],          //url上面所带的参数
                     url: null,  //接口地址
                     skip: false, //跳过判断
@@ -466,6 +476,69 @@
         },
         methods: {
 
+            addApi() {
+                let postData = {
+                    name: this.apiData.name,
+                    desc: this.apiData.desc,
+                    body_type: this.apiData.body_type, //参数选择类型
+                    base_url: this.apiData.base_url,      //基础url,序号对应项目的环境
+                    up_func: this.apiData.up_func,       //接口执行前的函数
+                    down_func: this.apiData.down_func,      //接口执行后的函数
+                    method: this.apiData.method,       //请求方式
+                    body_form_data: this.apiData.body_form_data,     //form-data形式的参数
+                    body_json: this.apiData.body_json,  //json形式的参数
+                    url_param: this.apiData.url_param,          //url上面所带的参数
+                    url: this.apiData.url,  //接口地址
+                    skip: this.apiData.skip, //跳过判断
+                    extract: this.apiData.extract, //提取信息
+                    validate: this.apiData.validate, //断言信息
+                    header: this.apiData.header,   //头部信息
+                    module_id: this.apiData.module_id,  //所属的接口模块id
+                    project_id: this.apiData.project_id,  //所属的项目id
+
+                };
+                addApiInfo(postData).then(res => {
+                    console.log(this.apiData)
+                    let code = res.data.code;
+                    let message = res.data.message;
+                    if (code === 200) {
+                        this.ApiDialogVisible = false;
+                        this.reload()
+                        this.resetForm('apiData')
+                        this.$notify({
+                            title: message,
+                            type: "success"
+                        })
+                    } else {
+                        this.$notify({
+                            title: message,
+                            type: "error"
+                        })
+                    }
+
+                })
+            },
+
+            getBaseUrl(projectId) {
+                for (var n = 0; n < this.projectList.length; n++) {
+                    console.log('id',this.projectList[n]['id'])
+                    console.log('projectid', projectId)
+                    if (projectId === this.projectList[n]['id']) {
+                        console.log('environment_type', this.projectList[n]['environment_type'])
+                        if (this.projectList[n]['environment_type'] === '1') {
+                            this.apiData.base_url = this.projectList[n]['test_environment']
+                        } else if (this.projectList[n]['environment_type'] === '2') {
+                            this.apiData.base_url = this.projectList[n]['dev_environment']
+                        } else if (this.projectList[n]['environment_type'] === '3') {
+                            this.apiData.base_url = this.projectList[n]['online_environment']
+                        } else if (this.projectList[n]['environment_type'] === '4') {
+                            this.apiData.base_url = this.projectList[n]['bak_environment']
+                        }
+                        break;
+                    }
+                }
+
+            },
             listProjectModule(project_id) {
                 let postData = {
                     id: project_id,
@@ -475,6 +548,7 @@
                         let rsData = res.data.data
                         if (code === 200) {
                             this.moduleList = rsData;
+
                         }
                     }
                 )
@@ -490,7 +564,9 @@
                         let rsData = res.data.data
                         if (code === 200) {
                             // this.totalPage = res.data.totalCount;
+                            this.apiData.module_id = null;
                             this.projectList = rsData;
+                            this.getBaseUrl(this.apiData.project_id);
                         }
                     }
                 )
@@ -617,49 +693,8 @@
 
                 })
             },
-            getSelectedEnvironmentType() {
-                let selectedLabel = this.$refs.selectEnvironment.selected.label;
-                if (selectedLabel === '测试环境') {
-                    this.apiData.environment_type = '1';
-                } else if (selectedLabel === '开发环境') {
-                    this.apiData.environment_type = '2';
-                } else if (selectedLabel === '线上环境') {
-                    this.apiData.environment_type = '3';
-                } else if (selectedLabel === '备用环境') {
-                    this.apiData.environment_type = '4';
-                }
-            },
-
-            addApi() {
-                let postData = {
-                    name: this.apiData.apiName,
-                    url: this.apiData.url,
-                    module_id: this.apiData.moduleId,
-                    project_id: this.apiData.moduleId,
-                    desc: this.apiData.desc,
-                };
-                addApiInfo(postData).then(res => {
-                    let code = res.data.code;
-                    let message = res.data.message;
-                    if (code === 200) {
-                        this.ApiDialogVisible = false;
-                        this.reload()
-                        this.resetForm('apiData')
-                        this.$notify({
-                            title: message,
-                            type: "success"
-                        })
-                    } else {
-                        this.$notify({
-                            title: message,
-                            type: "error"
-                        })
-                    }
-
-                })
 
 
-            },
 
             getListProject() {
                 let postData = {
