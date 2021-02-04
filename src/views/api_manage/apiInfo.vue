@@ -2,21 +2,41 @@
     <div>
         <el-tabs v-model="activeName1" type="card">
             <el-tab-pane label="接口信息" name="first">
-                <div style="position: absolute;
-        left: 430px;
-">
-                    <el-input
-                            style="width: 200px;float: left;"
-                            placeholder="请输入项目名称"
-                            v-model="kw"
-                            clearable>
-                    </el-input>
-                    <el-button type="primary" @click="getListProject">查询</el-button>
-                    <el-button @click="resetInput()">重置</el-button>
+                <div>
+                    <el-row style="float: left">
+                        <el-col :span="8">
+                            <el-select v-model="apiData.project_id" placeholder="请选择项目" @focus="listProject()"
+                                       @change="listProject()">
+                                <el-option v-for="item in projectList"
+                                           :key="item.id"
+                                           :value="item.id"
+                                           :label="item.name"
+                                >
+                                </el-option>
+                            </el-select>
+                        </el-col>
+                        <el-col :span="8">
+                            <el-select v-model="apiData.module_id" placeholder="请选择模块"
+                                       @focus="listProjectModule(apiData.project_id)">
+                                <el-option v-for="item in moduleList"
+                                           :key="item.id"
+                                           :value="item.id"
+                                           :label="item.name">
+                                </el-option>
+                            </el-select>
+                        </el-col>
+                        <el-col :span="2">
+                            <el-button type="primary" @click="getListProject">查询</el-button>
+                        </el-col>
+                        <el-col :span="5">
+                            <el-button @click="resetInput()">重置</el-button>
+                        </el-col>
+                    </el-row>
+
                 </div>
                 <el-table
                         ref="multipleTable"
-                        :data="listApiData"
+                        :data="apiList"
                         tooltip-effect="dark"
                         style="width: 100%"
                         @selection-change="handleSelectionChange">
@@ -34,21 +54,21 @@
                             label="描述"
                             width="120">
                     </el-table-column>
-                    <el-table-column
-                            label="项目"
-                            width="120">
-                        <template slot-scope="scope">
-                            <span v-if="scope.row.environment_type === '1'">测试环境</span>
-                            <span v-if="scope.row.environment_type === '2'">开发环境</span>
-                            <span v-if="scope.row.environment_type === '3'">线上环境</span>
-                            <span v-if="scope.row.environment_type === '4'">备用环境</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column
-                            label="模块"
-                            width="100">
-                        <template slot-scope="scope">{{ scope.row.user_name }}</template>
-                    </el-table-column>
+                                        <el-table-column
+                                                label="项目"
+                                                width="120">
+                                            <template slot-scope="scope">
+                                                <span v-if="scope.row.environment_type === '1'">测试环境</span>
+                                                <span v-if="scope.row.environment_type === '2'">开发环境</span>
+                                                <span v-if="scope.row.environment_type === '3'">线上环境</span>
+                                                <span v-if="scope.row.environment_type === '4'">备用环境</span>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="模块"
+                                                width="100">
+                                            <template slot-scope="scope">{{ scope.row.user_name }}</template>
+                                        </el-table-column>
                     <el-table-column
                             label="创建时间"
                             width="120">
@@ -82,7 +102,8 @@
                         </el-col>
                         <el-col :span="6">
                             <el-form-item label="选择项目">
-                                <el-select v-model="apiData.project_id" placeholder="请选择项目" @focus="listProject()" @change="listProject()">
+                                <el-select v-model="apiData.project_id" placeholder="请选择项目" @focus="listProject()"
+                                           @change="listProject()">
                                     <el-option v-for="item in projectList"
                                                :key="item.id"
                                                :value="item.id"
@@ -106,18 +127,18 @@
                         </el-col>
                         <el-col :span="6">
                             <el-form-item label="基础url">
-                                    <el-input
-                                            placeholder="base_url"
-                                            v-model="apiData.base_url"
-                                            :disabled="true">
-                                    </el-input>
-<!--                                <el-select v-model="apiData.base_url" placeholder="请选择活动区域">-->
-                                    <!--                                    <el-option v-for="item in moduleList"-->
-                                    <!--                                               :key="item.id"-->
-                                    <!--                                               :value="item.id"-->
-                                    <!--                                               :label="item.name">-->
-                                    <!--                                    </el-option>-->
-<!--                                </el-select>-->
+                                <el-input
+                                        placeholder="base_url"
+                                        v-model="apiData.base_url"
+                                        :disabled="true">
+                                </el-input>
+                                <!--                                <el-select v-model="apiData.base_url" placeholder="请选择活动区域">-->
+                                <!--                                    <el-option v-for="item in moduleList"-->
+                                <!--                                               :key="item.id"-->
+                                <!--                                               :value="item.id"-->
+                                <!--                                               :label="item.name">-->
+                                <!--                                    </el-option>-->
+                                <!--                                </el-select>-->
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -139,7 +160,7 @@
                                     <el-option v-for="item in skips"
                                                :key="item"
                                                :value="item"
-                                               >
+                                    >
                                     </el-option>
                                 </el-select>
                             </el-form-item>
@@ -521,7 +542,7 @@
 
             getBaseUrl(projectId) {
                 for (var n = 0; n < this.projectList.length; n++) {
-                    console.log('id',this.projectList[n]['id'])
+                    console.log('id', this.projectList[n]['id'])
                     console.log('projectid', projectId)
                     if (projectId === this.projectList[n]['id']) {
                         console.log('environment_type', this.projectList[n]['environment_type'])
@@ -693,7 +714,6 @@
 
                 })
             },
-
 
 
             getListProject() {
