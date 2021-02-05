@@ -26,13 +26,18 @@
                             </el-select>
                         </el-col>
                         <el-col :span="2">
-                            <el-button type="primary" @click="getListProject">查询</el-button>
+                            <el-button type="primary" @click="ListApi">查询</el-button>
                         </el-col>
-                        <el-col :span="5">
-                            <el-button @click="resetInput()">重置</el-button>
-                        </el-col>
-                    </el-row>
+                        <!--                        <el-col :span="5">-->
+                        <!--                            <el-button @click="resetInput()">重置</el-button>-->
+                        <!--                        </el-col>-->
 
+                    </el-row>
+                    <div style="position: absolute;right: 0">
+                        <el-button type="warning" @click="deleteApi"
+                                   plain>批量删除
+                        </el-button>
+                    </div>
                 </div>
                 <el-table
                         ref="multipleTable"
@@ -47,28 +52,29 @@
                     <el-table-column
                             prop="name"
                             label="名称"
-                            width="120">
+                            width="200">
+                    </el-table-column>
+                    <!--                    <el-table-column-->
+                    <!--                            prop="desc"-->
+                    <!--                            label="描述"-->
+                    <!--                            width="200">-->
+                    <!--                    </el-table-column>-->
+                    <el-table-column
+                            label="项目"
+                            width="200">
+                        <template slot-scope="scope">
+                            {{ scope.row.project_name}}
+                            <!--                                                <span v-if="scope.row.environment_type === '1'">测试环境</span>-->
+                            <!--                                                <span v-if="scope.row.environment_type === '2'">开发环境</span>-->
+                            <!--                                                <span v-if="scope.row.environment_type === '3'">线上环境</span>-->
+                            <!--                                                <span v-if="scope.row.environment_type === '4'">备用环境</span>-->
+                        </template>
                     </el-table-column>
                     <el-table-column
-                            prop="desc"
-                            label="描述"
-                            width="120">
+                            label="模块"
+                            width="200">
+                        <template slot-scope="scope">{{ scope.row.module_name }}</template>
                     </el-table-column>
-                                        <el-table-column
-                                                label="项目"
-                                                width="120">
-                                            <template slot-scope="scope">
-                                                <span v-if="scope.row.environment_type === '1'">测试环境</span>
-                                                <span v-if="scope.row.environment_type === '2'">开发环境</span>
-                                                <span v-if="scope.row.environment_type === '3'">线上环境</span>
-                                                <span v-if="scope.row.environment_type === '4'">备用环境</span>
-                                            </template>
-                                        </el-table-column>
-                                        <el-table-column
-                                                label="模块"
-                                                width="100">
-                                            <template slot-scope="scope">{{ scope.row.user_name }}</template>
-                                        </el-table-column>
                     <el-table-column
                             label="创建时间"
                             width="120">
@@ -84,8 +90,8 @@
                             width="120">
                         <template slot-scope="scope">
                             <!--                    <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>-->
-                            <el-button @click="catProject(scope.row.id)" type="text" size="small">编辑</el-button>
-                            <el-button @click="deleteProject(scope.row.id)" type="text" size="small">删除</el-button>
+                            <el-button @click="editApi(scope.row.id)" type="text" size="small">编辑</el-button>
+                            <el-button @click="deleteApi(scope.row.id)" type="text" size="small">删除</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -404,18 +410,33 @@
             </el-tab-pane>
 
         </el-tabs>
+        <div class="block">
+            <el-pagination
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="currentPage"
+                    :page-sizes=pageSizes
+                    :page-size=pageSize
+                    layout="total, sizes, prev, pager, next, jumper"
+                    :total=totalPage>
+            </el-pagination>
+        </div>
 
     </div>
 </template>
 
 <script>
 
-    import {addApiInfo, listProjectModuleInfo} from "../../api/api";
+    import {
+        addApiInfo,
+        catApiDetailInfo,
+        deleteApiInfo,
+        editApiInfo,
+        listApiInfo,
+        listProjectModuleInfo
+    } from "../../api/api";
     import {
         catProjectModuleInfo,
-        catProjectDetailInfo,
-        deleteProjectInfo,
-        editProjectInfo,
         listProjectInfo,
     } from "../../api/project";
 
@@ -455,6 +476,7 @@
                 pageSizes: [10, 20, 30, 40, 50],
                 totalPage: 0,
                 id: null,
+                ids: [],
 
                 apiData: {
                     name: null,
@@ -614,20 +636,21 @@
                 //locations是v-for里面的也是datas里面的值
                 console.log()
             },
-            deleteProject(id) {
+
+            deleteApi(id) {
                 console.log(id)
                 if (typeof id === "number") {
-                    this.apiData.ids.push(id);
+                    this.ids.push(id);
                 }
                 let postData = {
-                    ids: this.apiData.ids
+                    ids: this.ids
                 };
                 this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    deleteProjectInfo(postData).then(res => {
+                    deleteApiInfo(postData).then(res => {
                         let code = res.data.code;
                         if (code === 200) {
                             this.reload()
@@ -644,7 +667,7 @@
                     });
                 });
             },
-            catProject(id) {
+            catApi(id) {
                 this.title = '编辑';
                 this.ApiDialogVisible = true;
                 this.apiData.id = id;
@@ -652,7 +675,7 @@
                     "id": id
                 };
 
-                catProjectDetailInfo(postData).then(res => {
+                catApiDetailInfo(postData).then(res => {
                     let code = res.data.code;
                     // let message = res.data.message;
                     let resData = res.data.data[0];
@@ -680,7 +703,7 @@
                 })
             },
 
-            editProject() {
+            editApi() {
                 let postData = {
                     id: this.apiData.id,
                     name: this.apiData.apiName,
@@ -694,7 +717,7 @@
                     variables: JSON.stringify(this.apiData.variable),
                     desc: this.apiData.desc,
                 };
-                editProjectInfo(postData).then(res => {
+                editApiInfo(postData).then(res => {
                     let code = res.data.code;
                     let message = res.data.message;
                     if (code === 200) {
@@ -716,19 +739,22 @@
             },
 
 
-            getListProject() {
+            ListApi() {
                 let postData = {
-                    kw: this.kw,
+                    totalCount: this.totalPage,
+                    pageSize: this.pageSize,
+                    currentPage: this.currentPage,
+                    project_id: this.apiData.project_id,
+                    module_id: this.apiData.module_id,
                     sort: [{"direct": "DESC", "field": "created_time"}]
-
                 };
-                listProjectInfo(postData).then(res => {
+                listApiInfo(postData).then(res => {
                     let code = res.data.code;
                     let rsData = res.data.data
                     if (code === 200) {
                         console.log(rsData);
                         this.totalPage = res.data.totalCount;
-                        this.apiData.projectList = rsData;
+                        this.apiList = rsData;
 
                     }
                 })
@@ -789,7 +815,7 @@
             handleSelectionChange(val) {
                 this.multipleSelection = val;
                 this.multipleSelection.map((item) => {
-                    this.apiData.ids.push(item.id)
+                    this.ids.push(item.id)
                 });
             },
 
@@ -897,7 +923,7 @@
 
         },
         created() {
-            this.getListProject();
+            this.ListApi();
         },
 
 
