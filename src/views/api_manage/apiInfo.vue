@@ -96,6 +96,17 @@
                     </el-table-column>
                 </el-table>
             </el-tab-pane>
+             <div class="block">
+            <el-pagination
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="currentPage"
+                    :page-sizes=pageSizes
+                    :page-size=pageSize
+                    layout="total, sizes, prev, pager, next, jumper"
+                    :total=totalPage>
+            </el-pagination>
+        </div>
 
             <el-tab-pane label="接口配置" name="second">
 
@@ -410,17 +421,6 @@
             </el-tab-pane>
 
         </el-tabs>
-        <div class="block">
-            <el-pagination
-                    @size-change="handleSizeChange"
-                    @current-change="handleCurrentChange"
-                    :current-page="currentPage"
-                    :page-sizes=pageSizes
-                    :page-size=pageSize
-                    layout="total, sizes, prev, pager, next, jumper"
-                    :total=totalPage>
-            </el-pagination>
-        </div>
 
     </div>
 </template>
