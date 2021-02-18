@@ -95,18 +95,19 @@
                         </template>
                     </el-table-column>
                 </el-table>
+                <div class="block">
+                    <el-pagination
+                            @size-change="handleSizeChange"
+                            @current-change="handleCurrentChange"
+                            :current-page="currentPage"
+                            :page-sizes=pageSizes
+                            :page-size=pageSize
+                            layout="total, sizes, prev, pager, next, jumper"
+                            :total=totalPage>
+                    </el-pagination>
+                </div>
             </el-tab-pane>
-             <div class="block">
-            <el-pagination
-                    @size-change="handleSizeChange"
-                    @current-change="handleCurrentChange"
-                    :current-page="currentPage"
-                    :page-sizes=pageSizes
-                    :page-size=pageSize
-                    layout="total, sizes, prev, pager, next, jumper"
-                    :total=totalPage>
-            </el-pagination>
-        </div>
+
 
             <el-tab-pane label="接口配置" name="second">
 
