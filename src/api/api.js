@@ -24,5 +24,8 @@ export const deleteApiInfo = function (data) {
     return postRequest('DeleteApi', data)
 };
 
+export const runApiInfo = function (data) {
+    return postRequest('RunApi', data)
+};
 
 

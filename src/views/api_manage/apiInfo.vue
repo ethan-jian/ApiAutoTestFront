@@ -204,10 +204,11 @@
                                                    :label="item">
                                         </el-option>
                                     </el-select>
-                                    <el-button slot="suffix" type="primary" size="medium">
+                                    <el-button slot="suffix" type="primary" size="medium" @click="addApiOrRunApi(true)">
                                         Send
                                     </el-button>
-                                    <el-button slot="suffix" type="primary" size="medium" @click="addApi">
+                                    <el-button slot="suffix" type="primary" size="medium"
+                                               @click="addApiOrRunApi(false)">
                                         Save
                                     </el-button>
 
@@ -434,7 +435,8 @@
         deleteApiInfo,
         editApiInfo,
         listApiInfo,
-        listProjectModuleInfo
+        listProjectModuleInfo,
+        runApiInfo,
     } from "../../api/api";
     import {
         catProjectModuleInfo,
@@ -520,7 +522,7 @@
         },
         methods: {
 
-            addApi() {
+            addApiOrRunApi(runApi) {
                 let postData = {
                     name: this.apiData.name,
                     desc: this.apiData.desc,
@@ -542,24 +544,44 @@
 
                 };
                 addApiInfo(postData).then(res => {
-                    console.log(this.apiData)
-                    let code = res.data.code;
-                    let message = res.data.message;
-                    if (code === 200) {
-                        this.ApiDialogVisible = false;
-                        this.reload()
-                        this.resetForm('apiData')
-                        this.$notify({
-                            title: message,
-                            type: "success"
-                        })
-                    } else {
-                        this.$notify({
-                            title: message,
-                            type: "error"
-                        })
-                    }
+                        let code = res.data.code;
+                        let message = res.data.message;
+                        if (code === 200) {
+                            if (runApi) {
+                                this.runApi(res.data.data.id);
+                            } else {
+                                this.reload();
+                                this.$notify({
+                                        title: message,
+                                        type: "success"
+                                    }
+                                );
+                            }
 
+                        } else {
+                            this.$notify({
+                                title: message,
+                                type: "error"
+                            })
+                        }
+
+                    }
+                )
+            },
+
+            runApi(id) {
+                let postData = {
+                    apiId: id,
+                };
+                runApiInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let rsData = res.data.data
+                    if (code === 200) {
+                        console.log(rsData);
+                        // this.totalPage = res.data.totalCount;
+                        // this.apiList = rsData;
+
+                    }
                 })
             },
 
@@ -753,13 +775,13 @@
                     let code = res.data.code;
                     let rsData = res.data.data
                     if (code === 200) {
-                        console.log(rsData);
                         this.totalPage = res.data.totalCount;
                         this.apiList = rsData;
 
                     }
                 })
             },
+
 
             getProjectModule() {
                 let postData = {
