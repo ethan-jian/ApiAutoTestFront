@@ -204,11 +204,11 @@
                                                    :label="item">
                                         </el-option>
                                     </el-select>
-                                    <el-button slot="suffix" type="primary" size="medium" @click="addApiOrRunApi(true)">
+                                    <el-button slot="suffix" type="primary" size="medium" @click="runApi">
                                         Send
                                     </el-button>
                                     <el-button slot="suffix" type="primary" size="medium"
-                                               @click="addApiOrRunApi(false)">
+                                               @click="addApi">
                                         Save
                                     </el-button>
 
@@ -522,41 +522,37 @@
         },
         methods: {
 
-            addApiOrRunApi(runApi) {
+            addApi() {
                 let postData = {
                     name: this.apiData.name,
                     desc: this.apiData.desc,
-                    body_type: this.apiData.body_type, //参数选择类型
-                    base_url: this.apiData.base_url,      //基础url,序号对应项目的环境
-                    up_func: this.apiData.up_func,       //接口执行前的函数
-                    down_func: this.apiData.down_func,      //接口执行后的函数
+                    bodyType: this.apiData.body_type, //参数选择类型
+                    baseUrl: this.apiData.base_url,      //基础url,序号对应项目的环境
+                    upFunc: this.apiData.up_func,       //接口执行前的函数
+                    downFunc: this.apiData.down_func,      //接口执行后的函数
                     method: this.apiData.method,       //请求方式
-                    body_form_data: this.apiData.body_form_data,     //form-data形式的参数
-                    body_json: this.apiData.body_json,  //json形式的参数
-                    url_param: this.apiData.url_param,          //url上面所带的参数
+                    bodyFormData: this.apiData.body_form_data,     //form-data形式的参数
+                    bodyJson: this.apiData.body_json,  //json形式的参数
+                    urlParam: this.apiData.url_param,          //url上面所带的参数
                     url: this.apiData.url,  //接口地址
                     skip: this.apiData.skip, //跳过判断
                     extract: this.apiData.extract, //提取信息
                     validate: this.apiData.validate, //断言信息
                     header: this.apiData.header,   //头部信息
-                    module_id: this.apiData.module_id,  //所属的接口模块id
-                    project_id: this.apiData.project_id,  //所属的项目id
+                    moduleId: this.apiData.module_id,  //所属的接口模块id
+                    projectId: this.apiData.project_id,  //所属的项目id
 
                 };
                 addApiInfo(postData).then(res => {
                         let code = res.data.code;
                         let message = res.data.message;
                         if (code === 200) {
-                            if (runApi) {
-                                this.runApi(res.data.data.id);
-                            } else {
-                                this.reload();
-                                this.$notify({
-                                        title: message,
-                                        type: "success"
-                                    }
-                                );
-                            }
+                            this.reload();
+                            this.$notify({
+                                    title: message,
+                                    type: "success"
+                                }
+                            );
 
                         } else {
                             this.$notify({
@@ -569,9 +565,25 @@
                 )
             },
 
-            runApi(id) {
+            runApi() {
                 let postData = {
-                    apiId: id,
+                    name: this.apiData.name,
+                    desc: this.apiData.desc,
+                    bodyType: this.apiData.body_type, //参数选择类型
+                    baseUrl: this.apiData.base_url,      //基础url,序号对应项目的环境
+                    upFunc: this.apiData.up_func,       //接口执行前的函数
+                    downFunc: this.apiData.down_func,      //接口执行后的函数
+                    method: this.apiData.method,       //请求方式
+                    bodyFormData: this.apiData.body_form_data,     //form-data形式的参数
+                    bodyJson: this.apiData.body_json,  //json形式的参数
+                    urlParam: this.apiData.url_param,          //url上面所带的参数
+                    url: this.apiData.url,  //接口地址
+                    skip: this.apiData.skip, //跳过判断
+                    extract: this.apiData.extract, //提取信息
+                    validate: this.apiData.validate, //断言信息
+                    header: this.apiData.header,   //头部信息
+                    moduleId: this.apiData.module_id,  //所属的接口模块id
+                    projectId: this.apiData.project_id,  //所属的项目id
                 };
                 runApiInfo(postData).then(res => {
                     let code = res.data.code;
