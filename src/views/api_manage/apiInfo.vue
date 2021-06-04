@@ -109,7 +109,7 @@
             </el-tab-pane>
 
 
-            <el-tab-pane label="接口配置" name="second">
+            <el-tab-pane label="接口配置" name="second" v-loading="loading">
 
                 <el-form ref="form" :model="form" label-width="80px" size="small" style="float: left">
                     <el-row>
@@ -424,6 +424,9 @@
 
         </el-tabs>
 
+        <result ref="resultFunc">
+        </result>
+
     </div>
 </template>
 
@@ -443,6 +446,7 @@
         listProjectInfo,
     } from "../../api/project";
 
+    import result from "./result.vue"
 
     export default {
         inject: ['reload'],
@@ -450,9 +454,11 @@
 
         components: {
             editor: require('vue2-ace-editor'),
+            result: result,
         },
         data() {
             return {
+                loading: false,
                 radio: 'Form-data',
                 activeName1: 'first',
                 activeName11: 'first',
@@ -585,14 +591,16 @@
                     moduleId: this.apiData.module_id,  //所属的接口模块id
                     projectId: this.apiData.project_id,  //所属的项目id
                 };
+                this.loading = true;
                 runApiInfo(postData).then(res => {
                     let code = res.data.code;
                     let rsData = res.data.data
                     if (code === 200) {
                         console.log(rsData);
+                        this.$refs.resultFunc.showApiTestResult(rsData)
+                        this.loading = false;
                         // this.totalPage = res.data.totalCount;
                         // this.apiList = rsData;
-
                     }
                 })
             },

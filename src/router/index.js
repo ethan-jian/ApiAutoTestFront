@@ -41,6 +41,11 @@ const routes = [
                 name: 'servieConfig',
                 component: () => import('../views/api_manage/servieConfig'),
             },
+            {
+                path: 'case',
+                name: 'case',
+                component: () => import('../views/api_manage/case'),
+            },
 
         ]
     },
