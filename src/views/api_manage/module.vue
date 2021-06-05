@@ -261,7 +261,7 @@
                 console.log()
             },
             deleteModule(id) {
-                console.log(id)
+                this.moduleData.ids = []
                 if (typeof id === "number") {
                     this.moduleData.ids.push(id);
                 }

@@ -5,7 +5,7 @@
                 <div>
                     <el-row style="float: left">
                         <el-col :span="8">
-                            <el-select v-model="apiData.project_id" placeholder="请选择项目" @focus="listProject()"
+                            <el-select v-model="apiData.projectId" placeholder="请选择项目" @focus="listProject()"
                                        @change="listProject()">
                                 <el-option v-for="item in projectList"
                                            :key="item.id"
@@ -16,8 +16,9 @@
                             </el-select>
                         </el-col>
                         <el-col :span="8">
-                            <el-select v-model="apiData.module_id" placeholder="请选择模块"
-                                       @focus="listProjectModule(apiData.project_id)">
+                            <el-select v-model="apiData.moduleId" placeholder="请选择模块"
+                                       @focus="listProjectModule(apiData.projectId)"
+                                       @change="listProjectModule(apiData.projectId)">
                                 <el-option v-for="item in moduleList"
                                            :key="item.id"
                                            :value="item.id"
@@ -90,7 +91,7 @@
                             width="120">
                         <template slot-scope="scope">
                             <!--                    <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>-->
-                            <el-button @click="editApi(scope.row.id)" type="text" size="small">编辑</el-button>
+                            <el-button @click="catApi(scope.row.id)" type="text" size="small">编辑</el-button>
                             <el-button @click="deleteApi(scope.row.id)" type="text" size="small">删除</el-button>
                         </template>
                     </el-table-column>
@@ -108,19 +109,19 @@
                 </div>
             </el-tab-pane>
 
-
             <el-tab-pane label="接口配置" name="second" v-loading="loading">
 
-                <el-form ref="form" :model="form" label-width="80px" size="small" style="float: left">
+                <el-form :model="apiData" :rules="rules" ref="apiData" label-width="80px" size="small"
+                         style="float: left">
                     <el-row>
                         <el-col :span="6">
-                            <el-form-item label="接口名称">
+                            <el-form-item label="接口名称" prop="name">
                                 <el-input v-model="apiData.name"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :span="6">
-                            <el-form-item label="选择项目">
-                                <el-select v-model="apiData.project_id" placeholder="请选择项目" @focus="listProject()"
+                            <el-form-item label="选择项目" prop="projectId">
+                                <el-select v-model="apiData.projectId" placeholder="请选择项目" @focus="listProject()"
                                            @change="listProject()">
                                     <el-option v-for="item in projectList"
                                                :key="item.id"
@@ -132,9 +133,10 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="6">
-                            <el-form-item label="选择模块">
-                                <el-select v-model="apiData.module_id" placeholder="请选择模块"
-                                           @focus="listProjectModule(apiData.project_id)">
+                            <el-form-item label="选择模块" prop="moduleId">
+                                <el-select v-model="apiData.moduleId" placeholder="请选择模块"
+                                           @focus="listProjectModule(apiData.projectId)"
+                                           @change="listProjectModule(apiData.projectId)">
                                     <el-option v-for="item in moduleList"
                                                :key="item.id"
                                                :value="item.id"
@@ -144,10 +146,10 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="6">
-                            <el-form-item label="基础url">
+                            <el-form-item label="基础url" prop="baseUrl">
                                 <el-input
-                                        placeholder="base_url"
-                                        v-model="apiData.base_url"
+                                        placeholder="baseUrl"
+                                        v-model="apiData.baseUrl"
                                         :disabled="true">
                                 </el-input>
                                 <!--                                <el-select v-model="apiData.base_url" placeholder="请选择活动区域">-->
@@ -188,11 +190,14 @@
                     <el-form ref="form" :model="form" label-width="100%">
                         <el-row>
                             <el-col :span="24">
+
                                 <el-input placeholder="Enter request URL"
                                           v-model="apiData.url"
                                           style="width: 100%;margin-right: 5px"
                                           size="medium"
+                                          prop="url"
                                 >
+
                                     <el-select v-model="apiData.method"
                                                size="medium"
                                                style="width: 100px"
@@ -208,7 +213,7 @@
                                         Send
                                     </el-button>
                                     <el-button slot="suffix" type="primary" size="medium"
-                                               @click="addApi">
+                                               @click="submitForm('apiData')">
                                         Save
                                     </el-button>
 
@@ -269,7 +274,7 @@
                                                        size="small">
                                                 添加
                                             </el-button>
-                                            <el-form v-for="(item, index) in apiData.body_form_data"
+                                            <el-form v-for="(item, index) in apiData.bodyFormData"
                                                      :key="item.pass">
                                                 <el-form-item>
                                                     <el-row>
@@ -335,7 +340,7 @@
                                                                 <editor
                                                                         v-contextmenu:contextmenu
                                                                         style="font-size: 15px"
-                                                                        v-model="apiData.body_json"
+                                                                        v-model="apiData.bodyJson"
                                                                         @init="editorInit"
                                                                         lang="json"
                                                                         theme="chrome"
@@ -394,7 +399,22 @@
                                                             <el-input clearable v-model="item.key"
                                                                       size="small" placeholder="key"></el-input>
                                                         </el-col>
-                                                        <el-col :span="14">
+
+                                                        <el-col :span="2">
+                                                            <el-select v-model="item.validateType"
+                                                                       size="small"
+                                                                       style="width: 100px"
+                                                                       placeholder="选择">
+                                                                <el-option
+                                                                        v-for="item in validateTypes"
+                                                                        :key="item"
+                                                                        :value="item"
+                                                                        :label="item">
+                                                                </el-option>
+                                                            </el-select>
+                                                        </el-col>
+
+                                                        <el-col :span="12">
                                                             <el-input clearable v-model="item.value"
                                                                       size="small" placeholder="value"></el-input>
                                                         </el-col>
@@ -468,6 +488,10 @@
                 methodList: ['POST', 'GET', 'PUT', 'DELETE'],
                 bodyFormDataTypes: ['string', 'file'],
                 bodyFormDataType: 'string',
+                validateTypes: ['equals', 'less_than', 'less_than_or_equals', 'greater_than', 'greater_than_or_equals',
+                    'not_equals', 'string_equals', 'length_equals', 'length_greater_than', 'count_greater_than_or_equals'
+                    , 'length_less_than', 'length_less_than_or_equals'],
+                validateType: 'equals',
                 kw: '',
                 sort: [
                     {
@@ -490,36 +514,47 @@
                 apiData: {
                     name: null,
                     desc: null,
-                    body_type: 'json', //参数选择类型
-                    base_url: null,      //基础url,序号对应项目的环境
-                    up_func: null,       //接口执行前的函数
-                    down_func: '',      //接口执行后的函数
+                    bodyType: 'json', //参数选择类型
+                    baseUrl: null,      //基础url,序号对应项目的环境
+                    upFunc: null,       //接口执行前的函数
+                    downFunc: '',      //接口执行后的函数
                     method: 'POST',       //请求方式
-                    body_form_data: [],     //form-data形式的参数
-                    body_json: null,  //json形式的参数
-                    url_param: [],          //url上面所带的参数
+                    bodyFormData: [],     //form-data形式的参数
+                    bodyJson: null,  //json形式的参数
+                    urlParam: [],          //url上面所带的参数
                     url: null,  //接口地址
                     skip: false, //跳过判断
                     extract: [], //提取信息
                     validate: [], //断言信息
-                    header: [],   //头部信息
-                    module_id: null,  //所属的接口模块id
-                    project_id: null,  //所属的项目id
+                    header: Array(),   //头部信息
+                    moduleId: null,  //所属的接口模块id
+                    projectId: null,  //所属的项目id
 
                 },
 
                 rules: {
-                    apiName: [
+                    name: [
                         {required: true, message: '请输入接口名称', trigger: 'blur'},
                         {min: 3, max: 25, message: '长度在 3 到 25 个字符', trigger: 'blur'}
                     ],
+
+                    projectId: [
+                        {required: true, message: '请选择项目名称', trigger: 'change'}
+                    ],
+
+                    moduleId: [
+                        {required: true, message: '请选模块名称', trigger: 'change'}
+                    ],
+
+                    baseUrl: [
+                        {required: true, message: '基础url不能为空', trigger: 'change'}
+                    ],
+
                     url: [
                         {required: true, message: '请输入接口地址', trigger: 'blur'},
                         {min: 3, max: 25, message: '长度在 3 到 25 个字符', trigger: 'blur'}
                     ],
-                    projectId: [
-                        {required: true, message: '请选择项目名称', trigger: 'change'}
-                    ],
+
                     desc: [
                         {required: false, message: '请填写项目描述', trigger: 'blur'}
                     ]
@@ -528,26 +563,37 @@
         },
         methods: {
 
+            submitForm(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid && this.title === '新增') {
+                        this.addApi();
+                    } else if (valid && this.title === '编辑') {
+                        this.editApi();
+                    } else {
+                        return false;
+                    }
+                });
+            },
+
             addApi() {
                 let postData = {
                     name: this.apiData.name,
                     desc: this.apiData.desc,
-                    bodyType: this.apiData.body_type, //参数选择类型
-                    baseUrl: this.apiData.base_url,      //基础url,序号对应项目的环境
-                    upFunc: this.apiData.up_func,       //接口执行前的函数
-                    downFunc: this.apiData.down_func,      //接口执行后的函数
+                    body_type: this.apiData.bodyType, //参数选择类型
+                    base_url: this.apiData.baseUrl,      //基础url,序号对应项目的环境
+                    up_func: this.apiData.upFunc,       //接口执行前的函数
+                    down_func: this.apiData.downFunc,      //接口执行后的函数
                     method: this.apiData.method,       //请求方式
-                    bodyFormData: this.apiData.body_form_data,     //form-data形式的参数
-                    bodyJson: this.apiData.body_json,  //json形式的参数
-                    urlParam: this.apiData.url_param,          //url上面所带的参数
+                    body_form_data: this.apiData.bodyFormData,     //form-data形式的参数
+                    body_json: this.apiData.bodyJson,  //json形式的参数
+                    url_param: this.apiData.urlParam,          //url上面所带的参数
                     url: this.apiData.url,  //接口地址
                     skip: this.apiData.skip, //跳过判断
                     extract: this.apiData.extract, //提取信息
                     validate: this.apiData.validate, //断言信息
                     header: this.apiData.header,   //头部信息
-                    moduleId: this.apiData.module_id,  //所属的接口模块id
-                    projectId: this.apiData.project_id,  //所属的项目id
-
+                    module_id: this.apiData.moduleId,  //所属的接口模块id
+                    project_id: this.apiData.projectId,  //所属的项目id
                 };
                 addApiInfo(postData).then(res => {
                         let code = res.data.code;
@@ -571,38 +617,69 @@
                 )
             },
 
-            runApi() {
+            editApi() {
                 let postData = {
+                    id: this.id,
                     name: this.apiData.name,
                     desc: this.apiData.desc,
-                    bodyType: this.apiData.body_type, //参数选择类型
-                    baseUrl: this.apiData.base_url,      //基础url,序号对应项目的环境
-                    upFunc: this.apiData.up_func,       //接口执行前的函数
-                    downFunc: this.apiData.down_func,      //接口执行后的函数
+                    body_type: this.apiData.bodyType, //参数选择类型
+                    base_url: this.apiData.baseUrl,      //基础url,序号对应项目的环境
+                    up_func: this.apiData.upFunc,       //接口执行前的函数
+                    down_func: this.apiData.downFunc,      //接口执行后的函数
                     method: this.apiData.method,       //请求方式
-                    bodyFormData: this.apiData.body_form_data,     //form-data形式的参数
-                    bodyJson: this.apiData.body_json,  //json形式的参数
-                    urlParam: this.apiData.url_param,          //url上面所带的参数
+                    body_form_data: this.apiData.bodyFormData,     //form-data形式的参数
+                    body_json: this.apiData.bodyJson,  //json形式的参数
+                    url_param: this.apiData.urlParam,          //url上面所带的参数
                     url: this.apiData.url,  //接口地址
                     skip: this.apiData.skip, //跳过判断
                     extract: this.apiData.extract, //提取信息
                     validate: this.apiData.validate, //断言信息
                     header: this.apiData.header,   //头部信息
-                    moduleId: this.apiData.module_id,  //所属的接口模块id
-                    projectId: this.apiData.project_id,  //所属的项目id
+                    module_id: this.apiData.moduleId,  //所属的接口模块id
+                    project_id: this.apiData.projectId,  //所属的项目id
                 };
-                this.loading = true;
-                runApiInfo(postData).then(res => {
+                editApiInfo(postData).then(res => {
                     let code = res.data.code;
-                    let rsData = res.data.data
+                    let message = res.data.message;
                     if (code === 200) {
-                        console.log(rsData);
-                        this.$refs.resultFunc.showApiTestResult(rsData)
-                        this.loading = false;
-                        // this.totalPage = res.data.totalCount;
-                        // this.apiList = rsData;
+                        this.ApiDialogVisible = false;
+                        this.reload()
+                        this.resetForm('apiData')
+                        this.$notify({
+                            title: message,
+                            type: "success"
+                        })
+                    } else {
+                        this.$notify({
+                            title: message,
+                            type: "error"
+                        })
                     }
+
                 })
+            },
+
+            runApi() {
+                let postData = this.apiData;
+                if (postData.name && postData.projectId && postData.moduleId && postData.url) {
+                    this.loading = true;
+                    runApiInfo(postData).then(res => {
+                        let code = res.data.code;
+                        let rsData = res.data.data
+                        if (code === 200) {
+                            console.log(rsData);
+                            this.$refs.resultFunc.showApiTestResult(rsData)
+                            this.loading = false;
+                            // this.totalPage = res.data.totalCount;
+                            // this.apiList = rsData;
+                        }
+                    })
+                } else {
+                    this.loading = false;
+
+                }
+
+
             },
 
             getBaseUrl(projectId) {
@@ -612,13 +689,13 @@
                     if (projectId === this.projectList[n]['id']) {
                         console.log('environment_type', this.projectList[n]['environment_type'])
                         if (this.projectList[n]['environment_type'] === '1') {
-                            this.apiData.base_url = this.projectList[n]['test_environment']
+                            this.apiData.baseUrl = this.projectList[n]['test_environment']
                         } else if (this.projectList[n]['environment_type'] === '2') {
-                            this.apiData.base_url = this.projectList[n]['dev_environment']
+                            this.apiData.baseUrl = this.projectList[n]['dev_environment']
                         } else if (this.projectList[n]['environment_type'] === '3') {
-                            this.apiData.base_url = this.projectList[n]['online_environment']
+                            this.apiData.baseUrl = this.projectList[n]['online_environment']
                         } else if (this.projectList[n]['environment_type'] === '4') {
-                            this.apiData.base_url = this.projectList[n]['bak_environment']
+                            this.apiData.baseUrl = this.projectList[n]['bak_environment']
                         }
                         break;
                     }
@@ -640,23 +717,6 @@
                 )
             },
 
-            listProject() {
-                let postData = {
-                    kw: this.kw,
-                    sort: this.sort,
-                };
-                listProjectInfo(postData).then(res => {
-                        let code = res.data.code;
-                        let rsData = res.data.data
-                        if (code === 200) {
-                            // this.totalPage = res.data.totalCount;
-                            this.apiData.module_id = null;
-                            this.projectList = rsData;
-                            this.getBaseUrl(this.apiData.project_id);
-                        }
-                    }
-                )
-            },
 
             openAddproject() {
                 this.title = '新增';
@@ -710,77 +770,63 @@
                     });
                 });
             },
+
             catApi(id) {
                 this.title = '编辑';
+                this.activeName1 = 'second';
                 this.ApiDialogVisible = true;
-                this.apiData.id = id;
+                this.id = id;
                 let postData = {
                     "id": id
                 };
 
                 catApiDetailInfo(postData).then(res => {
                     let code = res.data.code;
-                    // let message = res.data.message;
                     let resData = res.data.data[0];
                     if (code === 200) {
-                        this.apiData.apiName = resData.name;
-                        this.apiData.testEnvironment = resData.test_environment;
-                        this.apiData.devEnvironment = resData.dev_environment;
-                        this.apiData.onLineEnvironment = resData.online_environment;
-                        this.apiData.bakEnvironment = resData.bak_environment;
+                        this.apiData.name = resData.name;
                         this.apiData.desc = resData.desc;
-                        this.apiData.environment_type = resData.environment_type;
-                        if (this.apiData.environment_type === '1') {
-                            this.apiData.environment = '测试环境';
-                        } else if (this.apiData.environment_type === '2') {
-                            this.apiData.environment = '开发环境';
-                        } else if (this.apiData.environment_type === '3') {
-                            this.apiData.environment = '线上环境';
-                        } else if (this.apiData.environment_type === '4') {
-                            this.apiData.environment = '备用环境';
+                        this.apiData.bodyType = resData.body_type;
+                        this.apiData.baseUrl = resData.base_url;
+                        this.apiData.upFunc = resData.up_func;
+                        this.apiData.downFunc = resData.down_func;
+                        this.apiData.method = resData.method;
+                        this.apiData.bodyFormData = resData.body_form_data;
+                        this.apiData.bodyJson = resData.body_json;
+                        this.apiData.urlParam = resData.url_param;
+                        this.apiData.url = resData.url;
+                        if (resData.skip === 'True') {
+                            this.apiData.skip = 'true';
+                        } else {
+                            this.apiData.skip = 'false'
                         }
-                        this.getAllUser();
-                        this.apiData.testUserId = resData.user_id_id;
-                        this.apiData.variable = JSON.parse(resData.variables);
+                        this.apiData.extract = resData.extract;
+                        this.apiData.validate = resData.validate;
+                        this.apiData.header = resData.header;
+                        this.listProject();
+                        this.apiData.projectId = resData.project_id;
+                        this.listProjectModule(this.apiData.projectId);
+                        this.apiData.moduleId = resData.module_id;
                     }
                 })
             },
 
-            editApi() {
+            listProject() {
+                this.apiData.moduleId = null;
                 let postData = {
-                    id: this.apiData.id,
-                    name: this.apiData.apiName,
-                    user_id_id: this.apiData.testUserId,
-                    // environment: this.apiData.environment,
-                    test_environment: this.apiData.testEnvironment,
-                    dev_environment: this.apiData.devEnvironment,
-                    online_environment: this.apiData.onLineEnvironment,
-                    bak_environment: this.apiData.bakEnvironment,
-                    environment_type: this.apiData.environment_type,
-                    variables: JSON.stringify(this.apiData.variable),
-                    desc: this.apiData.desc,
+                    kw: this.kw,
+                    sort: this.sort,
                 };
-                editApiInfo(postData).then(res => {
-                    let code = res.data.code;
-                    let message = res.data.message;
-                    if (code === 200) {
-                        this.ApiDialogVisible = false;
-                        this.reload()
-                        this.resetForm('apiData')
-                        this.$notify({
-                            title: message,
-                            type: "success"
-                        })
-                    } else {
-                        this.$notify({
-                            title: message,
-                            type: "error"
-                        })
+                listProjectInfo(postData).then(res => {
+                        let code = res.data.code;
+                        let rsData = res.data.data
+                        if (code === 200) {
+                            this.projectList = rsData;
+                            this.getBaseUrl(this.apiData.projectId);
+                        }
                     }
-
-                })
+                )
             },
-
 
             ListApi() {
                 let postData = {
@@ -867,18 +913,6 @@
 
             },
 
-            submitForm(formName) {
-                this.$refs[formName].validate((valid) => {
-                    if (valid && this.title === '新增') {
-                        this.addApi();
-                    } else if (valid && this.title === '编辑') {
-                        this.editProject();
-                    } else {
-                        return false;
-                    }
-                });
-            },
-
             resetForm(formName) {
                 this.$refs[formName].resetFields();
             },
@@ -889,14 +923,15 @@
             },
 
             addRow(type) {
+
                 if (type === 'Heard') {
-                    console.log(this.apiData.header)
+                    console.log("数据"+this.apiData.header)
                     this.apiData.header.push({key: null, value: null, remark: null});
                 } else if (type === 'Form-data') {
-                    this.apiData.body_form_data.push({key: null, value: null, bodyFormDataType: null, remark: null});
-                    console.log(this.apiData.body_form_data)
+                    this.apiData.bodyFormData.push({key: null, value: null, bodyFormDataType: null, remark: null});
+                    console.log(this.apiData.bodyFormData)
                 } else if (type === 'Text') {
-                    this.apiData.body_form_data.push({key: null, value: null, remark: null});
+                    this.apiData.bodyFormData.push({key: null, value: null, remark: null});
                 } else if (type === 'Extract') {
                     this.apiData.extract.push({key: null, value: null, remark: null});
                 } else if (type === 'Validate') {
@@ -909,9 +944,9 @@
                 if (type === 'Heard') {
                     this.apiData.header.splice(index, 1);
                 } else if (type === 'Form-data') {
-                    this.apiData.body_form_data.splice(index, 1);
+                    this.apiData.bodyFormData.splice(index, 1);
                 } else if (type === 'Text') {
-                    this.apiData.body_form_data.splice(index, 1);
+                    this.apiData.bodyFormData.splice(index, 1);
                 } else if (type === 'Extract') {
                     this.apiData.extract.splice(index, 1);
                 } else if (type === 'Validate') {

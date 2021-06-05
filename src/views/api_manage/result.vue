@@ -34,6 +34,13 @@
                                  boxed
                     ></json-viewer>
                 </el-tab-pane>
+                <el-tab-pane label="校验信息" style="text-align: left">
+                    <json-viewer :value="apiTestResultRecords[0].meta_datas.validators"
+                                 :expand-depth=10
+                                 copyable
+                                 boxed
+                    ></json-viewer>
+                </el-tab-pane>
                 <el-tab-pane label="错误信息" style="text-align: left">
                     <json-viewer :value="apiTestResultRecords[0].attachment"
                                  :expand-depth=10
