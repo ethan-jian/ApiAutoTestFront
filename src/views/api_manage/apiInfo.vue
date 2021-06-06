@@ -519,13 +519,13 @@
                     upFunc: null,       //接口执行前的函数
                     downFunc: '',      //接口执行后的函数
                     method: 'POST',       //请求方式
-                    bodyFormData: [],     //form-data形式的参数
+                    bodyFormData: Array(),     //form-data形式的参数
                     bodyJson: null,  //json形式的参数
-                    urlParam: [],          //url上面所带的参数
+                    urlParam: Array(),          //url上面所带的参数
                     url: null,  //接口地址
                     skip: false, //跳过判断
-                    extract: [], //提取信息
-                    validate: [], //断言信息
+                    extract: Array(), //提取信息
+                    validate: Array(), //断言信息
                     header: Array(),   //头部信息
                     moduleId: null,  //所属的接口模块id
                     projectId: null,  //所属的项目id
@@ -584,14 +584,14 @@
                     up_func: this.apiData.upFunc,       //接口执行前的函数
                     down_func: this.apiData.downFunc,      //接口执行后的函数
                     method: this.apiData.method,       //请求方式
-                    body_form_data: this.apiData.bodyFormData,     //form-data形式的参数
+                    body_form_data: JSON.stringify(this.apiData.bodyFormData),     //form-data形式的参数
                     body_json: this.apiData.bodyJson,  //json形式的参数
-                    url_param: this.apiData.urlParam,          //url上面所带的参数
+                    url_param: JSON.stringify(this.apiData.urlParam),          //url上面所带的参数
                     url: this.apiData.url,  //接口地址
                     skip: this.apiData.skip, //跳过判断
-                    extract: this.apiData.extract, //提取信息
-                    validate: this.apiData.validate, //断言信息
-                    header: this.apiData.header,   //头部信息
+                    extract: JSON.stringify(this.apiData.extract), //提取信息
+                    validate: JSON.stringify(this.apiData.validate), //断言信息
+                    header: JSON.stringify(this.apiData.header),   //头部信息
                     module_id: this.apiData.moduleId,  //所属的接口模块id
                     project_id: this.apiData.projectId,  //所属的项目id
                 };
@@ -627,14 +627,14 @@
                     up_func: this.apiData.upFunc,       //接口执行前的函数
                     down_func: this.apiData.downFunc,      //接口执行后的函数
                     method: this.apiData.method,       //请求方式
-                    body_form_data: this.apiData.bodyFormData,     //form-data形式的参数
+                    body_form_data: JSON.stringify(this.apiData.bodyFormData),     //form-data形式的参数
                     body_json: this.apiData.bodyJson,  //json形式的参数
-                    url_param: this.apiData.urlParam,          //url上面所带的参数
+                    url_param: JSON.stringify(this.apiData.urlParam),          //url上面所带的参数
                     url: this.apiData.url,  //接口地址
                     skip: this.apiData.skip, //跳过判断
-                    extract: this.apiData.extract, //提取信息
-                    validate: this.apiData.validate, //断言信息
-                    header: this.apiData.header,   //头部信息
+                    extract: JSON.stringify(this.apiData.extract), //提取信息
+                    validate: JSON.stringify(this.apiData.validate), //断言信息
+                    header: JSON.stringify(this.apiData.header),   //头部信息
                     module_id: this.apiData.moduleId,  //所属的接口模块id
                     project_id: this.apiData.projectId,  //所属的项目id
                 };
@@ -779,7 +779,6 @@
                 let postData = {
                     "id": id
                 };
-
                 catApiDetailInfo(postData).then(res => {
                     let code = res.data.code;
                     let resData = res.data.data[0];
@@ -791,24 +790,26 @@
                         this.apiData.upFunc = resData.up_func;
                         this.apiData.downFunc = resData.down_func;
                         this.apiData.method = resData.method;
-                        this.apiData.bodyFormData = resData.body_form_data;
+                        this.apiData.bodyFormData = JSON.parse(resData.body_form_data);
                         this.apiData.bodyJson = resData.body_json;
-                        this.apiData.urlParam = resData.url_param;
+                        this.apiData.urlParam = JSON.parse(resData.url_param);
                         this.apiData.url = resData.url;
                         if (resData.skip === 'True') {
                             this.apiData.skip = 'true';
                         } else {
                             this.apiData.skip = 'false'
                         }
-                        this.apiData.extract = resData.extract;
-                        this.apiData.validate = resData.validate;
-                        this.apiData.header = resData.header;
+
+                        this.apiData.extract = JSON.parse(resData.extract);
+                        this.apiData.validate = JSON.parse(resData.validate);
+                        this.apiData.header = JSON.parse(resData.header);
                         this.listProject();
                         this.apiData.projectId = resData.project_id;
                         this.listProjectModule(this.apiData.projectId);
                         this.apiData.moduleId = resData.module_id;
                     }
-                })
+                });
+
             },
 
             listProject() {
@@ -925,11 +926,9 @@
             addRow(type) {
 
                 if (type === 'Heard') {
-                    console.log("数据"+this.apiData.header)
                     this.apiData.header.push({key: null, value: null, remark: null});
                 } else if (type === 'Form-data') {
                     this.apiData.bodyFormData.push({key: null, value: null, bodyFormDataType: null, remark: null});
-                    console.log(this.apiData.bodyFormData)
                 } else if (type === 'Text') {
                     this.apiData.bodyFormData.push({key: null, value: null, remark: null});
                 } else if (type === 'Extract') {
@@ -937,7 +936,6 @@
                 } else if (type === 'Validate') {
                     this.apiData.validate.push({key: null, value: null, remark: null});
                 }
-
             },
 
             delRow(type, index) {
@@ -1002,6 +1000,12 @@
         },
         created() {
             this.ListApi();
+        },
+
+        watch: {
+            "activeName1": function () {
+                Object.assign(this.$data.apiData, this.$options.data().apiData);
+            }
         },
 
 
