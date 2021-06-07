@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-tabs v-model="activeName1" type="card">
+        <el-tabs v-model="activeName1" @tab-click="initApidata(0)" type="card">
             <el-tab-pane label="接口信息" name="first">
                 <div>
                     <el-row style="float: left">
@@ -563,6 +563,14 @@
         },
         methods: {
 
+            //初始化apiData
+            initApidata(index) {
+                if (index === 0) {
+                    this.title = '新增';
+                    Object.assign(this.$data.apiData, this.$options.data().apiData);
+                }
+
+            },
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid && this.title === '新增') {
@@ -1002,11 +1010,11 @@
             this.ListApi();
         },
 
-        watch: {
-            "activeName1": function () {
-                Object.assign(this.$data.apiData, this.$options.data().apiData);
-            }
-        },
+        // watch: {
+        //     "activeName1": function () {
+        //         Object.assign(this.$data.apiData, this.$options.data().apiData);
+        //     }
+        // },
 
 
     }
