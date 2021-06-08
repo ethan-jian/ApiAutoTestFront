@@ -11,18 +11,21 @@
         <div style="position: absolute;
         left: 430px;
 ">
-            <el-button type="primary" @click="getListModule">查询</el-button>
+            <el-button type="primary" @click="getListCaseSet">查询</el-button>
             <el-button @click="resetInput()">重置</el-button>
         </div>
+        <el-button type="primary" icon="el-icon-circle-plus-outline" v-if="hasSelect" @click="addCase">测试用例</el-button>
         <el-table
                 ref="multipleTable"
                 :data="caseSetData.caseSetList"
                 tooltip-effect="dark"
                 style="width: 100%"
+                highlight-current-row
+                @cell-click="handle"
                 @selection-change="handleSelectionChange">
             <el-table-column
                     type="selection"
-                    width="55">
+                    width="50">
             </el-table-column>
             <el-table-column
                     prop="name"
@@ -34,7 +37,7 @@
                     label="项目"
                     width="120">
             </el-table-column>
-             <el-table-column
+            <el-table-column
                     prop="desc"
                     label="描述"
                     width="120">
@@ -51,17 +54,30 @@
             </el-table-column>
             <el-table-column
                     label="操作"
-                    width="120">
+                    width="200">
                 <template slot-scope="scope">
-                    <!--                    <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>-->
-                    <el-button @click="catCaseSet(scope.row.id)" type="text" size="small">编辑</el-button>
-                    <el-button @click="deleteCaseSet(scope.row.id)" type="text" size="small">删除</el-button>
+                    <el-row>
+                        <el-col :span="8">
+                            <el-button @click="catCaseSet(scope.row.id)" type="primary" size="small">编辑
+                            </el-button>
+                        </el-col>
+                        <el-col :span="8">
+                            <el-button @click="deleteCaseSet(scope.row.id)" size="small" type="success"
+                                       icon="el-icon-video-play">
+                            </el-button>
+                        </el-col>
+                        <el-col :span="8">
+                            <el-button @click="deleteCaseSet(scope.row.id)" type="warning" size="small">删除</el-button>
+                        </el-col>
+                    </el-row>
+
                 </template>
             </el-table-column>
 
         </el-table>
 
-        <div class="block">
+
+        <div class="block" style="float: left;">
             <el-pagination
                     @size-change="handleSizeChange"
                     @current-change="handleCurrentChange"
@@ -105,8 +121,8 @@
                         <el-input type="textarea" v-model="caseSetData.desc"></el-input>
                     </el-form-item>
                     <el-form-item>
-                        <el-button type="primary" @click="submitForm('moduleData')">保存</el-button>
-                        <el-button @click="resetForm('moduleData')">重置</el-button>
+                        <el-button type="primary" @click="submitForm('caseSetData')">保存</el-button>
+                        <el-button @click="resetForm('caseSetData')">重置</el-button>
                     </el-form-item>
                 </el-form>
             </div>
@@ -116,6 +132,74 @@
                 <!--    <el-button type="primary" @click="ApiDialogVisible = false">确 定</el-button>-->
   </span>
         </el-dialog>
+
+        <el-dialog
+                title="用例信息"
+                :visible.sync="centerDialogVisible"
+                width="50%"
+                center>
+
+            <el-form :model="ruleForm" :rules="caseInfoRules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+                <el-form-item label="用例名称" prop="name">
+                    <el-input v-model="caseInfoRuleForm.name" size="mini"></el-input>
+                </el-form-item>
+
+                <el-form-item label="增加步骤">
+                    <el-input v-model="caseInfoRuleForm.name" :disabled="true" style="width: auto"
+                              size="mini"></el-input>
+                    <el-select v-model="caseInfoRuleForm.region" placeholder="模块" size="mini">
+                        <el-option label="区域一" value="shanghai"></el-option>
+                        <el-option label="区域二" value="beijing"></el-option>
+                    </el-select>
+                    <el-button type="primary" icon="el-icon-circle-plus-outline" @click="addCase" size="mini">
+                        添加
+                    </el-button>
+
+                </el-form-item>
+                <el-table
+                        ref="multipleTable"
+                        :data="tableData"
+                        tooltip-effect="dark"
+                        style="width: 100%; text-align: right;"
+                        size="mini"
+                        @selection-change="handleSelectionChange">
+                    <el-table-column
+                            type="selection"
+                            width="30">
+                    </el-table-column>
+                    <el-table-column
+                            label="接口名称"
+                            width="160">
+                        <template slot-scope="scope">{{ scope.row.date }}</template>
+                    </el-table-column>
+                    <el-table-column
+                            prop="name"
+                            label="接口描述"
+                            width="150">
+                    </el-table-column>
+                    <el-table-column
+                            prop="address"
+                            label="接口地址"
+                            show-overflow-tooltip>
+                    </el-table-column>
+                </el-table>
+
+                <el-form-item label="用例描述" prop="desc">
+                    <el-input type="textarea" v-model="caseInfoRuleForm.desc"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
+                    <el-button @click="caseInfoRuleForm('ruleForm')">重置</el-button>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="centerDialogVisible = false">确 定</el-button>
+                <el-button @click="centerDialogVisible = false">取 消</el-button>
+
+  </span>
+        </el-dialog>
+
     </div>
 </template>
 
@@ -135,6 +219,8 @@
         name: 'module',
         data() {
             return {
+                centerDialogVisible: false,
+                hasSelect: false,
                 title: '新增',
                 kw: '',
                 openDialogVisible: false,
@@ -153,6 +239,17 @@
                     projectList: [],
                 },
 
+                caseInfoRuleForm: {
+                    name: '',
+                    region: '',
+                    date1: '',
+                    date2: '',
+                    delivery: false,
+                    type: [],
+                    resource: '',
+                    desc: ''
+                },
+
                 multipleSelection: [],
                 rules: {
                     name: [
@@ -165,10 +262,52 @@
                     desc: [
                         {required: false, message: '请填写描述', trigger: 'blur'}
                     ]
+                },
+                caseInfoRules: {
+                    name: [
+                        {required: true, message: '请输入活动名称', trigger: 'blur'},
+                        {min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur'}
+                    ],
+                    region: [
+                        {required: true, message: '请选择活动区域', trigger: 'change'}
+                    ],
+                    date1: [
+                        {type: 'date', required: true, message: '请选择日期', trigger: 'change'}
+                    ],
+                    date2: [
+                        {type: 'date', required: true, message: '请选择时间', trigger: 'change'}
+                    ],
+                    type: [
+                        {type: 'array', required: true, message: '请至少选择一个活动性质', trigger: 'change'}
+                    ],
+                    resource: [
+                        {required: true, message: '请选择活动资源', trigger: 'change'}
+                    ],
+                    desc: [
+                        {required: true, message: '请填写活动形式', trigger: 'blur'}
+                    ]
                 }
-            }
+            };
         },
+
+
         methods: {
+
+            handle(row, column, event, cell) {
+                console.log("row" + row.name)
+                console.log("row" + row.id)
+                console.log("event" + event)
+                console.log("cell" + cell)
+                this.hasSelect = true;
+            },
+
+
+            addCase() {
+                this.centerDialogVisible = true;
+
+            },
+
+
             addCaseSet() {
                 let postData = {
                     name: this.caseSetData.name,
@@ -195,7 +334,8 @@
                     }
 
                 })
-            },
+            }
+            ,
             getListCaseSet() {
                 let postData = {
                     totalCount: this.totalPage,
@@ -210,12 +350,13 @@
                     let rsData = res.data.data
                     if (code === 200) {
                         this.totalPage = res.data.totalCount;
-                        this.caseSetData.ids = rsData;
+                        this.caseSetData.caseSetList = rsData;
                         console.log(rsData);
 
                     }
                 })
-            },
+            }
+            ,
             getListProject() {
                 let postData = {
                     kw: this.kw,
@@ -231,28 +372,33 @@
                         this.caseSetData.projectList = rsData;
                     }
                 })
-            },
+            }
+            ,
 
             openAddModule() {
                 this.title = '新增';
                 this.openDialogVisible = true;
                 this.resetForm('moduleData');
-            },
+            }
+            ,
             handleSizeChange(val) {
                 console.log(`每页 ${val} 条`);
                 this.pageSize = val;
                 this.getListProject();
-            },
+            }
+            ,
             handleCurrentChange(val) {
                 console.log(`当前页: ${val}`);
                 this.currentPage = val;
                 this.getListProject();
-            },
+            }
+            ,
 
             getEnvironment() {
                 //locations是v-for里面的也是datas里面的值
                 console.log()
-            },
+            }
+            ,
             deleteCaseSet(id) {
                 this.caseSetData.ids = []
                 if (typeof id === "number") {
@@ -282,7 +428,8 @@
                         message: '已取消删除'
                     });
                 });
-            },
+            }
+            ,
             catCaseSet(id) {
                 this.title = '编辑';
                 this.openDialogVisible = true;
@@ -302,7 +449,8 @@
                         this.caseSetData.desc = resData.desc;
                     }
                 })
-            },
+            }
+            ,
 
             editCaseSet() {
                 let postData = {
@@ -330,7 +478,8 @@
                     }
 
                 })
-            },
+            }
+            ,
 
             toggleSelection(rows) {
                 if (rows) {
@@ -340,18 +489,21 @@
                 } else {
                     this.$refs.multipleTable.clearSelection();
                 }
-            },
+            }
+            ,
             handleSelectionChange(val) {
                 this.multipleSelection = val;
                 this.multipleSelection.map((item) => {
                     this.caseSetData.ids.push(item.id)
                 });
-            },
+            }
+            ,
 
             open() {
                 this.openDialogVisible = true;
 
-            },
+            }
+            ,
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid && this.title === '新增') {
@@ -362,19 +514,26 @@
                         return false;
                     }
                 });
-            },
+            }
+            ,
             resetForm(formName) {
                 this.$refs[formName].resetFields();
-            },
+            }
+            ,
             resetInput() {
                 this.kw = '';
                 this.getListProject();
-            },
+            }
+            ,
 
             handleCloseModuleDialog() {
                 this.openDialogVisible = false;
-            },
-        },
+            }
+            ,
+
+
+        }
+        ,
         created() {
             this.getListCaseSet();
         }
@@ -384,9 +543,9 @@
 </script>
 
 <style scoped>
-    .projectTable {
-        /*width:50%;*/
-        /*height:50%;*/
+    el-table__body tr.current-row > td {
+        color: #fff;
+        background: rgba(66, 66, 66, 0.66) !important;
     }
 
 </style>
