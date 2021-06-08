@@ -16,7 +16,7 @@
                             </el-select>
                         </el-col>
                         <el-col :span="8">
-                            <el-select v-model="apiData.moduleId" placeholder="请选择模块"
+                            <el-select v-model="apiData.moduleId" placeholder="请选择用例集"
                                        @focus="listProjectModule(apiData.projectId)"
                                        @change="listProjectModule(apiData.projectId)">
                                 <el-option v-for="item in moduleList"
@@ -35,6 +35,7 @@
 
                     </el-row>
                     <div style="position: absolute;right: 0">
+                        <el-button type="primary" plain @click="addCaseSet">新增</el-button>
                         <el-button type="warning" @click="deleteApi"
                                    plain>批量删除
                         </el-button>

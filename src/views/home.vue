@@ -13,7 +13,7 @@
                             <el-menu-item index="project">项目管理</el-menu-item>
                             <el-menu-item index="module">模块管理</el-menu-item>
                             <el-menu-item index="interface">接口信息</el-menu-item>
-                            <el-menu-item index="servieConfig">业务配置</el-menu-item>
+                            <el-menu-item index="caseSet">用例集合</el-menu-item>
                             <el-menu-item index="case">接口用例</el-menu-item>
                             <el-menu-item index="builtInfunc">内置函数</el-menu-item>
                         </el-menu-item-group>
@@ -138,8 +138,8 @@
                     case "interface":
                         this.$router.push('/interface');
                         break;
-                    case "servieConfig":
-                        this.$router.push('/servieConfig');
+                    case "caseSet":
+                        this.$router.push('/caseSet');
                         break;
                     case "case":
                         this.$router.push('/case');
