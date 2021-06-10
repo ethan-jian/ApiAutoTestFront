@@ -87,7 +87,7 @@
                 </el-pagination>
             </div>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="9">
             <el-table
                     ref="multipleTable"
                     :data="caseData.caseList"
@@ -103,23 +103,13 @@
                 <el-table-column
                         prop="name"
                         label="用例名称"
-                        width="250">
+                        width="200">
                 </el-table-column>
                 <el-table-column
                         prop="desc"
                         label="描述"
-                        width="200">
+                        width="150">
                 </el-table-column>
-<!--                <el-table-column-->
-<!--                        label="创建时间"-->
-<!--                        width="120">-->
-<!--                    <template slot-scope="scope">{{ scope.row.created_time }}</template>-->
-<!--                </el-table-column>-->
-<!--                <el-table-column-->
-<!--                        label="更新时间"-->
-<!--                        width="120">-->
-<!--                    <template slot-scope="scope">{{ scope.row.update_time }}</template>-->
-<!--                </el-table-column>-->
                 <el-table-column
                         label="操作"
                         width="303">
@@ -132,18 +122,11 @@
                             </el-button>
                             <el-button @click="deleteCaseSet(scope.row.id)" type="warning" size="small">删除
                             </el-button>
-                            <el-button type="primary" icon="el-icon-circle-plus-outline"
-                                       size="small" @click="openCaseInfo">测试用例
-                            </el-button>
                         </el-col>
                     </template>
                 </el-table-column>
 
             </el-table>
-            <!--            <div style="margin-top: 20px">-->
-            <!--                <el-button @click="toggleSelection([tableData[1], tableData[2]])">切换第二、第三行的选中状态</el-button>-->
-            <!--                <el-button @click="toggleSelection()">取消选择</el-button>-->
-            <!--            </div>-->
             <div class="block">
                 <el-pagination
                         @size-change="handleSizeChange"
@@ -320,7 +303,8 @@
                     caseSetId: null,
                     moduleId: null,
                     desc: null,
-                    caseList: []
+                    caseList: [],
+
                 },
 
                 multipleSelection: [],
@@ -365,6 +349,7 @@
                 this.title = "新增";
                 this.caseData.caseSetId = row.id;
                 this.caseData.projectId = row.project_id;
+                this.getListCase();
             },
 
             openCaseInfo() {
@@ -412,9 +397,9 @@
                     let message = res.data.message;
                     if (code === 200) {
                         this.caseInfoDialogVisible = false;
-                        this.reload();
+                        // this.reload();
                         this.getListCase();
-                        this.resetCaseForm('caseData');
+                        // this.resetCaseForm('caseData');
                         this.$notify({
                             title: message,
                             type: "success"
@@ -454,17 +439,18 @@
                     totalCount: this.totalPage,
                     pageSize: this.pageSize,
                     currentPage: this.currentPage,
-                    kw: this.kw,
+                    project_id: this.caseData.projectId,
+                    case_set_id: this.caseData.caseSetId,
                     sort: [{"direct": "DESC", "field": "created_time"}]
 
                 };
                 listCaseInfo(postData).then(res => {
+
                     let code = res.data.code;
-                    let rsData = res.data.data
+                    let rsData = res.data.data;
                     if (code === 200) {
                         this.totalPage = res.data.totalCount;
                         this.caseData.caseList = rsData;
-                        console.log(rsData);
                     }
                 })
             },
