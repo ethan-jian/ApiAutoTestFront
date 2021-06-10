@@ -1,94 +1,162 @@
 <template>
     <div>
-
-        <el-input
-                style="width: 200px;
+        <el-col>
+            <el-input
+                    style="width: 200px;
                     float: left;"
-                placeholder="请输入项目名称"
-                v-model="kw"
-                clearable>
-        </el-input>
-        <div style="position: absolute;
+                    placeholder="请输入项目名称"
+                    v-model="kw"
+                    clearable>
+            </el-input>
+            <div style="position: absolute;
         left: 430px;
 ">
-            <el-button type="primary" @click="getListCaseSet">查询</el-button>
-            <el-button @click="resetInput()">重置</el-button>
-        </div>
-        <el-button type="primary" icon="el-icon-circle-plus-outline" v-if="hasSelect" @click="openCaseInfo">测试用例
-        </el-button>
-        <el-table
-                ref="multipleTable"
-                :data="caseSetData.caseSetList"
-                tooltip-effect="dark"
-                style="width: 100%"
-                highlight-current-row
-                @cell-click="handle"
-                @selection-change="handleSelectionChange">
-            <el-table-column
-                    type="selection"
-                    width="50">
-            </el-table-column>
-            <el-table-column
-                    prop="name"
-                    label="名称"
-                    width="120">
-            </el-table-column>
-            <el-table-column
-                    prop="project_name"
-                    label="项目"
-                    width="120">
-            </el-table-column>
-            <el-table-column
-                    prop="desc"
-                    label="描述"
-                    width="120">
-            </el-table-column>
-            <el-table-column
-                    label="创建时间"
-                    width="120">
-                <template slot-scope="scope">{{ scope.row.created_time }}</template>
-            </el-table-column>
-            <el-table-column
-                    label="更新时间"
-                    width="120">
-                <template slot-scope="scope">{{ scope.row.update_time }}</template>
-            </el-table-column>
-            <el-table-column
-                    label="操作"
-                    width="200">
-                <template slot-scope="scope">
-                    <el-row>
-                        <el-col :span="8">
+                <el-button type="primary" @click="getListCaseSet">查询</el-button>
+                <el-button @click="resetInput()">重置</el-button>
+            </div>
+
+        </el-col>
+
+        <el-col :span="15">
+            <el-table
+                    ref="multipleTable"
+                    :data="caseSetData.caseSetList"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    highlight-current-row
+                    @cell-click="handle"
+                    @selection-change="handleSelectionChange">
+                <el-table-column
+                        type="selection"
+                        width="50">
+                </el-table-column>
+                <el-table-column
+                        prop="name"
+                        label="名称"
+                        width="120">
+                </el-table-column>
+                <el-table-column
+                        prop="project_name"
+                        label="项目"
+                        width="120">
+                </el-table-column>
+                <el-table-column
+                        prop="desc"
+                        label="描述"
+                        width="120">
+                </el-table-column>
+                <el-table-column
+                        label="创建时间"
+                        width="120">
+                    <template slot-scope="scope">{{ scope.row.created_time }}</template>
+                </el-table-column>
+                <el-table-column
+                        label="更新时间"
+                        width="120">
+                    <template slot-scope="scope">{{ scope.row.update_time }}</template>
+                </el-table-column>
+                <el-table-column
+                        label="操作"
+                        width="303">
+                    <template slot-scope="scope">
+                        <el-col>
                             <el-button @click="catCaseSet(scope.row.id)" type="primary" size="small">编辑
                             </el-button>
-                        </el-col>
-                        <el-col :span="8">
                             <el-button @click="deleteCaseSet(scope.row.id)" size="small" type="success"
                                        icon="el-icon-video-play">
                             </el-button>
+                            <el-button @click="deleteCaseSet(scope.row.id)" type="warning" size="small">删除
+                            </el-button>
+                            <el-button type="primary" icon="el-icon-circle-plus-outline"
+                                       size="small" @click="openCaseInfo">测试用例
+                            </el-button>
                         </el-col>
-                        <el-col :span="8">
-                            <el-button @click="deleteCaseSet(scope.row.id)" type="warning" size="small">删除</el-button>
+                    </template>
+                </el-table-column>
+
+            </el-table>
+            <div class="block">
+                <el-pagination
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="currentPage"
+                        :page-sizes=pageSizes
+                        :page-size=pageSize
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total=totalPage>
+                </el-pagination>
+            </div>
+        </el-col>
+        <el-col :span="8">
+            <el-table
+                    ref="multipleTable"
+                    :data="caseData.caseList"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    highlight-current-row
+                    @cell-click="handle"
+                    @selection-change="handleSelectionChange">
+                <el-table-column
+                        type="selection"
+                        width="50">
+                </el-table-column>
+                <el-table-column
+                        prop="name"
+                        label="用例名称"
+                        width="250">
+                </el-table-column>
+                <el-table-column
+                        prop="desc"
+                        label="描述"
+                        width="200">
+                </el-table-column>
+<!--                <el-table-column-->
+<!--                        label="创建时间"-->
+<!--                        width="120">-->
+<!--                    <template slot-scope="scope">{{ scope.row.created_time }}</template>-->
+<!--                </el-table-column>-->
+<!--                <el-table-column-->
+<!--                        label="更新时间"-->
+<!--                        width="120">-->
+<!--                    <template slot-scope="scope">{{ scope.row.update_time }}</template>-->
+<!--                </el-table-column>-->
+                <el-table-column
+                        label="操作"
+                        width="303">
+                    <template slot-scope="scope">
+                        <el-col>
+                            <el-button @click="catCaseSet(scope.row.id)" type="primary" size="small">编辑
+                            </el-button>
+                            <el-button @click="deleteCaseSet(scope.row.id)" size="small" type="success"
+                                       icon="el-icon-video-play">
+                            </el-button>
+                            <el-button @click="deleteCaseSet(scope.row.id)" type="warning" size="small">删除
+                            </el-button>
+                            <el-button type="primary" icon="el-icon-circle-plus-outline"
+                                       size="small" @click="openCaseInfo">测试用例
+                            </el-button>
                         </el-col>
-                    </el-row>
+                    </template>
+                </el-table-column>
 
-                </template>
-            </el-table-column>
+            </el-table>
+            <!--            <div style="margin-top: 20px">-->
+            <!--                <el-button @click="toggleSelection([tableData[1], tableData[2]])">切换第二、第三行的选中状态</el-button>-->
+            <!--                <el-button @click="toggleSelection()">取消选择</el-button>-->
+            <!--            </div>-->
+            <div class="block">
+                <el-pagination
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="currentPage"
+                        :page-sizes=pageSizes
+                        :page-size=pageSize
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total=totalPage>
+                </el-pagination>
+            </div>
+        </el-col>
 
-        </el-table>
-
-
-        <div class="block" style="float: left;">
-            <el-pagination
-                    @size-change="handleSizeChange"
-                    @current-change="handleCurrentChange"
-                    :current-page="currentPage"
-                    :page-sizes=pageSizes
-                    :page-size=pageSize
-                    layout="total, sizes, prev, pager, next, jumper"
-                    :total=totalPage>
-            </el-pagination>
-        </div>
 
         <div style="position: absolute;top: 9.5%;right: 0">
             <el-button type="primary" plain @click="openAddCaseSet">新增</el-button>
@@ -217,7 +285,7 @@
         // catCaseDetailInfo,
         // deleteCaseInfo,
         // editCaseInfo,
-        // listCaseInfo
+        listCaseInfo
     } from "../../api/case";
 
 
@@ -252,6 +320,7 @@
                     caseSetId: null,
                     moduleId: null,
                     desc: null,
+                    caseList: []
                 },
 
                 multipleSelection: [],
@@ -343,8 +412,9 @@
                     let message = res.data.message;
                     if (code === 200) {
                         this.caseInfoDialogVisible = false;
-                        this.reload()
-                        this.resetCaseForm('caseData')
+                        this.reload();
+                        this.getListCase();
+                        this.resetCaseForm('caseData');
                         this.$notify({
                             title: message,
                             type: "success"
@@ -377,8 +447,28 @@
 
                     }
                 })
-            }
-            ,
+            },
+
+            getListCase() {
+                let postData = {
+                    totalCount: this.totalPage,
+                    pageSize: this.pageSize,
+                    currentPage: this.currentPage,
+                    kw: this.kw,
+                    sort: [{"direct": "DESC", "field": "created_time"}]
+
+                };
+                listCaseInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let rsData = res.data.data
+                    if (code === 200) {
+                        this.totalPage = res.data.totalCount;
+                        this.caseData.caseList = rsData;
+                        console.log(rsData);
+                    }
+                })
+            },
+
             getListProject() {
                 let postData = {
                     kw: this.kw,
