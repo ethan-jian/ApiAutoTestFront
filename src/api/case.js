@@ -21,7 +21,7 @@ export const editCaseInfo = function (data) {
 };
 
 export const deleteCaseInfo = function (data) {
-    return postRequest('DeleteCaseSet', data)
+    return postRequest('DeleteCase', data)
 };
 
 

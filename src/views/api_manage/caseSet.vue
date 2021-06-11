@@ -93,8 +93,7 @@
                     :data="caseData.caseList"
                     tooltip-effect="dark"
                     style="width: 100%"
-                    highlight-current-row
-                    @cell-click="handle"
+
                     @selection-change="handleSelectionChange">
                 <el-table-column
                         type="selection"
@@ -115,12 +114,12 @@
                         width="303">
                     <template slot-scope="scope">
                         <el-col>
-                            <el-button @click="catCaseSet(scope.row.id)" type="primary" size="small">编辑
+                            <el-button @click="catCase(scope.row.id)" type="primary" size="small">编辑
                             </el-button>
-                            <el-button @click="deleteCaseSet(scope.row.id)" size="small" type="success"
+                            <el-button @click="deleteCase(scope.row.id)" size="small" type="success"
                                        icon="el-icon-video-play">
                             </el-button>
-                            <el-button @click="deleteCaseSet(scope.row.id)" type="warning" size="small">删除
+                            <el-button @click="deleteCase(scope.row.id)" type="warning" size="small">删除
                             </el-button>
                         </el-col>
                     </template>
@@ -266,7 +265,7 @@
     import {
         addCaseInfo,
         // catCaseDetailInfo,
-        // deleteCaseInfo,
+        deleteCaseInfo,
         // editCaseInfo,
         listCaseInfo
     } from "../../api/case";
@@ -525,8 +524,38 @@
                         message: '已取消删除'
                     });
                 });
-            }
-            ,
+            },
+
+            deleteCase(id) {
+                this.caseData.ids = []
+                if (typeof id === "number") {
+                    this.caseData.ids.push(id);
+                }
+                let postData = {
+                    ids: this.caseData.ids
+                };
+                this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    deleteCaseInfo(postData).then(res => {
+                        let code = res.data.code;
+                        if (code === 200) {
+                            this.getListCase();
+                        }
+                    });
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功!'
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
             catCaseSet(id) {
                 this.title = '编辑';
                 this.openDialogVisible = true;
