@@ -710,6 +710,7 @@
                 }
 
             },
+
             listProjectModule(project_id) {
                 let postData = {
                     id: project_id,
@@ -842,8 +843,8 @@
                     totalCount: this.totalPage,
                     pageSize: this.pageSize,
                     currentPage: this.currentPage,
-                    project_id: this.apiData.project_id,
-                    module_id: this.apiData.module_id,
+                    project_id: this.apiData.projectId,
+                    module_id: this.apiData.moduleId,
                     sort: [{"direct": "DESC", "field": "created_time"}]
                 };
                 listApiInfo(postData).then(res => {

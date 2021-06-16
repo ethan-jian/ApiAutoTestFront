@@ -88,76 +88,12 @@
             </div>
         </el-col>
         <el-col :span="9">
-            <br/>
-            <div>用例</div>
-            <el-col :span="24">
-
-                <el-collapse accordion>
-                    <el-collapse-item v-for="(item, i) in caseData.caseList" :title="item.name" :key="i"
-                                      @change="collopseChanged">
-                        <el-table
-                                ref="multipleTable"
-                                :data="caseData.caseList"
-                                tooltip-effect="dark"
-                                style="width: 100%"
-                                @selection-change="handleSelectionChange">
-                            <el-table-column
-                                    type="selection"
-                                    width="30">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="name"
-                                    label="状态"
-                                    width="50">
-                                <template slot-scope="scope">
-                                    <el-switch
-                                            v-model="scope.row.status"
-                                            active-color="#13ce66"
-                                            inactive-color="#ff4949"
-                                            :active-value="1"
-                                            :inactive-value="0"
-                                            @change="changeStatus($event,scope.row,scope.$index)"
-                                    />
-                                </template>
-                            </el-table-column>
-                            <el-table-column
-                                    prop="name"
-                                    label="接口名称"
-                                    width="200">
-                            </el-table-column>
-                            <el-table-column
-                                    prop="name"
-                                    label="执行次数"
-                                    width="150">
-                                <el-input-number size="mini" :precision="0"
-                                                 v-model="caseData.num"
-                                                 :min="1" :max="1000">
-                                </el-input-number>
-                            </el-table-column>
-                            <el-table-column
-                                    label="操作"
-                                    width="303">
-                                <template slot-scope="scope">
-                                    <el-col>
-                                        <el-button @click="catCase(scope.row.id)" type="primary" size="small">编辑
-                                        </el-button>
-
-                                        <el-button @click="deleteCase(scope.row.id)" type="warning" size="small">删除
-                                        </el-button>
-                                    </el-col>
-                                </template>
-                            </el-table-column>
-
-                        </el-table>
-                    </el-collapse-item>
-                </el-collapse>
-
-            </el-col>
-            <el-col :span="0">
-
-            </el-col>
-
-<<<<<<< HEAD
+            <el-table
+                    ref="multipleTable"
+                    :data="caseData.caseList"
+                    tooltip-effect="dark"
+                    style="width: 100%"
+                    highlight-current-row
                     @selection-change="handleSelectionChange">
                 <el-table-column
                         type="selection"
@@ -169,19 +105,10 @@
                         width="200">
                 </el-table-column>
                 <el-table-column
-                        label="步骤"
+                        prop="desc"
+                        label="描述"
                         width="150">
-                    <el-collapse v-model="activeNames" @change="handleChange">
-                        <el-collapse-item title="" name="1">
-                            <div>fefefefe</div>
-                        </el-collapse-item>
-                    </el-collapse>
                 </el-table-column>
-<!--                <el-table-column-->
-<!--                        prop="desc"-->
-<!--                        label="描述"-->
-<!--                        width="150">-->
-<!--                </el-table-column>-->
                 <el-table-column
                         label="操作"
                         width="303">
@@ -197,7 +124,6 @@
                         </el-col>
                     </template>
                 </el-table-column>
-
 
 
             </el-table>
@@ -235,7 +161,7 @@
                                    placeholder="请选择项目"
                                    @focus="getListProject"
                         >
-                            <el-option v-for="item in caseSetData.projectList"
+                            <el-option v-for="item in projectList"
                                        :key="item.id"
                                        :label="item.name"
                                        :value="item.id"
@@ -255,16 +181,16 @@
 
             <span slot="footer" class="dialog-footer">
     <el-button @click="openDialogVisible = false">取 消</el-button>
-                <!--    <el-button type="primary" @click="ApiDialogVisible = false">确 定</el-button>-->
-  </span>
+            </span>
         </el-dialog>
+
 
         <el-dialog
                 title="用例信息"
                 :visible.sync="caseInfoDialogVisible"
                 width="50%"
-                center>
-
+                center
+                :model="apiData" :rules="caseInfoRules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
             <el-form :model="caseData" :rules="caseInfoRules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
                 <el-form-item label="用例名称" prop="name">
                     <el-input v-model="caseData.name" size="mini"></el-input>
@@ -273,61 +199,123 @@
                     <el-input type="textarea" v-model="caseData.desc"></el-input>
                 </el-form-item>
                 <el-form-item label="增加步骤">
-                    <el-select v-model="caseData.projectId" placeholder="项目" size="mini">
-                        <el-option label="区域一" value="shanghai"></el-option>
-                        <el-option label="区域二" value="beijing"></el-option>
+                    <el-select v-model="apiData.projectId" placeholder="项目" size="mini" @focus="getListProject()"
+                               @change="getListProject()">
+                        <el-option v-for="item in projectList"
+                                   :key="item.id"
+                                   :value="item.id"
+                                   :label="item.name"
+                        >
+                        </el-option>
                     </el-select>
-                    <el-select v-model="caseData.moduleId" placeholder="模块" size="mini">
-                        <el-option label="区域一" value="shanghai"></el-option>
-                        <el-option label="区域二" value="beijing"></el-option>
+                    <el-select v-model="apiData.moduleId" placeholder="请选择模块" size="mini"
+                               @focus="listProjectModule(apiData.projectId)"
+                               @change="listProjectModule(apiData.projectId)">
+                        <el-option v-for="item in moduleList"
+                                   :key="item.id"
+                                   :value="item.id"
+                                   :label="item.name">
+                        </el-option>
                     </el-select>
                     <el-button type="primary" icon="el-icon-circle-plus-outline" @click="addCase" size="mini">
                         添加
                     </el-button>
-
                 </el-form-item>
-                <el-table
-                        ref="multipleTable"
-                        :data="tableData"
-                        tooltip-effect="dark"
-                        style="width: 100%; text-align: right;"
-                        size="mini"
-                        @selection-change="handleSelectionChange">
-                    <el-table-column
-                            type="selection"
-                            width="30">
-                    </el-table-column>
-                    <el-table-column
-                            label="接口名称"
-                            width="160">
-                        <template slot-scope="scope">{{ scope.row.date }}</template>
-                    </el-table-column>
-                    <el-table-column
-                            prop="name"
-                            label="接口描述"
-                            width="150">
-                    </el-table-column>
-                    <el-table-column
-                            prop="address"
-                            label="接口地址"
-                            show-overflow-tooltip>
-                    </el-table-column>
-                </el-table>
-
-                <el-form-item>
-                    <div style="text-align: center">
-                        <el-button type="primary" @click="addCase">保存</el-button>
-                    </div>
-                </el-form-item>
-
             </el-form>
+
+            <el-table
+                    ref="multipleTable"
+                    :data="apiData.apiList"
+                    tooltip-effect="dark"
+                    style="width: 100%; text-align: right;"
+                    size="mini"
+                    @selection-change="handleSelectionChange">
+                <el-table-column
+                        type="selection"
+                        width="30">
+                </el-table-column>
+                <el-table-column
+                        prop="name"
+                        label="接口名称"
+                        width="150">
+                </el-table-column>
+                <el-table-column
+                        prop="desc"
+                        label="描述"
+                        width="150">
+                </el-table-column>
+                <el-table-column
+                        prop="url"
+                        label="接口地址"
+                        show-overflow-tooltip>
+                </el-table-column>
+            </el-table>
+            <div class="block">
+                <el-pagination
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="currentPage"
+                        :page-sizes=pageSizes
+                        :page-size=pageSize
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total=totalPage>
+                </el-pagination>
+            </div>
+            <el-divider></el-divider>
+
+            <div style="text-align: center">已增加的步骤</div>
+            <el-table
+                    ref="multipleTable"
+                    :data="tableData"
+                    tooltip-effect="dark"
+                    style="width: 100%; text-align: right;"
+                    size="mini"
+                    @selection-change="handleSelectionChange">
+                <el-table-column
+                        type="selection"
+                        width="30">
+                </el-table-column>
+                <el-table-column
+                        label="接口名称"
+                        width="160">
+                    <template slot-scope="scope">{{ scope.row.date }}</template>
+                </el-table-column>
+                <el-table-column
+                        prop="name"
+                        label="接口描述"
+                        width="150">
+                </el-table-column>
+                <el-table-column
+                        prop="address"
+                        label="接口地址"
+                        show-overflow-tooltip>
+                </el-table-column>
+            </el-table>
+            <div class="block">
+                <el-pagination
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="currentPage"
+                        :page-sizes=pageSizes
+                        :page-size=pageSize
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total=totalPage>
+                </el-pagination>
+            </div>
+
+
+            <div style="text-align: center">
+                <el-button type="primary" @click="addCase">保存</el-button>
+            </div>
+
+
         </el-dialog>
 
     </div>
 </template>
 
 <script>
-    import {listProjectInfo} from "../../api/project";
+    import {catProjectModuleInfo, listProjectInfo} from "../../api/project";
 
     import {
         addCaseSetInfo,
@@ -344,6 +332,7 @@
         // editCaseInfo,
         listCaseInfo
     } from "../../api/case";
+    import {listApiInfo, listProjectModuleInfo} from "../../api/api";
 
 
     export default {
@@ -355,40 +344,50 @@
                 hasSelect: false,
                 title: '新增',
                 kw: '',
+                sort: [
+                    {
+                        "direct": "DESC",
+                        "field": "created_time"
+                    }],
                 openDialogVisible: false,
                 currentPage: 1,
                 pageSize: 10,
                 pageSizes: [10, 20, 30, 40, 50],
                 totalPage: 0,
+                projectList: [],
+                moduleList: [],
+                projectId: null,
+                moduleId: null,
+
                 caseSetData: {
                     id: null,
                     ids: [],
                     name: null,
                     url: null,
-                    projectId: null,
                     desc: null,
+                    projectId: null,
                     caseSetList: [],
-                    projectList: [],
+
                 },
 
                 caseData: {
                     name: null,
-                    projectId: null,
                     caseSetId: null,
-                    moduleId: null,
                     desc: null,
                     caseList: [],
+                    projectId: null,
                     num: 1,
 
                 },
 
                 apiData: {
                     name: null,
-                    projectId: null,
                     caseSetId: null,
-                    moduleId: null,
                     desc: null,
-                    caseList: [],
+                    projectId: null,
+                    moduleId: null,
+                    apiList: [],
+
 
                 },
 
@@ -441,6 +440,56 @@
             },
             openCaseInfo() {
                 this.caseInfoDialogVisible = true;
+                this.ListApi();
+            },
+
+            getProjectModule() {
+                let postData = {
+                    id: this.apiData.projectId,
+                };
+                catProjectModuleInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let rsData = res.data.data
+                    if (code === 200) {
+                        this.totalPage = res.data.totalCount;
+                        this.moduleList = rsData;
+                    }
+                })
+            },
+
+            listProjectModule(project_id) {
+                let postData = {
+                    id: project_id,
+                };
+                listProjectModuleInfo(postData).then(res => {
+                        let code = res.data.code;
+                        let rsData = res.data.data
+                        if (code === 200) {
+                            this.moduleList = rsData;
+                            this.ListApi();
+                        }
+                    }
+                )
+            },
+
+            ListApi() {
+                let postData = {
+                    totalCount: this.totalPage,
+                    pageSize: this.pageSize,
+                    currentPage: this.currentPage,
+                    project_id: this.apiData.projectId,
+                    module_id: this.apiData.moduleId,
+                    sort: [{"direct": "DESC", "field": "created_time"}]
+                };
+                listApiInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let rsData = res.data.data
+                    if (code === 200) {
+                        this.totalPage = res.data.totalCount;
+                        this.apiData.apiList = rsData;
+
+                    }
+                })
             },
 
             addCaseSet() {
@@ -543,6 +592,7 @@
             },
 
             getListProject() {
+                this.apiData.moduleId = null;
                 let postData = {
                     kw: this.kw,
                     sort: [{"direct": "DESC", "field": "created_time"}]
@@ -552,13 +602,12 @@
                     let code = res.data.code;
                     let rsData = res.data.data
                     if (code === 200) {
-                        console.log(rsData);
                         this.totalPage = res.data.totalCount;
-                        this.caseSetData.projectList = rsData;
+                        this.projectList = rsData;
+                        this.ListApi();
                     }
                 })
-            }
-            ,
+            },
 
             openAddCaseSet() {
                 this.title = '新增';
