@@ -105,10 +105,19 @@
                         width="200">
                 </el-table-column>
                 <el-table-column
-                        prop="desc"
-                        label="描述"
+                        label="步骤"
                         width="150">
+                    <el-collapse v-model="activeNames" @change="handleChange">
+                        <el-collapse-item title="" name="1">
+                            <div>fefefefe</div>
+                        </el-collapse-item>
+                    </el-collapse>
                 </el-table-column>
+<!--                <el-table-column-->
+<!--                        prop="desc"-->
+<!--                        label="描述"-->
+<!--                        width="150">-->
+<!--                </el-table-column>-->
                 <el-table-column
                         label="操作"
                         width="303">
@@ -124,6 +133,8 @@
                         </el-col>
                     </template>
                 </el-table-column>
+
+
 
             </el-table>
             <div class="block">
