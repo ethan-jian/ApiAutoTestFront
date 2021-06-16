@@ -88,12 +88,76 @@
             </div>
         </el-col>
         <el-col :span="9">
-            <el-table
-                    ref="multipleTable"
-                    :data="caseData.caseList"
-                    tooltip-effect="dark"
-                    style="width: 100%"
+            <br/>
+            <div>用例</div>
+            <el-col :span="24">
 
+                <el-collapse accordion>
+                    <el-collapse-item v-for="(item, i) in caseData.caseList" :title="item.name" :key="i"
+                                      @change="collopseChanged">
+                        <el-table
+                                ref="multipleTable"
+                                :data="caseData.caseList"
+                                tooltip-effect="dark"
+                                style="width: 100%"
+                                @selection-change="handleSelectionChange">
+                            <el-table-column
+                                    type="selection"
+                                    width="30">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="name"
+                                    label="状态"
+                                    width="50">
+                                <template slot-scope="scope">
+                                    <el-switch
+                                            v-model="scope.row.status"
+                                            active-color="#13ce66"
+                                            inactive-color="#ff4949"
+                                            :active-value="1"
+                                            :inactive-value="0"
+                                            @change="changeStatus($event,scope.row,scope.$index)"
+                                    />
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    prop="name"
+                                    label="接口名称"
+                                    width="200">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="name"
+                                    label="执行次数"
+                                    width="150">
+                                <el-input-number size="mini" :precision="0"
+                                                 v-model="caseData.num"
+                                                 :min="1" :max="1000">
+                                </el-input-number>
+                            </el-table-column>
+                            <el-table-column
+                                    label="操作"
+                                    width="303">
+                                <template slot-scope="scope">
+                                    <el-col>
+                                        <el-button @click="catCase(scope.row.id)" type="primary" size="small">编辑
+                                        </el-button>
+
+                                        <el-button @click="deleteCase(scope.row.id)" type="warning" size="small">删除
+                                        </el-button>
+                                    </el-col>
+                                </template>
+                            </el-table-column>
+
+                        </el-table>
+                    </el-collapse-item>
+                </el-collapse>
+
+            </el-col>
+            <el-col :span="0">
+
+            </el-col>
+
+<<<<<<< HEAD
                     @selection-change="handleSelectionChange">
                 <el-table-column
                         type="selection"
@@ -314,6 +378,17 @@
                     moduleId: null,
                     desc: null,
                     caseList: [],
+                    num: 1,
+
+                },
+
+                apiData: {
+                    name: null,
+                    projectId: null,
+                    caseSetId: null,
+                    moduleId: null,
+                    desc: null,
+                    caseList: [],
 
                 },
 
@@ -361,7 +436,9 @@
                 this.caseData.projectId = row.project_id;
                 this.getListCase();
             },
+            changeStatus() {
 
+            },
             openCaseInfo() {
                 this.caseInfoDialogVisible = true;
             },
