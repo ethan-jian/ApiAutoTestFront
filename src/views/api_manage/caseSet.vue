@@ -1,150 +1,291 @@
 <template>
     <div>
-        <el-col>
-            <el-input
-                    style="width: 200px;
+        <el-tabs type="card">
+            <el-tab-pane label="用例集合">
+                <el-col>
+                    <el-input
+                            style="width: 200px;
                     float: left;"
-                    placeholder="请输入项目名称"
-                    v-model="kw"
-                    clearable>
-            </el-input>
-            <div style="position: absolute;
-        left: 430px;
-">
-                <el-button type="primary" @click="getListCaseSet">查询</el-button>
-                <el-button @click="resetInput()">重置</el-button>
+                            placeholder="请输入项目名称"
+                            v-model="kw"
+                            clearable>
+                    </el-input>
+                    <div style="position: absolute;left: 205px;">
+                        <el-button type="primary" @click="getListCaseSet">查询</el-button>
+                        <el-button @click="resetInput()">重置</el-button>
+                    </div>
+                    <div style="position: absolute; right: 0%;">
+                        <el-button type="primary" plain @click="openAddCaseSet">新增</el-button>
+                        <el-button type="warning" @click="deleteCaseSet" plain>批量删除</el-button>
+                    </div>
+
+                </el-col>
+
+                <el-col :span="15">
+                    <el-table
+                            ref="multipleTable"
+                            :data="caseSetData.caseSetList"
+                            tooltip-effect="dark"
+                            style="width: 100%"
+                            highlight-current-row
+                            @cell-click="handle"
+                            @selection-change="handleSelectionChange">
+                        <el-table-column
+                                type="selection"
+                                width="50">
+                        </el-table-column>
+                        <el-table-column
+                                prop="name"
+                                label="名称"
+                                width="120">
+                        </el-table-column>
+                        <el-table-column
+                                prop="project_name"
+                                label="项目"
+                                width="120">
+                        </el-table-column>
+                        <el-table-column
+                                prop="desc"
+                                label="描述"
+                                width="120">
+                        </el-table-column>
+                        <el-table-column
+                                label="创建时间"
+                                width="120">
+                            <template slot-scope="scope">{{ scope.row.created_time }}</template>
+                        </el-table-column>
+                        <el-table-column
+                                label="更新时间"
+                                width="120">
+                            <template slot-scope="scope">{{ scope.row.update_time }}</template>
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="303">
+                            <template slot-scope="scope">
+                                <el-col>
+                                    <el-button @click="catCaseSet(scope.row.id)" type="primary" size="small">编辑
+                                    </el-button>
+                                    <el-button @click="deleteCaseSet(scope.row.id)" size="small" type="success"
+                                               icon="el-icon-video-play">
+                                    </el-button>
+                                    <el-button @click="deleteCaseSet(scope.row.id)" type="warning" size="small">删除
+                                    </el-button>
+                                    <el-button type="primary" icon="el-icon-circle-plus-outline"
+                                               size="small" @click="openCaseInfo">测试用例
+                                    </el-button>
+                                </el-col>
+                            </template>
+                        </el-table-column>
+
+                    </el-table>
+                    <div class="block">
+                        <el-pagination
+                                @size-change="handleSizeChange"
+                                @current-change="handleCurrentChange"
+                                :current-page="currentPage"
+                                :page-sizes=pageSizes
+                                :page-size=pageSize
+                                layout="total, sizes, prev, pager, next, jumper"
+                                :total=totalPage>
+                        </el-pagination>
+                    </div>
+                </el-col>
+                <el-col :span="9">
+                    <el-table
+                            ref="multipleTable"
+                            :data="caseData.caseList"
+                            tooltip-effect="dark"
+                            style="width: 100%"
+                            highlight-current-row
+                            @selection-change="handleSelectionChange">
+                        <el-table-column
+                                type="selection"
+                                width="50">
+                        </el-table-column>
+                        <el-table-column
+                                prop="name"
+                                label="用例名称"
+                                width="200">
+                        </el-table-column>
+                        <el-table-column
+                                prop="desc"
+                                label="描述"
+                                width="150">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="303">
+                            <template slot-scope="scope">
+                                <el-col>
+                                    <el-button @click="catCase(scope.row.id)" type="primary" size="small">编辑
+                                    </el-button>
+                                    <el-button @click="deleteCase(scope.row.id)" size="small" type="success"
+                                               icon="el-icon-video-play">
+                                    </el-button>
+                                    <el-button @click="deleteCase(scope.row.id)" type="warning" size="small">删除
+                                    </el-button>
+                                </el-col>
+                            </template>
+                        </el-table-column>
+
+
+                    </el-table>
+                    <div class="block">
+                        <el-pagination
+                                @size-change="handleSizeChange"
+                                @current-change="handleCurrentChange"
+                                :current-page="currentPage"
+                                :page-sizes=pageSizes
+                                :page-size=pageSize
+                                layout="total, sizes, prev, pager, next, jumper"
+                                :total=totalPage>
+                        </el-pagination>
+                    </div>
+                </el-col>
+
+
+            </el-tab-pane>
+            <el-tab-pane label="编辑用例">
+
+                <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
+                    <el-tab-pane label="用例信息" name="first">
+                        <el-form :model="caseData" :rules="caseInfoRules" ref="ruleForm" label-width="100px"
+                                 class="demo-ruleForm">
+                            <el-form-item label="用例名称" prop="name">
+                                <el-input v-model="caseData.name" size="mini"></el-input>
+                            </el-form-item>
+                            <el-form-item label="用例描述" prop="desc">
+                                <el-input type="textarea" v-model="caseData.desc"></el-input>
+                            </el-form-item>
+
+                        </el-form>
+
+                    </el-tab-pane>
+                    <el-tab-pane label="用例步骤" name="second">
+                        <el-row>
+                            <el-col span="12">
+                                <el-table
+                                        ref="multipleTable"
+                                        :data="tableData"
+                                        tooltip-effect="dark"
+                                        style="width: 100%; text-align: right;"
+                                        size="mini"
+                                        @selection-change="handleSelectionChange">
+                                    <el-table-column
+                                            type="selection"
+                                            width="30">
+                                    </el-table-column>
+                                    <el-table-column
+                                            label="接口名称"
+                                            width="160">
+                                        <template slot-scope="scope">{{ scope.row.date }}</template>
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="name"
+                                            label="接口描述"
+                                            width="150">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="address"
+                                            label="接口地址"
+                                            show-overflow-tooltip>
+                                    </el-table-column>
+                                </el-table>
+                                <div class="block">
+                                    <el-pagination
+                                            @size-change="handleSizeChange"
+                                            @current-change="handleCurrentChange"
+                                            :current-page="currentPage"
+                                            :page-sizes=pageSizes
+                                            :page-size=pageSize
+                                            layout="total, sizes, prev, pager, next, jumper"
+                                            :total=totalPage>
+                                    </el-pagination>
+                                </div>
+
+                            </el-col>
+                            <el-col span="12">
+                                <el-form :model="caseData" :rules="caseInfoRules" ref="ruleForm" label-width="100px"
+                                         class="demo-ruleForm">
+                                    <el-form-item>
+                                        添加步骤
+                                        <el-select v-model="apiData.projectId" placeholder="项目" size="mini"
+                                                   @focus="getListProject()"
+                                                   @change="getListProject()">
+                                            <el-option v-for="item in projectList"
+                                                       :key="item.id"
+                                                       :value="item.id"
+                                                       :label="item.name"
+                                            >
+                                            </el-option>
+                                        </el-select>
+                                        <el-select v-model="apiData.moduleId" placeholder="请选择模块" size="mini"
+                                                   @focus="listProjectModule(apiData.projectId)"
+                                                   @change="listProjectModule(apiData.projectId)">
+                                            <el-option v-for="item in moduleList"
+                                                       :key="item.id"
+                                                       :value="item.id"
+                                                       :label="item.name">
+                                            </el-option>
+                                        </el-select>
+                                        <el-button type="primary" icon="el-icon-circle-plus-outline" @click="addCase"
+                                                   size="mini">
+                                            添加
+                                        </el-button>
+                                    </el-form-item>
+                                </el-form>
+                                <el-table
+                                        ref="multipleTable"
+                                        :data="apiData.apiList"
+                                        tooltip-effect="dark"
+                                        style="width: 100%; text-align: right;"
+                                        size="mini"
+                                        @selection-change="handleSelectionChange">
+                                    <el-table-column
+                                            type="selection"
+                                            width="30">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="name"
+                                            label="接口名称"
+                                            width="150">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="desc"
+                                            label="描述"
+                                            width="150">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="url"
+                                            label="接口地址"
+                                            show-overflow-tooltip>
+                                    </el-table-column>
+                                </el-table>
+                                <div class="block">
+                                    <el-pagination
+                                            @size-change="handleSizeChange"
+                                            @current-change="handleCurrentChange"
+                                            :current-page="currentPage"
+                                            :page-sizes=pageSizes
+                                            :page-size=pageSize
+                                            layout="total, sizes, prev, pager, next, jumper"
+                                            :total=totalPage>
+                                    </el-pagination>
+                                </div>
+
+                            </el-col>
+                        </el-row>
+
+
+                    </el-tab-pane>
+                </el-tabs>
+            </el-tab-pane>
+            <div style="text-align: center">
+                <el-button type="primary" style="float: right" @click="addCase">保存</el-button>
             </div>
 
-        </el-col>
-
-        <el-col :span="15">
-            <el-table
-                    ref="multipleTable"
-                    :data="caseSetData.caseSetList"
-                    tooltip-effect="dark"
-                    style="width: 100%"
-                    highlight-current-row
-                    @cell-click="handle"
-                    @selection-change="handleSelectionChange">
-                <el-table-column
-                        type="selection"
-                        width="50">
-                </el-table-column>
-                <el-table-column
-                        prop="name"
-                        label="名称"
-                        width="120">
-                </el-table-column>
-                <el-table-column
-                        prop="project_name"
-                        label="项目"
-                        width="120">
-                </el-table-column>
-                <el-table-column
-                        prop="desc"
-                        label="描述"
-                        width="120">
-                </el-table-column>
-                <el-table-column
-                        label="创建时间"
-                        width="120">
-                    <template slot-scope="scope">{{ scope.row.created_time }}</template>
-                </el-table-column>
-                <el-table-column
-                        label="更新时间"
-                        width="120">
-                    <template slot-scope="scope">{{ scope.row.update_time }}</template>
-                </el-table-column>
-                <el-table-column
-                        label="操作"
-                        width="303">
-                    <template slot-scope="scope">
-                        <el-col>
-                            <el-button @click="catCaseSet(scope.row.id)" type="primary" size="small">编辑
-                            </el-button>
-                            <el-button @click="deleteCaseSet(scope.row.id)" size="small" type="success"
-                                       icon="el-icon-video-play">
-                            </el-button>
-                            <el-button @click="deleteCaseSet(scope.row.id)" type="warning" size="small">删除
-                            </el-button>
-                            <el-button type="primary" icon="el-icon-circle-plus-outline"
-                                       size="small" @click="openCaseInfo">测试用例
-                            </el-button>
-                        </el-col>
-                    </template>
-                </el-table-column>
-
-            </el-table>
-            <div class="block">
-                <el-pagination
-                        @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange"
-                        :current-page="currentPage"
-                        :page-sizes=pageSizes
-                        :page-size=pageSize
-                        layout="total, sizes, prev, pager, next, jumper"
-                        :total=totalPage>
-                </el-pagination>
-            </div>
-        </el-col>
-        <el-col :span="9">
-            <el-table
-                    ref="multipleTable"
-                    :data="caseData.caseList"
-                    tooltip-effect="dark"
-                    style="width: 100%"
-                    highlight-current-row
-                    @selection-change="handleSelectionChange">
-                <el-table-column
-                        type="selection"
-                        width="50">
-                </el-table-column>
-                <el-table-column
-                        prop="name"
-                        label="用例名称"
-                        width="200">
-                </el-table-column>
-                <el-table-column
-                        prop="desc"
-                        label="描述"
-                        width="150">
-                </el-table-column>
-                <el-table-column
-                        label="操作"
-                        width="303">
-                    <template slot-scope="scope">
-                        <el-col>
-                            <el-button @click="catCase(scope.row.id)" type="primary" size="small">编辑
-                            </el-button>
-                            <el-button @click="deleteCase(scope.row.id)" size="small" type="success"
-                                       icon="el-icon-video-play">
-                            </el-button>
-                            <el-button @click="deleteCase(scope.row.id)" type="warning" size="small">删除
-                            </el-button>
-                        </el-col>
-                    </template>
-                </el-table-column>
-
-
-            </el-table>
-            <div class="block">
-                <el-pagination
-                        @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange"
-                        :current-page="currentPage"
-                        :page-sizes=pageSizes
-                        :page-size=pageSize
-                        layout="total, sizes, prev, pager, next, jumper"
-                        :total=totalPage>
-                </el-pagination>
-            </div>
-        </el-col>
-
-
-        <div style="position: absolute;top: 9.5%;right: 0">
-            <el-button type="primary" plain @click="openAddCaseSet">新增</el-button>
-            <el-button type="warning" @click="deleteCaseSet" plain>批量删除</el-button>
-        </div>
+        </el-tabs>
 
         <el-dialog
                 :title="title"
@@ -184,133 +325,18 @@
             </span>
         </el-dialog>
 
-
         <el-dialog
-                title="用例信息"
                 :visible.sync="caseInfoDialogVisible"
                 width="50%"
                 center
-                :model="apiData" :rules="caseInfoRules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-            <el-form :model="caseData" :rules="caseInfoRules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-                <el-form-item label="用例名称" prop="name">
-                    <el-input v-model="caseData.name" size="mini"></el-input>
-                </el-form-item>
-                <el-form-item label="用例描述" prop="desc">
-                    <el-input type="textarea" v-model="caseData.desc"></el-input>
-                </el-form-item>
-                <el-form-item label="增加步骤">
-                    <el-select v-model="apiData.projectId" placeholder="项目" size="mini" @focus="getListProject()"
-                               @change="getListProject()">
-                        <el-option v-for="item in projectList"
-                                   :key="item.id"
-                                   :value="item.id"
-                                   :label="item.name"
-                        >
-                        </el-option>
-                    </el-select>
-                    <el-select v-model="apiData.moduleId" placeholder="请选择模块" size="mini"
-                               @focus="listProjectModule(apiData.projectId)"
-                               @change="listProjectModule(apiData.projectId)">
-                        <el-option v-for="item in moduleList"
-                                   :key="item.id"
-                                   :value="item.id"
-                                   :label="item.name">
-                        </el-option>
-                    </el-select>
-                    <el-button type="primary" icon="el-icon-circle-plus-outline" @click="addCase" size="mini">
-                        添加
-                    </el-button>
-                </el-form-item>
-            </el-form>
+                :model="apiData" :rules="caseInfoRules" ref="ruleForm" label-width="100px"
+                class="demo-ruleForm">
 
-            <el-table
-                    ref="multipleTable"
-                    :data="apiData.apiList"
-                    tooltip-effect="dark"
-                    style="width: 100%; text-align: right;"
-                    size="mini"
-                    @selection-change="handleSelectionChange">
-                <el-table-column
-                        type="selection"
-                        width="30">
-                </el-table-column>
-                <el-table-column
-                        prop="name"
-                        label="接口名称"
-                        width="150">
-                </el-table-column>
-                <el-table-column
-                        prop="desc"
-                        label="描述"
-                        width="150">
-                </el-table-column>
-                <el-table-column
-                        prop="url"
-                        label="接口地址"
-                        show-overflow-tooltip>
-                </el-table-column>
-            </el-table>
-            <div class="block">
-                <el-pagination
-                        @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange"
-                        :current-page="currentPage"
-                        :page-sizes=pageSizes
-                        :page-size=pageSize
-                        layout="total, sizes, prev, pager, next, jumper"
-                        :total=totalPage>
-                </el-pagination>
-            </div>
-            <el-divider></el-divider>
 
             <div style="text-align: center">已增加的步骤</div>
-            <el-table
-                    ref="multipleTable"
-                    :data="tableData"
-                    tooltip-effect="dark"
-                    style="width: 100%; text-align: right;"
-                    size="mini"
-                    @selection-change="handleSelectionChange">
-                <el-table-column
-                        type="selection"
-                        width="30">
-                </el-table-column>
-                <el-table-column
-                        label="接口名称"
-                        width="160">
-                    <template slot-scope="scope">{{ scope.row.date }}</template>
-                </el-table-column>
-                <el-table-column
-                        prop="name"
-                        label="接口描述"
-                        width="150">
-                </el-table-column>
-                <el-table-column
-                        prop="address"
-                        label="接口地址"
-                        show-overflow-tooltip>
-                </el-table-column>
-            </el-table>
-            <div class="block">
-                <el-pagination
-                        @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange"
-                        :current-page="currentPage"
-                        :page-sizes=pageSizes
-                        :page-size=pageSize
-                        layout="total, sizes, prev, pager, next, jumper"
-                        :total=totalPage>
-                </el-pagination>
-            </div>
-
-
-            <div style="text-align: center">
-                <el-button type="primary" @click="addCase">保存</el-button>
-            </div>
 
 
         </el-dialog>
-
     </div>
 </template>
 
