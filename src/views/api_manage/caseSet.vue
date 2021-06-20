@@ -1,7 +1,7 @@
 <template>
     <div>
-        <el-tabs type="card">
-            <el-tab-pane label="用例集合">
+        <el-tabs type="card" v-model="activeName1">
+            <el-tab-pane label="用例集合" name="first">
                 <el-col>
                     <el-input
                             style="width: 200px;
@@ -23,7 +23,7 @@
 
                 <el-col :span="15">
                     <el-table
-                            ref="multipleTable"
+                            ref="multipleTable1"
                             :data="caseSetData.caseSetList"
                             tooltip-effect="dark"
                             style="width: 100%"
@@ -93,7 +93,7 @@
                 </el-col>
                 <el-col :span="9">
                     <el-table
-                            ref="multipleTable"
+                            ref="multipleTable2"
                             :data="caseData.caseList"
                             tooltip-effect="dark"
                             style="width: 100%"
@@ -146,9 +146,9 @@
 
 
             </el-tab-pane>
-            <el-tab-pane label="编辑用例">
+            <el-tab-pane label="编辑用例" name="second">
 
-                <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
+                <el-tabs v-model="activeName11" type="card" @tab-click="handleClick">
                     <el-tab-pane label="用例信息" name="first">
                         <el-form :model="caseData" :rules="caseInfoRules" ref="ruleForm" label-width="100px"
                                  class="demo-ruleForm">
@@ -166,7 +166,7 @@
                         <el-row>
                             <el-col span="12">
                                 <el-table
-                                        ref="multipleTable"
+                                        ref="multipleTable3"
                                         :data="tableData"
                                         tooltip-effect="dark"
                                         style="width: 100%; text-align: right;"
@@ -324,19 +324,6 @@
     <el-button @click="openDialogVisible = false">取 消</el-button>
             </span>
         </el-dialog>
-
-        <el-dialog
-                :visible.sync="caseInfoDialogVisible"
-                width="50%"
-                center
-                :model="apiData" :rules="caseInfoRules" ref="ruleForm" label-width="100px"
-                class="demo-ruleForm">
-
-
-            <div style="text-align: center">已增加的步骤</div>
-
-
-        </el-dialog>
     </div>
 </template>
 
@@ -356,8 +343,10 @@
         // catCaseDetailInfo,
         deleteCaseInfo,
         // editCaseInfo,
-        listCaseInfo
+        listCaseInfo,
+        AddCaseStepInfo
     } from "../../api/case";
+
     import {listApiInfo, listProjectModuleInfo} from "../../api/api";
 
 
@@ -366,6 +355,8 @@
         name: 'module',
         data() {
             return {
+                activeName1: 'first',
+                activeName11: 'first',
                 caseInfoDialogVisible: false,
                 hasSelect: false,
                 title: '新增',
@@ -413,8 +404,6 @@
                     projectId: null,
                     moduleId: null,
                     apiList: [],
-
-
                 },
 
                 multipleSelection: [],
@@ -461,11 +450,14 @@
                 this.caseData.projectId = row.project_id;
                 this.getListCase();
             },
+
             changeStatus() {
 
             },
+
             openCaseInfo() {
-                this.caseInfoDialogVisible = true;
+                this.activeName1 = "second";
+                this.activeName11 = "first";
                 this.ListApi();
             },
 
@@ -558,7 +550,35 @@
                     let code = res.data.code;
                     let message = res.data.message;
                     if (code === 200) {
-                        this.caseInfoDialogVisible = false;
+                        this.activeName1 = "first";
+                        this.activeName11 = "first";
+                        // this.reload();
+                        this.getListCase();
+                        // this.resetCaseForm('caseData');
+                        this.$notify({
+                            title: message,
+                            type: "success"
+                        })
+                    } else {
+                        this.$notify({
+                            title: message,
+                            type: "error"
+                        })
+                    }
+                })
+            },
+
+            addCaseStep() {
+                let postData = {
+                    api_id: this.caseData.name,
+                    case_id: this.caseData.projectId,
+                };
+                AddCaseStepInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let message = res.data.message;
+                    if (code === 200) {
+                        this.activeName1 = "first";
+                        this.activeName11 = "first";
                         // this.reload();
                         this.getListCase();
                         // this.resetCaseForm('caseData');
@@ -639,28 +659,28 @@
                 this.title = '新增';
                 this.openDialogVisible = true;
                 // this.resetForm('moduleData');
-            }
-            ,
+            },
+
             handleSizeChange(val) {
                 console.log(`每页 ${val} 条`);
                 this.pageSize = val;
                 this.getListProject();
-            }
-            ,
+            },
+
             handleCurrentChange(val) {
                 console.log(`当前页: ${val}`);
                 this.currentPage = val;
                 this.getListProject();
-            }
-            ,
+            },
+
             getEnvironment() {
                 //locations是v-for里面的也是datas里面的值
                 console.log()
-            }
-            ,
+            },
+
             deleteCaseSet(id) {
-                this.caseSetData.ids = []
                 if (typeof id === "number") {
+                    this.caseSetData.ids = [];
                     this.caseSetData.ids.push(id);
                 }
                 let postData = {
@@ -671,15 +691,20 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
+                    this.reload();
                     deleteCaseSetInfo(postData).then(res => {
                         let code = res.data.code;
                         if (code === 200) {
-                            this.reload()
+                            this.$message({
+                                type: 'success',
+                                message: '删除成功!'
+                            });
+                        } else {
+                            this.$message({
+                                type: 'warning',
+                                message: '删除失败!'
+                            });
                         }
-                    });
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功!'
                     });
                 }).catch(() => {
                     this.$message({
@@ -719,6 +744,7 @@
                     });
                 });
             },
+
             catCaseSet(id) {
                 this.title = '编辑';
                 this.openDialogVisible = true;
@@ -738,8 +764,7 @@
                         this.caseSetData.desc = resData.desc;
                     }
                 })
-            }
-            ,
+            },
 
             editCaseSet() {
                 let postData = {
@@ -767,8 +792,7 @@
                     }
 
                 })
-            }
-            ,
+            },
 
             toggleSelection(rows) {
                 if (rows) {
@@ -778,21 +802,23 @@
                 } else {
                     this.$refs.multipleTable.clearSelection();
                 }
-            }
-            ,
+            },
+
             handleSelectionChange(val) {
                 this.multipleSelection = val;
                 this.multipleSelection.map((item) => {
                     this.caseSetData.ids.push(item.id)
                 });
-            }
-            ,
+                this.caseSetData.ids = Array.from(new Set(this.caseSetData.ids));//去重
+
+
+            },
 
             open() {
                 this.openDialogVisible = true;
 
-            }
-            ,
+            },
+
             submitCaseSetForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid && this.title === '新增') {
@@ -803,8 +829,8 @@
                         return false;
                     }
                 });
-            }
-            ,
+            },
+
             // submitCaseForm(formName) {
             //     this.$refs[formName].validate((valid) => {
             //         if (valid && this.title === '新增') {
@@ -823,22 +849,18 @@
 
             resetCaseSetForm(formName) {
                 this.$refs[formName].resetFields();
-            }
-            ,
+            },
+
             resetInput() {
                 this.kw = '';
                 this.getListProject();
-            }
-            ,
+            },
 
             handleCloseModuleDialog() {
                 this.openDialogVisible = false;
-            }
-            ,
+            },
+        },
 
-
-        }
-        ,
         created() {
             this.getListCaseSet();
         }

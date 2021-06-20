@@ -139,7 +139,7 @@
                     </el-table>
                     <span slot="footer" class="dialog-footer">
 <!--    <el-button @click="handleClosevariableDialog">取 消</el-button>-->
-<!--    <el-button type="primary" @click="variableDialogVisible = false">确 定</el-button>-->
+                        <!--    <el-button type="primary" @click="variableDialogVisible = false">确 定</el-button>-->
   </span>
                 </el-dialog>
             </div>
@@ -305,7 +305,6 @@
                 console.log()
             },
             deleteProject(id) {
-                console.log(id)
                 if (typeof id === "number") {
                     this.projectData.ids.push(id);
                 }
@@ -317,15 +316,20 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
+                    this.reload();
                     deleteProjectInfo(postData).then(res => {
-                        let code = res.data.code;
+                       let code = res.data.code;
                         if (code === 200) {
-                            this.reload()
+                            this.$message({
+                                type: 'success',
+                                message: '删除成功!'
+                            });
+                        } else {
+                            this.$message({
+                                type: 'warning',
+                                message: '删除失败!'
+                            });
                         }
-                    });
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功!'
                     });
                 }).catch(() => {
                     this.$message({
@@ -529,6 +533,7 @@
                 this.multipleSelection.map((item) => {
                     this.projectData.ids.push(item.id)
                 });
+                this.projectData.ids = Array.from(new Set(this.projectData.ids));//去重
             },
 
             open() {

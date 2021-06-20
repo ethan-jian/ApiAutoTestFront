@@ -750,8 +750,8 @@
             },
 
             deleteApi(id) {
-                console.log(id)
                 if (typeof id === "number") {
+                    this.ids = [];
                     this.ids.push(id);
                 }
                 let postData = {
@@ -762,15 +762,20 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
+                    this.reload();
                     deleteApiInfo(postData).then(res => {
                         let code = res.data.code;
                         if (code === 200) {
-                            this.reload()
+                            this.$message({
+                                type: 'success',
+                                message: '删除成功!'
+                            });
+                        } else {
+                            this.$message({
+                                type: 'warning',
+                                message: '删除失败!'
+                            });
                         }
-                    });
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功!'
                     });
                 }).catch(() => {
                     this.$message({
@@ -916,6 +921,7 @@
                 this.multipleSelection.map((item) => {
                     this.ids.push(item.id)
                 });
+                this.ids = Array.from(new Set(this.ids));//去重
             },
 
             open() {

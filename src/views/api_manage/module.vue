@@ -34,7 +34,7 @@
                     label="项目"
                     width="120">
             </el-table-column>
-             <el-table-column
+            <el-table-column
                     prop="desc"
                     label="描述"
                     width="120">
@@ -261,8 +261,8 @@
                 console.log()
             },
             deleteModule(id) {
-                this.moduleData.ids = []
                 if (typeof id === "number") {
+                    this.moduleData.ids = []
                     this.moduleData.ids.push(id);
                 }
                 let postData = {
@@ -273,15 +273,20 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
+                    this.reload();
                     deleteModuleInfo(postData).then(res => {
                         let code = res.data.code;
                         if (code === 200) {
-                            this.reload()
+                            this.$message({
+                                type: 'success',
+                                message: '删除成功!'
+                            });
+                        } else {
+                            this.$message({
+                                type: 'warning',
+                                message: '删除失败!'
+                            });
                         }
-                    });
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功!'
                     });
                 }).catch(() => {
                     this.$message({
@@ -353,6 +358,7 @@
                 this.multipleSelection.map((item) => {
                     this.moduleData.ids.push(item.id)
                 });
+                this.moduleData.ids = Array.from(new Set(this.moduleData.ids));//去重
             },
 
             open() {
