@@ -24,4 +24,7 @@ export const catProjectModuleInfo = function (data) {
     return postRequest('ProjectModule', data)
 };
 
+export const projectCaseSetInfo = function (data) {
+    return postRequest('projectCaseSet', data)
+};
 

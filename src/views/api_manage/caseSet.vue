@@ -155,6 +155,27 @@
                             <el-form-item label="用例名称" prop="name">
                                 <el-input v-model="caseData.name" size="mini"></el-input>
                             </el-form-item>
+                            <el-form-item>
+                                <el-select v-model="apiData.projectId" placeholder="请选择项目" size="mini"
+                                           @focus="getListProject()"
+                                           @change="getListProject()">
+                                    <el-option v-for="item in projectList"
+                                               :key="item.id"
+                                               :value="item.id"
+                                               :label="item.name"
+                                    >
+                                    </el-option>
+                                </el-select>
+                                <el-select v-model="apiData.moduleId" placeholder="请选择用例集" size="mini"
+                                           @focus="getListCaseSet()"
+                                           @change="getListCaseSet()">
+                                    <el-option v-for="item in moduleList"
+                                               :key="item.id"
+                                               :value="item.id"
+                                               :label="item.name">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
                             <el-form-item label="用例描述" prop="desc">
                                 <el-input type="textarea" v-model="caseData.desc"></el-input>
                             </el-form-item>
@@ -229,7 +250,8 @@
                                                        :label="item.name">
                                             </el-option>
                                         </el-select>
-                                        <el-button type="primary" icon="el-icon-circle-plus-outline" @click="addCase"
+                                        <el-button type="primary" icon="el-icon-circle-plus-outline"
+                                                   @click="addCaseStep"
                                                    size="mini">
                                             添加
                                         </el-button>
@@ -328,7 +350,11 @@
 </template>
 
 <script>
-    import {catProjectModuleInfo, listProjectInfo} from "../../api/project";
+    import {
+        catProjectModuleInfo,
+        listProjectInfo,
+        projectCaseSetInfo
+    } from "../../api/project";
 
     import {
         addCaseSetInfo,
@@ -344,7 +370,7 @@
         deleteCaseInfo,
         // editCaseInfo,
         listCaseInfo,
-        AddCaseStepInfo
+        addCaseStepInfo
     } from "../../api/case";
 
     import {listApiInfo, listProjectModuleInfo} from "../../api/api";
@@ -394,6 +420,7 @@
                     caseList: [],
                     projectId: null,
                     num: 1,
+                    StepData: [],
 
                 },
 
@@ -490,6 +517,21 @@
                 )
             },
 
+            listProjectCaseSet(project_id) {
+                let postData = {
+                    id: project_id,
+                };
+                projectCaseSetInfo(postData).then(res => {
+                        let code = res.data.code;
+                        let rsData = res.data.data
+                        if (code === 200) {
+                            this.moduleList = rsData;
+                            this.ListApi();
+                        }
+                    }
+                )
+            },
+
             ListApi() {
                 let postData = {
                     totalCount: this.totalPage,
@@ -573,7 +615,7 @@
                     api_id: this.caseData.name,
                     case_id: this.caseData.projectId,
                 };
-                AddCaseStepInfo(postData).then(res => {
+                addCaseStepInfo(postData).then(res => {
                     let code = res.data.code;
                     let message = res.data.message;
                     if (code === 200) {
