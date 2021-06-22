@@ -278,7 +278,10 @@
                                         tooltip-effect="dark"
                                         style="width: 100%; text-align: right;"
                                         size="mini"
-                                        @selection-change="handleSelectionChange4">
+                                        type="selection"
+                                        @selection-change="handleSelectionChange"
+                                        @select="handleSelectionChange4"
+                                >
                                     <el-table-column
                                             type="selection"
                                             width="30">
@@ -913,40 +916,39 @@
             ,
 
             handleSelectionChange1(val) {
+                this.caseSetData.ids=[];
                 this.multipleSelection = val;
                 this.multipleSelection.map((item) => {
                     this.caseSetData.ids.push(item.id)
                 });
-                this.caseSetData.ids = Array.from(new Set(this.caseSetData.ids));//去重
             }
             ,
 
             handleSelectionChange2(val) {
+                this.caseData.ids=[];
                 this.multipleSelection = val;
                 this.multipleSelection.map((item) => {
                     this.caseData.ids.push(item.id)
                 });
-                this.caseData.ids = Array.from(new Set(this.caseData.ids));//去重
             }
             ,
 
             handleSelectionChange3(val) {
+                this.stepData.ids = []
                 this.multipleSelection = val;
                 this.multipleSelection.map((item) => {
                     this.stepData.ids.push(item.id)
                 });
-                this.stepData.ids = Array.from(new Set(this.stepData.ids));//去重
             }
             ,
 
             handleSelectionChange4(val) {
+                this.apiData.ids = []
                 this.multipleSelection = val;
                 this.multipleSelection.map((item) => {
                     this.apiData.ids.push(item.id)
                 });
-                this.apiData.ids = Array.from(new Set(this.apiData.ids));//去重
-            }
-            ,
+            },
 
             open() {
                 this.openDialogVisible = true;
