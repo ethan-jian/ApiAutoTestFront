@@ -29,7 +29,9 @@
                             style="width: 100%"
                             highlight-current-row
                             @cell-click="handle"
-                            @selection-change="handleSelectionChange">
+                            @selection-change="handleSelectionChange1"
+                            @tab-click="initdata(0)"
+                    >
                         <el-table-column
                                 type="selection"
                                 width="50">
@@ -98,7 +100,7 @@
                             tooltip-effect="dark"
                             style="width: 100%"
                             highlight-current-row
-                            @selection-change="handleSelectionChange">
+                            @selection-change="handleSelectionChange2">
                         <el-table-column
                                 type="selection"
                                 width="50">
@@ -151,12 +153,12 @@
                 <el-tabs v-model="activeName11" type="card" @tab-click="handleClick">
                     <el-tab-pane label="用例信息" name="first">
                         <el-form :model="caseData" :rules="caseInfoRules" ref="ruleForm" label-width="100px"
-                                 class="demo-ruleForm">
+                                 class="demo-ruleForm" size="mini" style="float: left">
                             <el-form-item label="用例名称" prop="name">
                                 <el-input v-model="caseData.name" size="mini"></el-input>
                             </el-form-item>
-                            <el-form-item>
-                                <el-select v-model="apiData.projectId" placeholder="请选择项目" size="mini"
+                            <el-form-item label="所属项目">
+                                <el-select v-model="caseSetData.projectId" placeholder="请选择项目" size="mini"
                                            @focus="getListProject()"
                                            @change="getListProject()">
                                     <el-option v-for="item in projectList"
@@ -166,10 +168,12 @@
                                     >
                                     </el-option>
                                 </el-select>
-                                <el-select v-model="apiData.moduleId" placeholder="请选择用例集" size="mini"
-                                           @focus="getListCaseSet()"
-                                           @change="getListCaseSet()">
-                                    <el-option v-for="item in moduleList"
+                            </el-form-item>
+                            <el-form-item label="用例集">
+                                <el-select v-model="caseSetData.id" placeholder="请选择用例集" size="mini"
+                                           @focus="listProjectCaseSet(caseSetData.projectId)"
+                                           @change="listProjectCaseSet(caseSetData.projectId)">
+                                    <el-option v-for="item in caseSetData.caseSetList "
                                                :key="item.id"
                                                :value="item.id"
                                                :label="item.name">
@@ -185,32 +189,43 @@
                     </el-tab-pane>
                     <el-tab-pane label="用例步骤" name="second">
                         <el-row>
-                            <el-col span="12">
+                            <el-col span="10">
                                 <el-table
-                                        ref="multipleTable3"
-                                        :data="tableData"
+                                        ref="multipleTable"
+                                        :data="stepData.stepList"
                                         tooltip-effect="dark"
                                         style="width: 100%; text-align: right;"
                                         size="mini"
-                                        @selection-change="handleSelectionChange">
+                                        @selection-change="handleSelectionChange3">
                                     <el-table-column
                                             type="selection"
                                             width="30">
                                     </el-table-column>
                                     <el-table-column
-                                            label="接口名称"
-                                            width="160">
-                                        <template slot-scope="scope">{{ scope.row.date }}</template>
-                                    </el-table-column>
-                                    <el-table-column
                                             prop="name"
-                                            label="接口描述"
+                                            label="接口名称"
                                             width="150">
                                     </el-table-column>
                                     <el-table-column
-                                            prop="address"
+                                            prop="desc"
+                                            label="描述"
+                                            width="150">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="url"
                                             label="接口地址"
                                             show-overflow-tooltip>
+                                    </el-table-column>
+                                    <el-table-column
+                                            label="操作"
+                                            width="90">
+                                        <template slot-scope="scope">
+                                            <!--                    <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>-->
+                                            <el-button @click="catCaseStep(scope.row.id)" type="text" size="small">编辑
+                                            </el-button>
+                                            <el-button @click="deleteCaseStep(scope.row.id)" type="text" size="small">删除
+                                            </el-button>
+                                        </template>
                                     </el-table-column>
                                 </el-table>
                                 <div class="block">
@@ -232,8 +247,8 @@
                                     <el-form-item>
                                         添加步骤
                                         <el-select v-model="apiData.projectId" placeholder="项目" size="mini"
-                                                   @focus="getListProject()"
-                                                   @change="getListProject()">
+                                                   @focus="getListProject('listApi')"
+                                                   @change="getListProject('listApi')">
                                             <el-option v-for="item in projectList"
                                                        :key="item.id"
                                                        :value="item.id"
@@ -263,7 +278,7 @@
                                         tooltip-effect="dark"
                                         style="width: 100%; text-align: right;"
                                         size="mini"
-                                        @selection-change="handleSelectionChange">
+                                        @selection-change="handleSelectionChange4">
                                     <el-table-column
                                             type="selection"
                                             width="30">
@@ -370,7 +385,7 @@
         deleteCaseInfo,
         // editCaseInfo,
         listCaseInfo,
-        addCaseStepInfo
+        // addCaseStepInfo
     } from "../../api/case";
 
     import {listApiInfo, listProjectModuleInfo} from "../../api/api";
@@ -414,17 +429,27 @@
                 },
 
                 caseData: {
+                    id: null,
+                    ids: [],
                     name: null,
                     caseSetId: null,
                     desc: null,
                     caseList: [],
                     projectId: null,
                     num: 1,
-                    StepData: [],
 
                 },
 
+                stepData: {
+                    id: null,
+                    ids: [],
+                    num: 1,
+                    stepList: []
+                },
+
                 apiData: {
+                    id: null,
+                    ids: [],
                     name: null,
                     caseSetId: null,
                     desc: null,
@@ -475,6 +500,8 @@
                 this.title = "新增";
                 this.caseData.caseSetId = row.id;
                 this.caseData.projectId = row.project_id;
+                this.caseSetData.projectId = row.project_id;
+                this.caseSetData.id = row.id;
                 this.getListCase();
             },
 
@@ -483,9 +510,12 @@
             },
 
             openCaseInfo() {
+                this.caseData.name = null;
+                this.getListProject();
+                this.getListCaseSet();
+                this.ListApi();
                 this.activeName1 = "second";
                 this.activeName11 = "first";
-                this.ListApi();
             },
 
             getProjectModule() {
@@ -525,8 +555,7 @@
                         let code = res.data.code;
                         let rsData = res.data.data
                         if (code === 200) {
-                            this.moduleList = rsData;
-                            this.ListApi();
+                            this.caseSetData.caseSetList = rsData;
                         }
                     }
                 )
@@ -611,31 +640,53 @@
             },
 
             addCaseStep() {
-                let postData = {
-                    api_id: this.caseData.name,
-                    case_id: this.caseData.projectId,
-                };
-                addCaseStepInfo(postData).then(res => {
-                    let code = res.data.code;
-                    let message = res.data.message;
-                    if (code === 200) {
-                        this.activeName1 = "first";
-                        this.activeName11 = "first";
-                        // this.reload();
-                        this.getListCase();
-                        // this.resetCaseForm('caseData');
-                        this.$notify({
-                            title: message,
-                            type: "success"
-                        })
-                    } else {
-                        this.$notify({
-                            title: message,
-                            type: "error"
-                        })
+                const hasSelectApiId = this.apiData.ids;
+                const allSelectApiId = this.apiData.apiList;
+                for (let i = 0; i < hasSelectApiId.length; i++) {
+                    for (let j = 0; j < allSelectApiId.length; j++) {
+                        if (hasSelectApiId[i] === allSelectApiId[j]['id']) {
+                            this.stepData.stepList.push(allSelectApiId[j])
+                        }
                     }
-                })
+                }
             },
+
+            deleteCaseStep(id) {
+                const stepList = this.stepData.stepList;
+                for (var i = 0; i < stepList.length; i++) {
+                    if (stepList[i].id === id) {
+                        stepList.splice(i, 1);
+                    }
+                }
+            },
+
+            // addCaseStep() {
+            //     let postData = {
+            //         api_id_list: this.apiData.ids,
+            //         case_id: this.caseData.id,
+            //     };
+            //
+            //     addCaseStepInfo(postData).then(res => {
+            //         let code = res.data.code;
+            //         let message = res.data.message;
+            //         if (code === 200) {
+            //             this.activeName1 = "first";
+            //             this.activeName11 = "first";
+            //             // this.reload();
+            //             this.getListCase();
+            //             // this.resetCaseForm('caseData');
+            //             this.$notify({
+            //                 title: message,
+            //                 type: "success"
+            //             })
+            //         } else {
+            //             this.$notify({
+            //                 title: message,
+            //                 type: "error"
+            //             })
+            //         }
+            //     })
+            // },
 
             getListCaseSet() {
                 let postData = {
@@ -644,7 +695,6 @@
                     currentPage: this.currentPage,
                     kw: this.kw,
                     sort: [{"direct": "DESC", "field": "created_time"}]
-
                 };
                 listCaseSetInfo(postData).then(res => {
                     let code = res.data.code;
@@ -656,7 +706,8 @@
 
                     }
                 })
-            },
+            }
+            ,
 
             getListCase() {
                 let postData = {
@@ -677,10 +728,12 @@
                         this.caseData.caseList = rsData;
                     }
                 })
-            },
+            }
+            ,
 
-            getListProject() {
+            getListProject(listApi) {
                 this.apiData.moduleId = null;
+                this.caseSetData.id = null;
                 let postData = {
                     kw: this.kw,
                     sort: [{"direct": "DESC", "field": "created_time"}]
@@ -692,33 +745,41 @@
                     if (code === 200) {
                         this.totalPage = res.data.totalCount;
                         this.projectList = rsData;
-                        this.ListApi();
+                        if (listApi) {
+                            this.ListApi();
+                        }
+
                     }
                 })
-            },
+            }
+            ,
 
             openAddCaseSet() {
                 this.title = '新增';
                 this.openDialogVisible = true;
                 // this.resetForm('moduleData');
-            },
+            }
+            ,
 
             handleSizeChange(val) {
                 console.log(`每页 ${val} 条`);
                 this.pageSize = val;
                 this.getListProject();
-            },
+            }
+            ,
 
             handleCurrentChange(val) {
                 console.log(`当前页: ${val}`);
                 this.currentPage = val;
                 this.getListProject();
-            },
+            }
+            ,
 
             getEnvironment() {
                 //locations是v-for里面的也是datas里面的值
                 console.log()
-            },
+            }
+            ,
 
             deleteCaseSet(id) {
                 if (typeof id === "number") {
@@ -754,7 +815,8 @@
                         message: '已取消删除'
                     });
                 });
-            },
+            }
+            ,
 
             deleteCase(id) {
                 this.caseData.ids = []
@@ -785,7 +847,8 @@
                         message: '已取消删除'
                     });
                 });
-            },
+            }
+            ,
 
             catCaseSet(id) {
                 this.title = '编辑';
@@ -806,7 +869,8 @@
                         this.caseSetData.desc = resData.desc;
                     }
                 })
-            },
+            }
+            ,
 
             editCaseSet() {
                 let postData = {
@@ -834,7 +898,8 @@
                     }
 
                 })
-            },
+            }
+            ,
 
             toggleSelection(rows) {
                 if (rows) {
@@ -844,22 +909,50 @@
                 } else {
                     this.$refs.multipleTable.clearSelection();
                 }
-            },
+            }
+            ,
 
-            handleSelectionChange(val) {
+            handleSelectionChange1(val) {
                 this.multipleSelection = val;
                 this.multipleSelection.map((item) => {
                     this.caseSetData.ids.push(item.id)
                 });
                 this.caseSetData.ids = Array.from(new Set(this.caseSetData.ids));//去重
+            }
+            ,
 
+            handleSelectionChange2(val) {
+                this.multipleSelection = val;
+                this.multipleSelection.map((item) => {
+                    this.caseData.ids.push(item.id)
+                });
+                this.caseData.ids = Array.from(new Set(this.caseData.ids));//去重
+            }
+            ,
 
-            },
+            handleSelectionChange3(val) {
+                this.multipleSelection = val;
+                this.multipleSelection.map((item) => {
+                    this.stepData.ids.push(item.id)
+                });
+                this.stepData.ids = Array.from(new Set(this.stepData.ids));//去重
+            }
+            ,
+
+            handleSelectionChange4(val) {
+                this.multipleSelection = val;
+                this.multipleSelection.map((item) => {
+                    this.apiData.ids.push(item.id)
+                });
+                this.apiData.ids = Array.from(new Set(this.apiData.ids));//去重
+            }
+            ,
 
             open() {
                 this.openDialogVisible = true;
 
-            },
+            }
+            ,
 
             submitCaseSetForm(formName) {
                 this.$refs[formName].validate((valid) => {
@@ -871,7 +964,8 @@
                         return false;
                     }
                 });
-            },
+            }
+            ,
 
             // submitCaseForm(formName) {
             //     this.$refs[formName].validate((valid) => {
@@ -887,20 +981,24 @@
 
             resetCaseForm(formName) {
                 this.$refs[formName].resetFields();
-            },
+            }
+            ,
 
             resetCaseSetForm(formName) {
                 this.$refs[formName].resetFields();
-            },
+            }
+            ,
 
             resetInput() {
                 this.kw = '';
                 this.getListProject();
-            },
+            }
+            ,
 
             handleCloseModuleDialog() {
                 this.openDialogVisible = false;
-            },
+            }
+            ,
         },
 
         created() {

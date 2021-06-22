@@ -24,5 +24,7 @@ export const deleteCaseInfo = function (data) {
     return postRequest('DeleteCase', data)
 };
 
-
+export const addCaseStepInfo = function (data) {
+    return postRequest('AddCaseStep', data)
+};
 
