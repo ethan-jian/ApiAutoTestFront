@@ -655,7 +655,9 @@
             },
 
             deleteCaseStep(id) {
+                console.log(id)
                 const stepList = this.stepData.stepList;
+                console.log(stepList)
                 for (var i = 0; i < stepList.length; i++) {
                     if (stepList[i].id === id) {
                         stepList.splice(i, 1);
