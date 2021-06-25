@@ -142,7 +142,7 @@
 
         <el-dialog
                 :title="title"
-                :visible.sync="casetSetDialogVisible"
+                :visible.sync="caseSetDialogVisible"
                 width="30%"
                 :before-close="handleCloseModuleDialog">
             <div>
@@ -411,7 +411,7 @@
 
     import {
         addCaseInfo,
-        // catCaseDetailInfo,
+        catCaseDetailInfo,
         deleteCaseInfo,
         // editCaseInfo,
         listCaseInfo,
@@ -426,7 +426,7 @@
         name: 'module',
         data() {
             return {
-                casetSetDialogVisible: false,
+                caseSetDialogVisible: false,
                 caseInfoDialogVisible: false,
                 caseDetailInfoDialogVisible: false,
                 hasSelect: false,
@@ -537,10 +537,6 @@
 
             },
 
-            catCase() {
-                this.caseDetailInfoDialogVisible = true;
-            },
-
             openCaseInfo() {
                 this.caseData.name = null;
                 this.getListProject();
@@ -622,7 +618,7 @@
                     let code = res.data.code;
                     let message = res.data.message;
                     if (code === 200) {
-                        this.casetSetDialogVisible = false;
+                        this.caseSetDialogVisible = false;
                         this.reload()
                         this.resetCaseSetForm('caseSetData')
                         this.$notify({
@@ -667,18 +663,6 @@
                     }
                 })
             },
-
-            // addCaseStep() {
-            //     const hasSelectApiId = this.apiData.ids;
-            //     const allSelectApiId = this.apiData.apiList;
-            //     for (let i = 0; i < hasSelectApiId.length; i++) {
-            //         for (let j = 0; j < allSelectApiId.length; j++) {
-            //             if (hasSelectApiId[i] === allSelectApiId[j]['id']) {
-            //                 this.stepData.stepList.push(allSelectApiId[j])
-            //             }
-            //         }
-            //     }
-            // },
 
             deleteCaseStep(id) {
                 console.log(id)
@@ -734,8 +718,7 @@
 
                     }
                 })
-            }
-            ,
+            },
 
             getListCase() {
                 let postData = {
@@ -748,7 +731,6 @@
 
                 };
                 listCaseInfo(postData).then(res => {
-
                     let code = res.data.code;
                     let rsData = res.data.data;
                     if (code === 200) {
@@ -756,12 +738,11 @@
                         this.caseData.caseList = rsData;
                     }
                 })
-            }
-            ,
+            },
 
             getListProject(listApi) {
                 this.apiData.moduleId = null;
-                // this.caseSetData.id = null;
+                this.caseSetData.id = null;
                 let postData = {
                     kw: this.kw,
                     sort: [{"direct": "DESC", "field": "created_time"}]
@@ -783,7 +764,7 @@
 
             openAddCaseSet() {
                 this.title = '新增';
-                this.casetSetDialogVisible = true;
+                this.caseSetDialogVisible = true;
                 // this.resetForm(this.caseSetData);
                 this.resetCaseSetForm('caseSetData')
             },
@@ -872,9 +853,28 @@
                 });
             },
 
+            catCase(id) {
+                this.caseDetailInfoDialogVisible = true;
+                let postData = {
+                    "id": id
+                };
+                catCaseDetailInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let resData = res.data.data[0];
+                    if (code === 200) {
+                        this.caseData.name = resData.name;
+                        this.getListProject()
+                        this.caseSetData.id = resData.id;
+                        // this.getListCaseSet()
+                        this.caseData.projectId = resData.project_id;
+                        this.caseData.desc = resData.desc;
+                    }
+                })
+            },
+
             catCaseSet(id) {
                 this.title = '编辑';
-                this.casetSetDialogVisible = true;
+                this.caseSetDialogVisible = true;
                 this.caseSetData.id = id;
                 let postData = {
                     "id": id
@@ -965,7 +965,6 @@
 
             open() {
                 this.openDialogVisible = true;
-
             },
 
             submitCaseSetForm(formName) {
@@ -1006,8 +1005,20 @@
             },
 
             handleCloseModuleDialog() {
-                this.casetSetDialogVisible = false;
+                this.caseSetDialogVisible = false;
             },
+
+            // addCaseStep() {
+            //     const hasSelectApiId = this.apiData.ids;
+            //     const allSelectApiId = this.apiData.apiList;
+            //     for (let i = 0; i < hasSelectApiId.length; i++) {
+            //         for (let j = 0; j < allSelectApiId.length; j++) {
+            //             if (hasSelectApiId[i] === allSelectApiId[j]['id']) {
+            //                 this.stepData.stepList.push(allSelectApiId[j])
+            //             }
+            //         }
+            //     }
+            // },
         },
 
         created() {
