@@ -203,7 +203,7 @@
                     <el-select v-model="caseSetData.id" placeholder="请选择用例集" disabled size="mini"
                                @focus="listProjectCaseSet(caseSetData.projectId)"
                                @change="listProjectCaseSet(caseSetData.projectId)">
-                        <el-option v-for="item in caseSetData.caseSetList "
+                        <el-option v-for="item in caseSetData.caseSetList"
                                    :key="item.id"
                                    :value="item.id"
                                    :label="item.name">
@@ -230,8 +230,8 @@
                 </el-form-item>
                 <el-form-item label="所属项目">
                     <el-select v-model="caseSetData.projectId" placeholder="请选择项目" size="mini"
-                               @focus="getListProject()"
-                               @change="getListProject()">
+                               @focus="getListProject(null, true)"
+                               @change="getListProject(null, true)">
                         <el-option v-for="item in projectList"
                                    :key="item.id"
                                    :value="item.id"
@@ -381,7 +381,7 @@
                         </el-pagination>
                     </div>
                     <div style="text-align: center">
-                        <el-button type="primary" style="float: right" @click="addCase">保存</el-button>
+                        <el-button type="primary" style="float: right" @click="editCase">保存</el-button>
                     </div>
                 </el-col>
 
@@ -413,7 +413,7 @@
         addCaseInfo,
         catCaseDetailInfo,
         deleteCaseInfo,
-        // editCaseInfo,
+        editCaseInfo,
         listCaseInfo,
         addCaseStepInfo
     } from "../../api/case";
@@ -533,81 +533,6 @@
                 this.getListCase();
             },
 
-            changeStatus() {
-
-            },
-
-            openCaseInfo() {
-                this.caseData.name = null;
-                this.getListProject();
-                this.getListCaseSet();
-                this.ListApi();
-                this.caseInfoDialogVisible = true;
-            },
-
-            getProjectModule() {
-                let postData = {
-                    id: this.apiData.projectId,
-                };
-                catProjectModuleInfo(postData).then(res => {
-                    let code = res.data.code;
-                    let rsData = res.data.data
-                    if (code === 200) {
-                        this.totalPage = res.data.totalCount;
-                        this.moduleList = rsData;
-                    }
-                })
-            },
-
-            listProjectModule(project_id) {
-                let postData = {
-                    id: project_id,
-                };
-                listProjectModuleInfo(postData).then(res => {
-                        let code = res.data.code;
-                        let rsData = res.data.data
-                        if (code === 200) {
-                            this.moduleList = rsData;
-                            this.ListApi();
-                        }
-                    }
-                )
-            },
-
-            listProjectCaseSet(project_id) {
-                let postData = {
-                    id: project_id,
-                };
-                projectCaseSetInfo(postData).then(res => {
-                        let code = res.data.code;
-                        let rsData = res.data.data
-                        if (code === 200) {
-                            this.caseSetData.caseSetList = rsData;
-                        }
-                    }
-                )
-            },
-
-            ListApi() {
-                let postData = {
-                    totalCount: this.totalPage,
-                    pageSize: this.pageSize,
-                    currentPage: this.currentPage,
-                    project_id: this.apiData.projectId,
-                    module_id: this.apiData.moduleId,
-                    sort: [{"direct": "DESC", "field": "created_time"}]
-                };
-                listApiInfo(postData).then(res => {
-                    let code = res.data.code;
-                    let rsData = res.data.data
-                    if (code === 200) {
-                        this.totalPage = res.data.totalCount;
-                        this.apiData.apiList = rsData;
-
-                    }
-                })
-            },
-
             addCaseSet() {
                 let postData = {
                     name: this.caseSetData.name,
@@ -664,17 +589,6 @@
                 })
             },
 
-            deleteCaseStep(id) {
-                console.log(id)
-                const stepList = this.stepData.stepList;
-                console.log(stepList)
-                for (var i = 0; i < stepList.length; i++) {
-                    if (stepList[i].id === id) {
-                        stepList.splice(i, 1);
-                    }
-                }
-            },
-
             addCaseStep() {
                 let postData = {
                     api_id_list: this.apiData.ids,
@@ -696,6 +610,85 @@
                             title: message,
                             type: "error"
                         })
+                    }
+                })
+            },
+
+            // addCaseStep() {
+            //     const hasSelectApiId = this.apiData.ids;
+            //     const allSelectApiId = this.apiData.apiList;
+            //     for (let i = 0; i < hasSelectApiId.length; i++) {
+            //         for (let j = 0; j < allSelectApiId.length; j++) {
+            //             if (hasSelectApiId[i] === allSelectApiId[j]['id']) {
+            //                 this.stepData.stepList.push(allSelectApiId[j])
+            //             }
+            //         }
+            //     }
+            // },
+
+            listProjectModule(project_id) {
+                let postData = {
+                    id: project_id,
+                };
+                listProjectModuleInfo(postData).then(res => {
+                        let code = res.data.code;
+                        let rsData = res.data.data
+                        if (code === 200) {
+                            this.moduleList = rsData;
+                            this.ListApi();
+                        }
+                    }
+                )
+            },
+
+            listProjectCaseSet(project_id) {
+                let postData = {
+                    id: project_id,
+                };
+                projectCaseSetInfo(postData).then(res => {
+                        let code = res.data.code;
+                        let rsData = res.data.data
+                        if (code === 200) {
+                            this.caseSetData.caseSetList = rsData;
+                        }
+                    }
+                )
+            },
+
+            ListApi() {
+                let postData = {
+                    totalCount: this.totalPage,
+                    pageSize: this.pageSize,
+                    currentPage: this.currentPage,
+                    project_id: this.apiData.projectId,
+                    module_id: this.apiData.moduleId,
+                    sort: [{"direct": "DESC", "field": "created_time"}]
+                };
+                listApiInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let rsData = res.data.data
+                    if (code === 200) {
+                        this.totalPage = res.data.totalCount;
+                        this.apiData.apiList = rsData;
+
+                    }
+                })
+            },
+
+            open() {
+                this.openDialogVisible = true;
+            },
+
+            getProjectModule() {
+                let postData = {
+                    id: this.apiData.projectId,
+                };
+                catProjectModuleInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let rsData = res.data.data
+                    if (code === 200) {
+                        this.totalPage = res.data.totalCount;
+                        this.moduleList = rsData;
                     }
                 })
             },
@@ -740,13 +733,14 @@
                 })
             },
 
-            getListProject(listApi) {
+            getListProject(listApi, listCaseSet) {
                 this.apiData.moduleId = null;
-                this.caseSetData.id = null;
+                if (listCaseSet) {
+                    this.caseSetData.id = null;
+                }
                 let postData = {
                     kw: this.kw,
                     sort: [{"direct": "DESC", "field": "created_time"}]
-
                 };
                 listProjectInfo(postData).then(res => {
                     let code = res.data.code;
@@ -762,28 +756,15 @@
                 })
             },
 
-            openAddCaseSet() {
-                this.title = '新增';
-                this.caseSetDialogVisible = true;
-                // this.resetForm(this.caseSetData);
-                this.resetCaseSetForm('caseSetData')
-            },
-
-            handleSizeChange(val) {
-                console.log(`每页 ${val} 条`);
-                this.pageSize = val;
-                this.getListProject();
-            },
-
-            handleCurrentChange(val) {
-                console.log(`当前页: ${val}`);
-                this.currentPage = val;
-                this.getListProject();
-            },
-
-            getEnvironment() {
-                //locations是v-for里面的也是datas里面的值
-                console.log()
+            deleteCaseStep(id) {
+                console.log(id)
+                const stepList = this.stepData.stepList;
+                console.log(stepList)
+                for (var i = 0; i < stepList.length; i++) {
+                    if (stepList[i].id === id) {
+                        stepList.splice(i, 1);
+                    }
+                }
             },
 
             deleteCaseSet(id) {
@@ -853,25 +834,6 @@
                 });
             },
 
-            catCase(id) {
-                this.caseDetailInfoDialogVisible = true;
-                let postData = {
-                    "id": id
-                };
-                catCaseDetailInfo(postData).then(res => {
-                    let code = res.data.code;
-                    let resData = res.data.data[0];
-                    if (code === 200) {
-                        this.caseData.name = resData.name;
-                        this.getListProject()
-                        this.caseSetData.id = resData.id;
-                        // this.getListCaseSet()
-                        this.caseData.projectId = resData.project_id;
-                        this.caseData.desc = resData.desc;
-                    }
-                })
-            },
-
             catCaseSet(id) {
                 this.title = '编辑';
                 this.caseSetDialogVisible = true;
@@ -881,17 +843,34 @@
                 };
                 catCaseSetDetailInfo(postData).then(res => {
                     let code = res.data.code;
-                    // let message = res.data.message;
                     let resData = res.data.data[0];
                     if (code === 200) {
                         this.caseSetData.name = resData.name;
-                        this.getListProject()
+                        this.getListProject();
                         this.caseSetData.projectId = resData.project_id;
                         this.caseSetData.desc = resData.desc;
-
                     }
                 })
             },
+
+            catCase(id) {
+                this.caseDetailInfoDialogVisible = true;
+                this.caseData.id = id;
+                let postData = {
+                    "id": id
+                };
+                catCaseDetailInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let resData = res.data.data[0];
+                    if (code === 200) {
+                        this.caseData.name = resData.name;
+                        this.getListProject();
+                        this.caseData.desc = resData.desc;
+                    }
+                })
+            },
+
+
 
             editCaseSet() {
                 let postData = {
@@ -904,7 +883,7 @@
                     let code = res.data.code;
                     let message = res.data.message;
                     if (code === 200) {
-                        this.openDialogVisible = false;
+                        this.caseSetDialogVisible = false;
                         this.reload()
                         this.resetForm('caseSetData')
                         this.$notify({
@@ -919,6 +898,71 @@
                     }
 
                 })
+            },
+
+            editCase() {
+                let postData = {
+                    id: this.caseData.id,
+                    name: this.caseData.name,
+                    project_id: this.caseData.projectId,
+                    case_set_id: this.caseSetData.id,
+                    desc: this.caseData.desc,
+                };
+                editCaseInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let message = res.data.message;
+                    if (code === 200) {
+                        this.caseDetailInfoDialogVisible = false;
+                        this.reload()
+                        this.resetForm('caseSetData')
+                        this.$notify({
+                            title: message,
+                            type: "success"
+                        })
+                    } else {
+                        this.$notify({
+                            title: message,
+                            type: "error"
+                        })
+                    }
+
+                })
+            },
+
+            changeStatus() {
+
+            },
+
+            openCaseInfo() {
+                this.caseData.name = null;
+                this.getListProject();
+                this.getListCaseSet();
+                this.ListApi();
+                this.caseInfoDialogVisible = true;
+            },
+
+            openAddCaseSet() {
+                this.title = '新增';
+                this.caseSetDialogVisible = true;
+                // this.resetForm(this.caseSetData);
+                this.resetCaseSetForm('caseSetData')
+            },
+
+            handleSizeChange(val) {
+                console.log(`每页 ${val} 条`);
+                this.pageSize = val;
+                this.getListProject();
+            },
+
+            handleCurrentChange(val) {
+                console.log(`当前页: ${val}`);
+                this.currentPage = val;
+                this.getListProject();
+            },
+
+            getEnvironment() {
+                //locations是v-for里面的也是datas里面的值
+                console.log()
             },
 
             toggleSelection(rows) {
@@ -963,10 +1007,6 @@
                 });
             },
 
-            open() {
-                this.openDialogVisible = true;
-            },
-
             submitCaseSetForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid && this.title === '新增') {
@@ -1008,17 +1048,6 @@
                 this.caseSetDialogVisible = false;
             },
 
-            // addCaseStep() {
-            //     const hasSelectApiId = this.apiData.ids;
-            //     const allSelectApiId = this.apiData.apiList;
-            //     for (let i = 0; i < hasSelectApiId.length; i++) {
-            //         for (let j = 0; j < allSelectApiId.length; j++) {
-            //             if (hasSelectApiId[i] === allSelectApiId[j]['id']) {
-            //                 this.stepData.stepList.push(allSelectApiId[j])
-            //             }
-            //         }
-            //     }
-            // },
         },
 
         created() {
