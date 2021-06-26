@@ -12,6 +12,7 @@
     "core-js": "^3.6.5",
     "element-ui": "^2.14.1",
     "jsoneditor": "^9.1.9",
+    "sortable.js": "^0.3.0",
     "vue": "^2.6.11",
     "vue-json-editor": "^1.4.3",
     "vue-json-ui-editor": "^1.0.0",

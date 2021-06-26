@@ -28,3 +28,10 @@ export const addCaseStepInfo = function (data) {
     return postRequest('AddCaseStep', data)
 };
 
+export const listCaseStepInfo = function (data) {
+    return postRequest('ListCaseStep', data)
+};
+
+export const deleteCaseStepInfo = function (data) {
+    return postRequest('DeleteCaseStep', data)
+};

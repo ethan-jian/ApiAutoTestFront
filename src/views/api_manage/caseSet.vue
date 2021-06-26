@@ -26,7 +26,7 @@
                     style="width: 100%"
                     highlight-current-row
                     @cell-click="handle"
-                    @selection-change="handleSelectionChange1"
+                    @selection-change="handleSelectionCaseSet"
             >
                 <el-table-column
                         type="selection"
@@ -95,7 +95,7 @@
                     tooltip-effect="dark"
                     style="width: 100%"
                     highlight-current-row
-                    @selection-change="handleSelectionChange2">
+                    @selection-change="handleSelectionCase">
                 <el-table-column
                         type="selection"
                         width="50">
@@ -146,14 +146,15 @@
                 width="30%"
                 :before-close="handleCloseModuleDialog">
             <div>
-                <el-form :model="caseSetData" :rules="rules" ref="caseSetData" label-width="80px" class="demo-ruleForm">
+                <el-form :model="caseSetData" :rules="caseSetRules" ref="caseSetData" label-width="80px"
+                         class="demo-ruleForm">
                     <el-form-item label-position="left" label="用例集合" prop="name">
                         <el-input v-model="caseSetData.name" size="mini"></el-input>
                     </el-form-item>
                     <el-form-item label-position="left" label="项目名称" prop="projectId">
                         <el-select v-model="caseSetData.projectId"
                                    placeholder="请选择项目"
-                                   @focus="getListProject"
+                                   @focus="getListProject(false, false)"
                         >
                             <el-option v-for="item in projectList"
                                        :key="item.id"
@@ -264,14 +265,14 @@
                             tooltip-effect="dark"
                             style="width: 100%; text-align: right;"
                             size="mini"
-                            @selection-change="handleSelectionChange3">
+                            @selection-change="handleSelectionStep">
                         <el-table-column
                                 type="selection"
                                 width="30">
                         </el-table-column>
                         <el-table-column
                                 prop="name"
-                                label="接口名称"
+                                label="步骤"
                                 width="150">
                         </el-table-column>
                         <el-table-column
@@ -281,7 +282,7 @@
                         </el-table-column>
                         <el-table-column
                                 prop="url"
-                                label="接口地址"
+                                label="地址"
                                 show-overflow-tooltip>
                         </el-table-column>
                         <el-table-column
@@ -346,8 +347,7 @@
                             style="width: 100%; text-align: right;"
                             size="mini"
                             type="selection"
-                            @selection-change="handleSelectionChange"
-                            @select="handleSelectionChange4"
+                            @selection-change="handleSelectionApi"
                     >
                         <el-table-column
                                 type="selection"
@@ -355,7 +355,7 @@
                         </el-table-column>
                         <el-table-column
                                 prop="name"
-                                label="接口名称"
+                                label="接口"
                                 width="150">
                         </el-table-column>
                         <el-table-column
@@ -365,7 +365,7 @@
                         </el-table-column>
                         <el-table-column
                                 prop="url"
-                                label="接口地址"
+                                label="地址"
                                 show-overflow-tooltip>
                         </el-table-column>
                     </el-table>
@@ -415,7 +415,9 @@
         deleteCaseInfo,
         editCaseInfo,
         listCaseInfo,
-        addCaseStepInfo
+        addCaseStepInfo,
+        listCaseStepInfo,
+        deleteCaseStepInfo
     } from "../../api/case";
 
     import {listApiInfo, listProjectModuleInfo} from "../../api/api";
@@ -443,14 +445,11 @@
                 totalPage: 0,
                 projectList: [],
                 moduleList: [],
-                projectId: null,
-                moduleId: null,
 
                 caseSetData: {
                     id: null,
                     ids: [],
                     name: null,
-                    url: null,
                     desc: null,
                     projectId: null,
                     caseSetList: [],
@@ -465,13 +464,13 @@
                     caseList: [],
                     projectId: null,
                     num: 1,
-
                 },
 
                 stepData: {
                     id: null,
                     ids: [],
                     num: 1,
+                    caseId: null,
                     stepList: []
                 },
 
@@ -487,7 +486,7 @@
                 },
 
                 multipleSelection: [],
-                rules: {
+                caseSetRules: {
                     name: [
                         {required: true, message: '请输入名称', trigger: 'blur'},
                         {min: 2, max: 25, message: '长度在 2 到 25 个字符', trigger: 'blur'}
@@ -598,13 +597,11 @@
                     let code = res.data.code;
                     let message = res.data.message;
                     if (code === 200) {
-                        // this.reload();
-                        this.getListCase();
-                        // this.resetCaseForm('caseData');
-                        this.$notify({
-                            title: message,
-                            type: "success"
-                        })
+                        this.getListCaseStep()
+                        // this.$notify({
+                        //     title: message,
+                        //     type: "success"
+                        // })
                     } else {
                         this.$notify({
                             title: message,
@@ -713,6 +710,24 @@
                 })
             },
 
+            getListCaseStep() {
+                let postData = {
+                    totalCount: this.totalPage,
+                    pageSize: this.pageSize,
+                    currentPage: this.currentPage,
+                    kw: this.caseData.id,
+                    sort: [{"direct": "ASC", "field": "created_time"}]
+                };
+                listCaseStepInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let rsData = res.data.data
+                    if (code === 200) {
+                        this.totalPage = res.data.totalCount;
+                        this.stepData.stepList = rsData;
+                    }
+                })
+            },
+
             getListCase() {
                 let postData = {
                     totalCount: this.totalPage,
@@ -756,16 +771,6 @@
                 })
             },
 
-            deleteCaseStep(id) {
-                console.log(id)
-                const stepList = this.stepData.stepList;
-                console.log(stepList)
-                for (var i = 0; i < stepList.length; i++) {
-                    if (stepList[i].id === id) {
-                        stepList.splice(i, 1);
-                    }
-                }
-            },
 
             deleteCaseSet(id) {
                 if (typeof id === "number") {
@@ -802,6 +807,7 @@
                     });
                 });
             },
+
 
             deleteCase(id) {
                 this.caseData.ids = []
@@ -853,6 +859,37 @@
                 })
             },
 
+            deleteCaseStep(id) {
+                this.stepData.ids = []
+                if (typeof id === "number") {
+                    this.stepData.ids.push(id);
+                }
+                let postData = {
+                    ids: this.stepData.ids
+                };
+                this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    deleteCaseStepInfo(postData).then(res => {
+                        let code = res.data.code;
+                        if (code === 200) {
+                            this.getListCaseStep();
+                        }
+                    });
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功!'
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+
             catCase(id) {
                 this.caseDetailInfoDialogVisible = true;
                 this.caseData.id = id;
@@ -866,10 +903,10 @@
                         this.caseData.name = resData.name;
                         this.getListProject();
                         this.caseData.desc = resData.desc;
+                        this.getListCaseStep();
                     }
                 })
             },
-
 
 
             editCaseSet() {
@@ -904,7 +941,7 @@
                 let postData = {
                     id: this.caseData.id,
                     name: this.caseData.name,
-                    project_id: this.caseData.projectId,
+                    project_id: this.caseSetData.projectId,
                     case_set_id: this.caseSetData.id,
                     desc: this.caseData.desc,
                 };
@@ -975,15 +1012,16 @@
                 }
             },
 
-            handleSelectionChange1(val) {
+            handleSelectionCaseSet(val) {
                 this.caseSetData.ids = [];
                 this.multipleSelection = val;
                 this.multipleSelection.map((item) => {
                     this.caseSetData.ids.push(item.id)
                 });
+                console.log(this.caseSetData.ids)
             },
 
-            handleSelectionChange2(val) {
+            handleSelectionCase(val) {
                 this.caseData.ids = [];
                 this.multipleSelection = val;
                 this.multipleSelection.map((item) => {
@@ -991,7 +1029,7 @@
                 });
             },
 
-            handleSelectionChange3(val) {
+            handleSelectionStep(val) {
                 this.stepData.ids = []
                 this.multipleSelection = val;
                 this.multipleSelection.map((item) => {
@@ -999,12 +1037,13 @@
                 });
             },
 
-            handleSelectionChange4(val) {
+            handleSelectionApi(val) {
                 this.apiData.ids = []
                 this.multipleSelection = val;
                 this.multipleSelection.map((item) => {
                     this.apiData.ids.push(item.id)
                 });
+                console.log(this.apiData.ids)
             },
 
             submitCaseSetForm(formName) {
