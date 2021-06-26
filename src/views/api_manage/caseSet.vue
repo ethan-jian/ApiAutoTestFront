@@ -289,8 +289,333 @@
                                 label="操作"
                                 width="90">
                             <template slot-scope="scope">
-                                <el-button @click="catCaseStep(scope.row.id)" type="text" size="small">编辑
+                                <!--                                <el-button @click="catCaseStep(scope.row.id)" type="text" size="small">编辑-->
+                                <!--                                </el-button>-->
+                                <el-button @click="catCaseStep(scope.row.id)" type="text" size="small">
+                                    编辑
                                 </el-button>
+                                <el-drawer
+                                        title="步骤信息"
+                                        :visible.sync="drawer"
+                                        :with-header="false"
+                                        :modal="false"
+                                        :size="stepInfoSize"
+                                >
+                                    <span>
+                                        <template>
+                                          <el-row style="margin:0 auto; width:400px; height:100px;">步骤信息</el-row>
+                                                <el-form :model="apiData" :rules="rules" ref="apiData"
+                                                         label-width="80px" size="small"
+                                                         style="float: left">
+                                        <el-row>
+                            <el-form-item label="步骤名称">
+                                <el-input v-model="apiData.up_func" placeholder="set_up_hooks"></el-input>
+                            </el-form-item>
+
+                            <el-form-item label="前置函数">
+                                <el-input v-model="apiData.up_func" placeholder="set_up_hooks"></el-input>
+                            </el-form-item>
+                            <el-form-item label="后置函数">
+                                <el-input v-model="apiData.down_func" placeholder="set_down_hooks"></el-input>
+                            </el-form-item>
+                            <el-form-item label="是否跳过">
+                                <el-select v-model="apiData.skip" placeholder="true or false">
+                                    <el-option v-for="item in skips"
+                                               :key="item"
+                                               :value="item"
+                                    >
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                    </el-row>
+
+                </el-form>
+                <el-row></el-row>
+
+                    <el-collapse v-model="activeNames" @change="handleChange" style="float: bottom">
+                              <el-collapse-item name="1">
+                                  <span class="collapse-title" slot="title">Headers</span>
+                                  <el-button type="primary" plain @click="addRow('Heard')" size="small">添加
+                                        </el-button>
+                                   <el-form v-for="(item, index) in stepData.header"
+                                            :key="item.pass">
+                                                <el-form-item>
+                                                    <el-row>
+                                                        <el-col :span="6">
+                                                            <el-input clearable v-model="item.key"
+                                                                      size="small" placeholder="key"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="14">
+                                                            <el-input clearable v-model="item.value"
+                                                                      size="small" placeholder="value"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="3">
+                                                            <el-input clearable v-model="item.remark"
+                                                                      size="small" placeholder="备注"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="1">
+                                                            <el-button type="danger" class="el-icon-delete"
+                                                                       @click="delRow('Heard', index)" size="small">
+                                                            </el-button>
+                                                        </el-col>
+                                                    </el-row>
+                                                </el-form-item>
+                                            </el-form>
+                              </el-collapse-item>
+                           <el-collapse-item name="2">
+                                  <span class="collapse-title" slot="title">Params</span>
+                                                                       <div class="Form-dataClass" v-if="radio!=='Raw'">
+                                            <el-button type="primary" plain
+                                                       @click="addRow(radio)"
+                                                       size="small">
+                                                添加
+                                            </el-button>
+                                            <el-form v-for="(item, index) in apiData.bodyFormData"
+                                                     :key="item.pass">
+                                                <el-form-item>
+                                                    <el-row>
+                                                        <el-col :span="6">
+                                                            <el-input clearable v-model="item.key"
+                                                                      size="small" placeholder="key"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="2">
+                                                            <el-select v-model="item.bodyFormDataType"
+                                                                       size="small"
+                                                                       style="width: 100px"
+                                                                       placeholder="选择">
+                                                                <el-option
+                                                                        v-for="item in bodyFormDataTypes"
+                                                                        :key="item"
+                                                                        :value="item"
+                                                                        :label="item">
+                                                                </el-option>
+                                                            </el-select>
+                                                        </el-col>
+                                                        <div v-if="item.bodyFormDataType==='file'">
+                                                            <el-col :span="2" style="padding-left:10px;">
+                                                                <el-upload
+                                                                        class="upload-demo"
+                                                                        action="/api/upload"
+                                                                        :show-file-list='false'
+                                                                        :on-success="fileChange">
+                                                                    <el-button size="mini" type="primary"
+                                                                               @click="tempNum(scope.$index)">
+                                                                        点击上传
+                                                                    </el-button>
+                                                                </el-upload>
+                                                            </el-col>
+                                                        </div>
+                                                        <div v-else>
+                                                            <el-col :span="12">
+                                                                <el-input clearable v-model="item.value"
+                                                                          size="small"
+                                                                          placeholder="value"></el-input>
+                                                            </el-col>
+                                                        </div>
+                                                        <el-col :span="3">
+                                                            <el-input clearable v-model="item.remark"
+                                                                      size="small" placeholder="备注"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="1">
+                                                            <el-button type="danger" class="el-icon-delete"
+                                                                       @click="delRow(radio, index)"
+                                                                       size="small">
+                                                            </el-button>
+                                                        </el-col>
+                                                    </el-row>
+                                                </el-form-item>
+                                            </el-form>
+                                        </div>
+
+                              </el-collapse-item>
+                        <el-collapse-item name="3">
+                                  <span class="collapse-title" slot="title">Body</span>
+                            <el-row style="float: left">
+                                            <el-col :span="24">
+                                                <el-radio-group v-model="radio">
+                                                    <el-radio-button label="Form-data"></el-radio-button>
+                                                    <el-radio-button label="Raw"></el-radio-button>
+                                                    <el-radio-button label="Text"></el-radio-button>
+                                                </el-radio-group>
+                                            </el-col>
+                                        </el-row>
+                                        <br>
+                                        <br>
+                                        <div class="Form-dataClass" v-if="radio!=='Raw'">
+                                            <el-button type="primary" plain
+                                                       @click="addRow(radio)"
+                                                       size="small">
+                                                添加
+                                            </el-button>
+                                            <el-form v-for="(item, index) in apiData.bodyFormData"
+                                                     :key="item.pass">
+                                                <el-form-item>
+                                                    <el-row>
+                                                        <el-col :span="6">
+                                                            <el-input clearable v-model="item.key"
+                                                                      size="small" placeholder="key"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="2">
+                                                            <el-select v-model="item.bodyFormDataType"
+                                                                       size="small"
+                                                                       style="width: 100px"
+                                                                       placeholder="选择">
+                                                                <el-option
+                                                                        v-for="item in bodyFormDataTypes"
+                                                                        :key="item"
+                                                                        :value="item"
+                                                                        :label="item">
+                                                                </el-option>
+                                                            </el-select>
+                                                        </el-col>
+                                                        <div v-if="item.bodyFormDataType==='file'">
+                                                            <el-col :span="2" style="padding-left:10px;">
+                                                                <el-upload
+                                                                        class="upload-demo"
+                                                                        action="/api/upload"
+                                                                        :show-file-list='false'
+                                                                        :on-success="fileChange">
+                                                                    <el-button size="mini" type="primary"
+                                                                               @click="tempNum(scope.$index)">
+                                                                        点击上传
+                                                                    </el-button>
+                                                                </el-upload>
+                                                            </el-col>
+                                                        </div>
+                                                        <div v-else>
+                                                            <el-col :span="12">
+                                                                <el-input clearable v-model="item.value"
+                                                                          size="small"
+                                                                          placeholder="value"></el-input>
+                                                            </el-col>
+                                                        </div>
+                                                        <el-col :span="3">
+                                                            <el-input clearable v-model="item.remark"
+                                                                      size="small" placeholder="备注"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="1">
+                                                            <el-button type="danger" class="el-icon-delete"
+                                                                       @click="delRow(radio, index)"
+                                                                       size="small">
+                                                            </el-button>
+                                                        </el-col>
+                                                    </el-row>
+                                                </el-form-item>
+                                            </el-form>
+                                        </div>
+
+                                        <div class="jsonClass" v-if="radio==='Raw'">
+                                            <el-form>
+                                                <el-form-item>
+                                                    <el-row>
+                                                        <el-col :span="24">
+                                                            <div>
+                                                                <editor
+                                                                        v-contextmenu:contextmenu
+                                                                        style="font-size: 15px"
+                                                                        v-model="apiData.bodyJson"
+                                                                        @init="editorInit"
+                                                                        lang="json"
+                                                                        theme="chrome"
+                                                                        width="100%"
+                                                                        height="515px"
+                                                                        :options="{}"
+                                                                ></editor>
+                                                            </div>
+                                                        </el-col>
+                                                    </el-row>
+                                                </el-form-item>
+                                            </el-form>
+                                        </div>
+                              </el-collapse-item>
+                        <el-collapse-item name="4">
+                                  <span class="collapse-title" slot="title">Extract</span>
+                             <el-button type="primary" plain @click="addRow('Extract')" size="small">添加
+                                        </el-button>
+                            <div>
+                                            <el-form v-for="(item, index) in apiData.extract"
+                                                     :key="item.pass">
+                                                <el-form-item>
+                                                    <el-row>
+                                                        <el-col :span="6">
+                                                            <el-input clearable v-model="item.key"
+                                                                      size="small" placeholder="key"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="14">
+                                                            <el-input clearable v-model="item.value"
+                                                                      size="small" placeholder="value"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="3">
+                                                            <el-input clearable v-model="item.remark"
+                                                                      size="small" placeholder="备注"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="1">
+                                                            <el-button type="danger" class="el-icon-delete"
+                                                                       @click="delRow('Extract', index)" size="small">
+                                                            </el-button>
+                                                        </el-col>
+                                                    </el-row>
+                                                </el-form-item>
+                                            </el-form>
+
+                                        </div>
+                              </el-collapse-item>
+                        <el-collapse-item name="5">
+                                  <span class="collapse-title" slot="title">Assert</span>
+                            <el-button type="primary" plain @click="addRow('Validate')" size="small">添加
+                                        </el-button>
+                             <div>
+                                            <el-form v-for="(item, index) in apiData.validate"
+                                                     :key="item.pass">
+                                                <el-form-item>
+                                                    <el-row>
+                                                        <el-col :span="6">
+                                                            <el-input clearable v-model="item.key"
+                                                                      size="small" placeholder="key"></el-input>
+                                                        </el-col>
+
+                                                        <el-col :span="2">
+                                                            <el-select v-model="item.validateType"
+                                                                       size="small"
+                                                                       style="width: 100px"
+                                                                       placeholder="选择">
+                                                                <el-option
+                                                                        v-for="item in validateTypes"
+                                                                        :key="item"
+                                                                        :value="item"
+                                                                        :label="item">
+                                                                </el-option>
+                                                            </el-select>
+                                                        </el-col>
+
+                                                        <el-col :span="12">
+                                                            <el-input clearable v-model="item.value"
+                                                                      size="small" placeholder="value"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="3">
+                                                            <el-input clearable v-model="item.remark"
+                                                                      size="small" placeholder="备注"></el-input>
+                                                        </el-col>
+                                                        <el-col :span="1">
+                                                            <el-button type="danger" class="el-icon-delete"
+                                                                       @click="delRow('Validate', index)" size="small">
+                                                            </el-button>
+                                                        </el-col>
+                                                    </el-row>
+                                                </el-form-item>
+                                            </el-form>
+
+                                        </div>
+                              </el-collapse-item>
+                    </el-collapse>
+
+                                        </template>
+
+
+
+                                    </span>
+                                </el-drawer>
+
                                 <el-button @click="deleteCaseStep(scope.row.id)" type="text" size="small">删除
                                 </el-button>
                             </template>
@@ -390,7 +715,6 @@
 
         </el-dialog>
 
-
     </div>
 </template>
 
@@ -431,7 +755,10 @@
                 caseSetDialogVisible: false,
                 caseInfoDialogVisible: false,
                 caseDetailInfoDialogVisible: false,
+                stepDialogVisible: false,
                 hasSelect: false,
+                drawer: false,
+                stepInfoSize: '57%',
                 title: '新增',
                 kw: '',
                 sort: [
@@ -471,7 +798,8 @@
                     ids: [],
                     num: 1,
                     caseId: null,
-                    stepList: []
+                    stepList: [],
+                    header: Array(),
                 },
 
                 apiData: {
@@ -908,6 +1236,25 @@
                 })
             },
 
+            catCaseStep(id) {
+                this.drawer = true;
+                this.caseData.id = id;
+                let postData = {
+                    "id": id
+                };
+                catCaseDetailInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let resData = res.data.data[0];
+                    if (code === 200) {
+                        this.caseData.name = resData.name;
+                        this.getListProject();
+                        this.caseData.desc = resData.desc;
+                        this.getListCaseStep();
+                    }
+                })
+
+            },
+
 
             editCaseSet() {
                 let postData = {
@@ -1102,5 +1449,16 @@
         color: #fff;
         background: rgba(66, 66, 66, 0.66) !important;
     }
+
+    .collapse-title {
+        flex: 1 0 90%;
+        order: 1;
+    }
+
+    .el-collapse-item__header {
+        flex: 1 0 auto;
+        order: -1;
+    }
+
 
 </style>
