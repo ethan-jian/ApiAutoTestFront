@@ -166,12 +166,12 @@
                     <el-row>
                         <el-col :span="6">
                             <el-form-item label="前置函数">
-                                <el-input v-model="apiData.up_func" placeholder="set_up_hooks"></el-input>
+                                <el-input v-model="apiData.upFunc" placeholder="set_up_hooks"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :span="6">
                             <el-form-item label="后置函数">
-                                <el-input v-model="apiData.down_func" placeholder="set_down_hooks"></el-input>
+                                <el-input v-model="apiData.downFunc" placeholder="set_down_hooks"></el-input>
                             </el-form-item>
                         </el-col>
                         <el-col :span="6">
