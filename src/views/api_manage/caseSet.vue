@@ -403,7 +403,7 @@
                 :size="stepInfoSize"
         >
 
-            <template>
+            <template style="overflow: auto;position: absolute">
                 <div style="margin:0 auto; width:400px; height:100px;">步骤信息</div>
 
                 <el-form>
