@@ -195,8 +195,8 @@
                 </el-form-item>
                 <el-form-item label="所属项目">
                     <el-select v-model="caseSetData.projectId" placeholder="请选择项目" disabled size="mini"
-                               @focus="getListProject()"
-                               @change="getListProject()">
+                               @focus="getListProject(false, false)"
+                               @change="getListProject(false, false)">
                         <el-option v-for="item in projectList"
                                    :key="item.id"
                                    :value="item.id"
@@ -209,7 +209,7 @@
                     <el-select v-model="caseSetData.id" placeholder="请选择用例集" disabled size="mini"
                                @focus="listProjectCaseSet(caseSetData.projectId)"
                                @change="listProjectCaseSet(caseSetData.projectId)">
-                        <el-option v-for="item in caseData.caseSetList"
+                        <el-option v-for="item in caseSetData.caseSetList"
                                    :key="item.id"
                                    :value="item.id"
                                    :label="item.name">
@@ -235,7 +235,7 @@
                     <el-input v-model="caseData.name" size="mini"></el-input>
                 </el-form-item>
                 <el-form-item label="所属项目">
-                    <el-select v-model="caseSetData.projectId" placeholder="请选择项目" size="mini"
+                    <el-select v-model="caseData.projectId" placeholder="请选择项目" size="mini"
                                @focus="getListProject(null, true)"
                                @change="getListProject(null, true)">
                         <el-option v-for="item in projectList"
@@ -247,10 +247,10 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item label="用例集">
-                    <el-select v-model="caseSetData.id" placeholder="请选择用例集" size="mini"
-                               @focus="listProjectCaseSet(caseSetData.projectId)"
-                               @change="listProjectCaseSet(caseSetData.projectId)">
-                        <el-option v-for="item in caseSetData.caseSetList"
+                    <el-select v-model="caseData.caseSetId" placeholder="请选择用例集" size="mini"
+                               @focus="listProjectCaseSet(caseData.projectId)"
+                               @change="listProjectCaseSet(caseData.projectId)">
+                        <el-option v-for="item in caseData.caseSetList"
                                    :key=item.id
                                    :value=item.id
                                    :label="item.name">
@@ -1063,7 +1063,8 @@
             getListProject(listApi, listCaseSet) {
                 this.apiData.moduleId = null;
                 if (listCaseSet) {
-                    this.caseSetData.id = null;
+                    // this.caseSetData.id = null;
+                    this.caseData.caseSetId = null;
                 }
                 let postData = {
                     kw: this.kw,
@@ -1078,7 +1079,6 @@
                         if (listApi) {
                             this.ListApi();
                         }
-
                     }
                 })
             },
@@ -1211,7 +1211,10 @@
                     let resData = res.data.data[0];
                     if (code === 200) {
                         this.caseData.name = resData.name;
+                        this.caseData.projectId = resData.project_id;
+                        this.caseData.caseSetId = resData.case_set_id;
                         this.getListProject();
+                        this.listProjectCaseSet(this.caseData.projectId)
                         this.caseData.desc = resData.desc;
                         this.getListCaseStep();
                         this.dragSort();
@@ -1305,7 +1308,7 @@
                     id: this.caseData.id,
                     name: this.caseData.name,
                     project_id: this.caseSetData.projectId,
-                    case_set_id: this.caseSetData.id,
+                    case_set_id: this.caseData.caseSetId,
                     desc: this.caseData.desc,
                 };
                 editCaseInfo(postData).then(res => {
@@ -1370,7 +1373,7 @@
                 this.caseData.name = null;
                 this.getListProject();
                 this.getListCaseSet();
-                this.ListApi();
+                //this.ListApi();
                 this.caseInfoDialogVisible = true;
             },
 
