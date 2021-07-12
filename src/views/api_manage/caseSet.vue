@@ -1365,6 +1365,32 @@
                 })
             },
 
+            orderStepNum() {
+                let postData = {
+                    id: this.stepData.id,
+                    num: this.stepData.name,
+
+                };
+                editCaseStepInfo(postData).then(res => {
+                    let code = res.data.code;
+                    let message = res.data.message;
+                    if (code === 200) {
+                        this.drawer = false;
+                        this.getListCaseStep();
+                        this.$notify({
+                            title: message,
+                            type: "success"
+                        })
+                    } else {
+                        this.$notify({
+                            title: message,
+                            type: "error"
+                        })
+                    }
+
+                })
+            },
+
             changeStatus() {
 
             },
@@ -1522,8 +1548,8 @@
                             const targetRow = this.stepData.stepList.splice(evt.oldIndex, 1)[0];
                             this.stepData.stepList.splice(evt.newIndex, 0, targetRow);
                             // console.log(evt.oldIndex) //当前行的被拖拽前的顺序
-                            // console.log(evt.newIndex) //当前行的被拖拽后的顺序
-                            // console.log(this.stepData.stepList)
+                            console.log(evt.newIndex) //当前行的被拖拽后的顺序
+                            console.log(this.stepData.stepList)
                         }
                     })
                 }
