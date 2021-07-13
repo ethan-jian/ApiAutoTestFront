@@ -704,7 +704,8 @@
         listCaseStepInfo,
         deleteCaseStepInfo,
         catCaseStepDetailInfo,
-        editCaseStepInfo
+        editCaseStepInfo,
+        bulkEditCaseStep
     } from "../../api/case";
 
     import {listApiInfo, listProjectModuleInfo} from "../../api/api";
@@ -1028,7 +1029,7 @@
                     pageSize: this.pageSize,
                     currentPage: this.currentPage,
                     kw: this.caseData.id,
-                    sort: [{"direct": "ASC", "field": "created_time"}]
+                    sort: [{"direct": "ASC", "field": "num"}]
                 };
                 listCaseStepInfo(postData).then(res => {
                     let code = res.data.code;
@@ -1365,18 +1366,14 @@
                 })
             },
 
-            orderStepNum() {
+            bulkEditStep(editDatas) {
                 let postData = {
-                    id: this.stepData.id,
-                    num: this.stepData.name,
-
+                    "editDatas": editDatas
                 };
-                editCaseStepInfo(postData).then(res => {
+                bulkEditCaseStep(postData).then(res => {
                     let code = res.data.code;
                     let message = res.data.message;
                     if (code === 200) {
-                        this.drawer = false;
-                        this.getListCaseStep();
                         this.$notify({
                             title: message,
                             type: "success"
@@ -1387,9 +1384,9 @@
                             type: "error"
                         })
                     }
-
                 })
             },
+
 
             changeStatus() {
 
@@ -1548,8 +1545,13 @@
                             const targetRow = this.stepData.stepList.splice(evt.oldIndex, 1)[0];
                             this.stepData.stepList.splice(evt.newIndex, 0, targetRow);
                             // console.log(evt.oldIndex) //当前行的被拖拽前的顺序
-                            console.log(evt.newIndex) //当前行的被拖拽后的顺序
-                            console.log(this.stepData.stepList)
+                            // console.log(evt.newIndex) //当前行的被拖拽后的顺序
+                            // console.log(this.stepData.stepList)
+                            let orderData = [];
+                            for (let i = 0; i < this.stepData.stepList.length; i++) {
+                                orderData.push({id: this.stepData.stepList[i]['id'], num: i})
+                            }
+                            this.bulkEditStep(orderData)
                         }
                     })
                 }

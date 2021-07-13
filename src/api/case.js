@@ -43,3 +43,7 @@ export const catCaseStepDetailInfo = function (data) {
 export const editCaseStepInfo = function (data) {
     return postRequest('EditCaseStep', data)
 };
+
+export const bulkEditCaseStep = function (data) {
+    return postRequest('BulkEditCaseStep', data)
+};
