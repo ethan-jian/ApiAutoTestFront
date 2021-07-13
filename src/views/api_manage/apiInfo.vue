@@ -299,7 +299,7 @@
                                                             <el-col :span="2" style="padding-left:10px;">
                                                                 <el-upload
                                                                         class="upload-demo"
-                                                                        action="/api/upload"
+                                                                        action="/api/Upload"
                                                                         :show-file-list='false'
                                                                         :on-success="fileChange">
                                                                     <el-button size="mini" type="primary"
