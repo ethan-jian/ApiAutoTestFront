@@ -303,7 +303,7 @@
                                                                         :show-file-list='false'
                                                                         :on-success="fileChange">
                                                                     <el-button size="mini" type="primary"
-                                                                               @click="tempNum(scope.$index)">
+                                                                               @click="uploadFile(scope.$index)">
                                                                         点击上传
                                                                     </el-button>
                                                                 </el-upload>
@@ -478,6 +478,7 @@
         },
         data() {
             return {
+                temp_num: "",
                 loading: false,
                 radio: 'Form-data',
                 activeName1: 'first',
@@ -563,6 +564,10 @@
         },
         methods: {
 
+            uploadFile(id) {
+                this.temp_num = id;
+            },
+
             //初始化apiData
             initApidata(index) {
                 if (index === 0) {
@@ -571,6 +576,7 @@
                 }
 
             },
+
             submitForm(formName) {
                 this.$refs[formName].validate((valid) => {
                     if (valid && this.title === '新增') {
@@ -726,18 +732,19 @@
                 )
             },
 
-
             openAddproject() {
                 this.title = '新增';
                 this.ApiDialogVisible = true;
                 this.resetForm('apiData');
                 this.apiData.variable = [];
             },
+
             handleSizeChange(val) {
                 console.log(`每页 ${val} 条`);
                 this.pageSize = val;
                 this.getListProject();
             },
+
             handleCurrentChange(val) {
                 console.log(`当前页: ${val}`);
                 this.currentPage = val;
@@ -863,7 +870,6 @@
                 })
             },
 
-
             getProjectModule() {
                 let postData = {
                     id: this.apiData.projectId,
@@ -916,6 +922,7 @@
                     this.$refs.multipleTable.clearSelection();
                 }
             },
+
             handleSelectionChange(val) {
                 this.multipleSelection = val;
                 this.multipleSelection.map((item) => {
@@ -971,22 +978,24 @@
             handleCloseProjectDialog() {
                 this.ApiDialogVisible = false;
             },
+
             handleClosevariableDialog() {
                 this.variableDialogVisible = false;
                 // this.apiData.variable = [];
             },
-
 
             onJsonChange(value) {
                 // console.log('更改value:', value);
                 // 实时保存
                 this.onJsonSave(value)
             },
+
             onJsonSave(value) {
                 // console.log('保存value:', value);
                 this.resultInfo = value
                 this.hasJsonFlag = true
             },
+
             onError(value) {
                 console.log("json错误了value:", value);
                 this.hasJsonFlag = false
@@ -1005,13 +1014,13 @@
                     return true
                 }
             },
+
             editorInit: function () {
                 require('brace/ext/language_tools');
                 require('brace/mode/json');
                 require('brace/theme/chrome');
                 require('brace/snippets/json')
             }
-
         },
         created() {
             this.ListApi();
