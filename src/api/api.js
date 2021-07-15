@@ -28,4 +28,7 @@ export const runApiInfo = function (data) {
     return postRequest('RunApi', data)
 };
 
+export const Upload = function (data) {
+    return postRequest('Upload', data)
+};
 
