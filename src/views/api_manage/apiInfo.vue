@@ -299,7 +299,7 @@
                                                             <el-col :span="2" style="padding-left:10px;">
                                                                 <el-upload
                                                                         class="upload-demo"
-                                                                        action="/api/Upload"
+                                                                        action="http://localhost/api/Upload"
                                                                         :show-file-list='false'
                                                                         :on-success="fileChange">
                                                                     <el-button size="mini" type="primary"
@@ -564,7 +564,13 @@
         },
         methods: {
 
+            fileChange(response, file) {
+                console.log(response, file)
+
+            },
+
             uploadFile(id) {
+                console.log("iddddddddddd" + id)
                 this.temp_num = id;
             },
 
@@ -674,6 +680,11 @@
             },
 
             runApi() {
+                if (this.apiData.bodyJson) {
+                    this.apiData.bodyType = "json"
+                }
+                else
+                    this.apiData.bodyType = "data"
                 let postData = this.apiData;
                 if (postData.name && postData.projectId && postData.moduleId && postData.url) {
                     this.loading = true;
