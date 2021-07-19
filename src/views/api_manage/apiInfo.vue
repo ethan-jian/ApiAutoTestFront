@@ -286,7 +286,9 @@
                                                             <el-select v-model="item.bodyFormDataType"
                                                                        size="small"
                                                                        style="width: 100px"
-                                                                       placeholder="选择">
+                                                                       placeholder="选择"
+                                                                       @change="filePath = null"
+                                                            >
                                                                 <el-option
                                                                         v-for="item in bodyFormDataTypes"
                                                                         :key="item"
@@ -296,6 +298,12 @@
                                                             </el-select>
                                                         </el-col>
                                                         <div v-if="item.bodyFormDataType==='file'">
+                                                            <el-col :span="10">
+                                                                <el-input clearable v-model="item.value"
+                                                                          size="small"
+                                                                          :disabled="true"
+                                                                          placeholder="value"></el-input>
+                                                            </el-col>
                                                             <el-col :span="2" style="padding-left:10px;">
                                                                 <el-upload
                                                                         class="upload-demo"
@@ -303,7 +311,7 @@
                                                                         :show-file-list='false'
                                                                         :on-success="fileChange">
                                                                     <el-button size="mini" type="primary"
-                                                                               @click="uploadFile(scope.$index)">
+                                                                               @click="uploadFile(index)">
                                                                         点击上传
                                                                     </el-button>
                                                                 </el-upload>
@@ -478,7 +486,7 @@
         },
         data() {
             return {
-                temp_num: "",
+                tempIndex: "",
                 loading: false,
                 radio: 'Form-data',
                 activeName1: 'first',
@@ -489,6 +497,7 @@
                 methodList: ['POST', 'GET', 'PUT', 'DELETE'],
                 bodyFormDataTypes: ['string', 'file'],
                 bodyFormDataType: 'string',
+                filePath: null,
                 validateTypes: ['equals', 'less_than', 'less_than_or_equals', 'greater_than', 'greater_than_or_equals',
                     'not_equals', 'string_equals', 'length_equals', 'length_greater_than', 'count_greater_than_or_equals'
                     , 'length_less_than', 'length_less_than_or_equals'],
@@ -566,12 +575,12 @@
 
             fileChange(response, file) {
                 console.log(response, file)
-
+                this.filePath = response.data;
+                this.apiData.bodyFormData[this.tempIndex].value = response.data;
             },
 
-            uploadFile(id) {
-                console.log("iddddddddddd" + id)
-                this.temp_num = id;
+            uploadFile(index) {
+                this.tempIndex = index;
             },
 
             //初始化apiData
@@ -682,8 +691,7 @@
             runApi() {
                 if (this.apiData.bodyJson) {
                     this.apiData.bodyType = "json"
-                }
-                else
+                } else
                     this.apiData.bodyType = "data"
                 let postData = this.apiData;
                 if (postData.name && postData.projectId && postData.moduleId && postData.url) {
