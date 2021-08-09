@@ -575,6 +575,23 @@
 
             fileChange(response, file) {
                 console.log(response, file)
+                if (response.message === "已存在") {
+                    this.$confirm('是否覆盖原文件', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        this.$message({
+                            type: 'success',
+                            message: '成功!'
+                        });
+                    }).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '已取消'
+                        });
+                    });
+                }
                 this.filePath = response.data;
                 this.apiData.bodyFormData[this.tempIndex].value = response.data;
             },
